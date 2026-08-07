@@ -1,0 +1,1 @@
+// simple neutralino script test

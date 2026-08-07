@@ -1,0 +1,42 @@
+{
+  "applicationId": "js.neutralino.meditor",
+  "version": "1.0.0",
+  "defaultMode": "window",
+  "port": 0,
+  "documentRoot": "/dist/",
+  "url": "/",
+  "enableServer": true,
+  "enableNativeAPI": true,
+  "tokenSecurity": "one-time",
+  "logging": {
+    "enabled": true,
+    "writeToLogFile": true
+  },
+  "nativeAllowList": ["app.*", "os.*", "window.*", "filesystem.*", "events.*"],
+  "modes": {
+    "window": {
+      "title": "meditor",
+      "width": 1000,
+      "height": 700,
+      "minWidth": 600,
+      "minHeight": 400,
+      "fullScreen": false,
+      "alwaysOnTop": false,
+      "icon": "/public/app-icon.png",
+      "enableInspector": true,
+      "borderlessWindow": true,
+      "maximize": false,
+      "hidden": false,
+      "resizable": true,
+      "exitProcessOnClose": true
+    }
+  },
+  "cli": {
+    "binaryName": "meditor",
+    "resourcesPath": "/dist/",
+    "extensionsPath": "/extensions/",
+    "clientLibrary": "/public/neutralino.js",
+    "binaryVersion": "5.3.0",
+    "clientVersion": "5.3.0"
+  }
+}
