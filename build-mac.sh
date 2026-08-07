@@ -1,71 +1,125 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-echo "==> Building Neutralino App"
-npm run build
-npx @neutralinojs/neu build
+# ─────────────────────────────────────────────────────────────
+# build-mac.sh
+# Builds Meditor as a macOS .app bundle and packages it as a DMG.
+#
+# Usage:
+#   ./build-mac.sh             # Uses version from package.json
+#   VERSION=1.2.3 ./build-mac.sh  # Override version
+# ─────────────────────────────────────────────────────────────
 
-echo "==> Preparing macOS .app bundle"
 APP_NAME="Meditor"
+BUNDLE_ID="com.meditor.app"
+MIN_MACOS="10.13.0"
+VERSION="${VERSION:-$(node -p "require('./package.json').version")}"
+
 APP_DIR="build/${APP_NAME}.app"
+DMG_PATH="build/${APP_NAME}-${VERSION}.dmg"
 
-# Clean previous build
-rm -rf "build"
-mkdir -p "build"
-
-# Create standard macOS App Bundle structure
+# ─── Clean ────────────────────────────────────────────────────
+echo "==> Cleaning previous build artifacts"
+rm -rf build
 mkdir -p "${APP_DIR}/Contents/MacOS"
 mkdir -p "${APP_DIR}/Contents/Resources"
 
-# Generate ICNS file from app-icon
-echo "==> Generating App Icon (ICNS)"
-mkdir -p build/icon.iconset
-sips -z 16 16     public/app-icon.png --out build/icon.iconset/icon_16x16.png > /dev/null
-sips -z 32 32     public/app-icon.png --out build/icon.iconset/icon_16x16@2x.png > /dev/null
-sips -z 32 32     public/app-icon.png --out build/icon.iconset/icon_32x32.png > /dev/null
-sips -z 64 64     public/app-icon.png --out build/icon.iconset/icon_32x32@2x.png > /dev/null
-sips -z 128 128   public/app-icon.png --out build/icon.iconset/icon_128x128.png > /dev/null
-sips -z 256 256   public/app-icon.png --out build/icon.iconset/icon_128x128@2x.png > /dev/null
-sips -z 256 256   public/app-icon.png --out build/icon.iconset/icon_256x256.png > /dev/null
-sips -z 512 512   public/app-icon.png --out build/icon.iconset/icon_256x256@2x.png > /dev/null
-sips -z 512 512   public/app-icon.png --out build/icon.iconset/icon_512x512.png > /dev/null
-sips -z 1024 1024 public/app-icon.png --out build/icon.iconset/icon_512x512@2x.png > /dev/null
-iconutil -c icns build/icon.iconset -o "${APP_DIR}/Contents/Resources/icon.icns"
-rm -rf build/icon.iconset
+# ─── Vite + Neutralino Build ──────────────────────────────────
+echo "==> Building Vite frontend"
+npm run build
 
+echo "==> Bundling Neutralino application"
+npx @neutralinojs/neu build
+
+# ─── Verify binaries exist ────────────────────────────────────
+if [ ! -f "dist/meditor/meditor-mac_universal" ]; then
+  echo "ERROR: Universal binary not found at dist/meditor/meditor-mac_universal"
+  echo "  Available binaries:"
+  ls dist/meditor/ | grep meditor-mac || echo "  (none found)"
+  exit 1
+fi
+
+if [ ! -f "dist/meditor/resources.neu" ]; then
+  echo "ERROR: resources.neu not found at dist/meditor/resources.neu"
+  exit 1
+fi
+
+# ─── Copy Binaries ────────────────────────────────────────────
 echo "==> Copying binaries and resources"
-# Using mac_universal to support both Intel and Apple Silicon
-cp dist/meditor/meditor-mac_universal "${APP_DIR}/Contents/MacOS/${APP_NAME}"
-cp dist/meditor/resources.neu "${APP_DIR}/Contents/MacOS/"
+cp "dist/meditor/meditor-mac_universal" "${APP_DIR}/Contents/MacOS/${APP_NAME}"
+chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}"
+cp "dist/meditor/resources.neu" "${APP_DIR}/Contents/MacOS/"
 
-echo "==> Generating Info.plist"
-cat <<EOF > "${APP_DIR}/Contents/Info.plist"
+# ─── App Icon (ICNS) ──────────────────────────────────────────
+echo "==> Generating app icon (ICNS)"
+ICONSET="build/icon.iconset"
+mkdir -p "${ICONSET}"
+
+declare -A SIZES=(
+  ["icon_16x16.png"]=16
+  ["icon_16x16@2x.png"]=32
+  ["icon_32x32.png"]=32
+  ["icon_32x32@2x.png"]=64
+  ["icon_128x128.png"]=128
+  ["icon_128x128@2x.png"]=256
+  ["icon_256x256.png"]=256
+  ["icon_256x256@2x.png"]=512
+  ["icon_512x512.png"]=512
+  ["icon_512x512@2x.png"]=1024
+)
+
+for name in "${!SIZES[@]}"; do
+  size="${SIZES[$name]}"
+  sips -z "$size" "$size" "public/app-icon.png" --out "${ICONSET}/${name}" > /dev/null
+done
+
+iconutil -c icns "${ICONSET}" -o "${APP_DIR}/Contents/Resources/AppIcon.icns"
+rm -rf "${ICONSET}"
+
+# ─── Info.plist ───────────────────────────────────────────────
+echo "==> Writing Info.plist (version: ${VERSION})"
+cat > "${APP_DIR}/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleExecutable</key>
-    <string>${APP_NAME}</string>
-    <key>CFBundleIconFile</key>
-    <string>icon.icns</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.meditor.app</string>
     <key>CFBundleName</key>
     <string>${APP_NAME}</string>
+    <key>CFBundleDisplayName</key>
+    <string>${APP_NAME}</string>
+    <key>CFBundleExecutable</key>
+    <string>${APP_NAME}</string>
+    <key>CFBundleIdentifier</key>
+    <string>${BUNDLE_ID}</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon.icns</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>CFBundleVersion</key>
+    <string>${VERSION}</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
+    <string>${VERSION}</string>
     <key>LSMinimumSystemVersion</key>
-    <string>10.13.0</string>
+    <string>${MIN_MACOS}</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright © 2026 Meditor. All rights reserved.</string>
 </dict>
 </plist>
-EOF
+PLIST
 
-echo "==> Creating DMG"
-DMG_NAME="Meditor.dmg"
-hdiutil create -volname "${APP_NAME}" -srcfolder "${APP_DIR}" -ov -format UDZO "build/${DMG_NAME}"
+# ─── Package into DMG ─────────────────────────────────────────
+echo "==> Packaging DMG: ${DMG_PATH}"
+hdiutil create \
+  -volname "${APP_NAME}" \
+  -srcfolder "${APP_DIR}" \
+  -ov \
+  -format UDZO \
+  "${DMG_PATH}"
 
-echo "==> Done! DMG created at build/${DMG_NAME}"
+echo ""
+echo "✅ Build complete!"
+echo "   App bundle : ${APP_DIR}"
+echo "   DMG        : ${DMG_PATH}"
+echo "   Version    : ${VERSION}"

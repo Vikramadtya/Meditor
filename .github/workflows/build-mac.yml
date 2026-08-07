@@ -1,37 +1,147 @@
-name: Build macOS DMG
+name: CI / Build macOS DMG
+
+# ─────────────────────────────────────────────────────────────
+# Triggers:
+#   - Push to `main`           → lint + build (no release)
+#   - Push a `v*` tag          → lint + build + GitHub Release
+#   - Pull Request to `main`   → lint + build (no release)
+#   - Manual dispatch          → lint + build (no release)
+# ─────────────────────────────────────────────────────────────
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
+    tags:
+      - "v*"
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
+permissions:
+  contents: write  # Needed to create GitHub Releases
+
 jobs:
-  build:
-    runs-on: macos-latest
+  # ─────────────────────────────────────────────────────────────
+  # JOB 1: Lint
+  # Fast quality gate — runs on ubuntu so it's cheap and quick.
+  # ─────────────────────────────────────────────────────────────
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '20'
-        cache: 'npm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Make build script executable
-      run: chmod +x build-mac.sh
+      - name: Run OXLint
+        run: npm run lint
 
-    - name: Build macOS DMG
-      run: ./build-mac.sh
+  # ─────────────────────────────────────────────────────────────
+  # JOB 2: Build & Package DMG
+  # Only runs after lint passes.
+  # ─────────────────────────────────────────────────────────────
+  build:
+    name: Build macOS DMG
+    runs-on: macos-latest
+    needs: lint
 
-    - name: Upload DMG Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: Meditor-macOS
-        path: build/Meditor.dmg
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Cache Neutralino binaries — they don't change between commits
+      # unless the neutralino version in package.json changes.
+      - name: Cache Neutralino binaries
+        uses: actions/cache@v4
+        with:
+          path: bin/
+          key: neutralino-bins-${{ hashFiles('neutralino.config.json') }}
+
+      - name: Read version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Make build script executable
+        run: chmod +x build-mac.sh
+
+      - name: Build & Package DMG
+        run: VERSION=${{ steps.version.outputs.version }} ./build-mac.sh
+
+      - name: Verify DMG was produced
+        run: |
+          DMG="build/Meditor-${{ steps.version.outputs.version }}.dmg"
+          if [ ! -f "$DMG" ]; then
+            echo "ERROR: DMG not found at $DMG"
+            exit 1
+          fi
+          echo "DMG size: $(du -sh $DMG | cut -f1)"
+
+      # Upload as a workflow artifact (available on every run)
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Meditor-${{ steps.version.outputs.version }}-macOS
+          path: build/Meditor-${{ steps.version.outputs.version }}.dmg
+          retention-days: 30
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 3: GitHub Release
+  # Only runs on `v*` tag pushes (e.g. git tag v1.2.0 && git push --tags).
+  # Downloads the DMG from the build job and attaches it to a Release.
+  # ─────────────────────────────────────────────────────────────
+  release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from package.json
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Download DMG artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Meditor-${{ steps.version.outputs.version }}-macOS
+          path: release/
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Meditor v${{ steps.version.outputs.version }}"
+          tag_name: ${{ github.ref_name }}
+          body: |
+            ## Meditor v${{ steps.version.outputs.version }}
+
+            ### Install
+            1. Download `Meditor-${{ steps.version.outputs.version }}.dmg` below
+            2. Open the DMG and drag **Meditor.app** to your **Applications** folder
+            3. On first launch, right-click → Open if macOS shows an unverified developer warning
+
+            ### Changes
+            See [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for full details.
+          files: release/Meditor-${{ steps.version.outputs.version }}.dmg
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}
