@@ -1,7 +1,6 @@
 import MarkdownIt from "markdown-it";
 import markdownItTaskLists from "markdown-it-task-lists";
 import markdownItKatex from "markdown-it-katex";
-import matter from "gray-matter";
 
 let mdInstance = null;
 let currentConfigStr = "";
@@ -32,11 +31,26 @@ self.onmessage = function (e) {
   const { markdown, mdConfig } = e.data;
 
   try {
-    // 1. Extract Frontmatter using gray-matter
-    const parsed = matter(markdown);
-    const content = parsed.content;
-    const frontmatter =
-      Object.keys(parsed.data).length > 0 ? parsed.data : null;
+    // 1. Extract Frontmatter using Regex (Zero dependencies for Web Worker compatibility)
+    let content = markdown;
+    let frontmatter = null;
+
+    const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---\n/);
+    if (fmMatch) {
+      content = markdown.slice(fmMatch[0].length);
+      const yamlString = fmMatch[1];
+
+      // Basic YAML parser for simple key-value pairs
+      frontmatter = {};
+      yamlString.split("\n").forEach((line) => {
+        const idx = line.indexOf(":");
+        if (idx > 0) {
+          const key = line.slice(0, idx).trim();
+          const value = line.slice(idx + 1).trim();
+          frontmatter[key] = value;
+        }
+      });
+    }
 
     // 2. Parse Markdown to HTML
     const md = getMarkdownInstance(mdConfig);

@@ -1,0 +1,37 @@
+name: Build macOS DMG
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Make build script executable
+      run: chmod +x build-mac.sh
+
+    - name: Build macOS DMG
+      run: ./build-mac.sh
+
+    - name: Upload DMG Artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Meditor-macOS
+        path: build/Meditor.dmg
