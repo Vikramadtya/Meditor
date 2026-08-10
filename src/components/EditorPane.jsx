@@ -140,6 +140,7 @@ export default function EditorPane() {
             <div className="cm-editor-container" style={{ height: "100%" }}>
               <CodeMirror
                 value={markdown}
+                width="100%"
                 height="100%"
                 extensions={extensions}
                 onChange={(val) => setMarkdown(val)}
@@ -173,6 +174,7 @@ export default function EditorPane() {
             <div className="cm-editor-container">
               <CodeMirror
                 value={markdown}
+                width="100%"
                 height="auto"
                 minHeight="calc(100vh - 200px)"
                 extensions={extensions}

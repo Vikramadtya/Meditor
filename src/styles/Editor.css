@@ -102,6 +102,8 @@
 .cm-editor-container {
   width: 100%;
   font-family: var(--font-mono);
+  max-width: var(--prose-width, none);
+  margin: 0 auto;
 }
 
 /* The react-codemirror wrapper div */
