@@ -26,11 +26,11 @@ export const useSettingsStore = create((set) => ({
     // Prose display font
     proseFont: "'Inter', system-ui, sans-serif",
     // Base reading font size (px)
-    fontSize: 16,
+    fontSize: 17,
     // Line height multiplier
-    lineHeight: 1.75,
+    lineHeight: 1.8,
     // Max width of the prose column (px) — 0 means full width
-    proseWidth: 720,
+    proseWidth: 900,
     // Heading scale: multipliers relative to base fontSize
     h1Scale: 2.0,
     h2Scale: 1.5,

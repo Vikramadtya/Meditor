@@ -14,6 +14,16 @@
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "Fira Code", monospace;
 
+  /* Typography defaults — overridden live by App.jsx from settingsStore */
+  --prose-font: "Inter", system-ui, sans-serif;
+  --prose-size: 17px;
+  --prose-line-height: 1.8;
+  --prose-width: 900px;
+  --prose-h1: 2em;
+  --prose-h2: 1.5em;
+  --prose-h3: 1.25em;
+  --prose-h4: 1.1em;
+
   --app-padding: 24px;
 }
 

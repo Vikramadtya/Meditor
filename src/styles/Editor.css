@@ -60,50 +60,73 @@
   font-size: 12px;
 }
 
-/* ── Pane Layout ──────────────────────────────────────────────── */
+/* ── Pane Layout (Typora-style) ──────────────────────────────── */
+/*
+  The outer .pane-container fills ALL available space and handles
+  the vertical scroll. Content is centered inside via padding, not
+  a hard max-width on the container itself. This matches how Typora
+  feels: a clean open page, not a boxed widget.
+*/
 .pane-container {
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  padding: var(--app-padding);
-  padding-bottom: 80px;
-  max-width: var(--prose-width, 800px);
-  margin: 0 auto;
+  /* Generous side padding so content feels centred like a real page */
+  padding: 48px max(64px, calc((100% - var(--prose-width, 900px)) / 2));
+  padding-bottom: 120px; /* extra bottom space so FAB never covers text */
   width: 100%;
   position: relative;
   display: flex;
+  flex-direction: column;
 }
 
+/* Split mode: two half-width panes side by side, each scrolls independently */
 .pane-container.split {
-  max-width: none;
+  flex-direction: row;
   overflow: hidden;
-  padding-right: 0;
+  padding: 0;
+}
+
+.split-pane {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  padding: 48px 40px 120px;
 }
 
 .split-divider {
   width: 1px;
+  flex-shrink: 0;
   background-color: var(--glass-border);
-  margin: 0 24px;
 }
 
 /* ── CodeMirror Editor ────────────────────────────────────────── */
 .cm-editor-container {
+  width: 100%;
   height: 100%;
   font-family: var(--font-mono);
-  font-size: 15px;
-  line-height: 1.6;
 }
 
 .cm-editor-container .cm-scroller {
   font-family: var(--font-mono);
+  /* Match the prose font size so editing & preview feel identical */
+  font-size: var(--prose-size, 16px);
+  line-height: var(--prose-line-height, 1.75);
 }
 
 .cm-editor-container .cm-editor {
   background: transparent !important;
+  width: 100% !important;
 }
 
 .cm-editor.cm-focused {
   outline: none !important;
+}
+
+/* Make the content div inside CM fill the width */
+.cm-editor .cm-content {
+  max-width: none !important;
+  width: 100%;
 }
 
 /* ── Prose / Preview Typography ───────────────────────────────── */

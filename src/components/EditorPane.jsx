@@ -131,50 +131,70 @@ export default function EditorPane() {
 
   return (
     <>
-      <div className={`pane-container ${isSplit ? "split" : ""}`} ref={paneRef}>
-        <div
-          className={`fade-pane ${isSplit || isEditMode ? "visible" : "hidden"}`}
-          style={{
-            display: isSplit || isEditMode ? "block" : "none",
-            height: "100%",
-            flex: 1,
-            overflowY: isSplit ? "hidden" : "visible",
-          }}
-        >
-          <div className="cm-editor-container" style={{ height: "100%" }}>
-            <CodeMirror
-              value={markdown}
-              height="100%"
-              extensions={extensions}
-              onChange={(val) => setMarkdown(val)}
-              theme={theme}
-              style={{ fontSize: "15px", fontFamily: "var(--font-mono)" }}
-              basicSetup={{
-                lineNumbers: false,
-                foldGutter: false,
-                highlightActiveLine: false,
-              }}
-            />
+      {isSplit ? (
+        /* ── Split mode: two independent scroll columns ── */
+        <div className="pane-container split" ref={paneRef}>
+          {/* Left: Editor */}
+          <div className="split-pane">
+            <div className="cm-editor-container" style={{ height: "100%" }}>
+              <CodeMirror
+                value={markdown}
+                height="100%"
+                extensions={extensions}
+                onChange={(val) => setMarkdown(val)}
+                theme={theme}
+                basicSetup={{
+                  lineNumbers: false,
+                  foldGutter: false,
+                  highlightActiveLine: false,
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="split-divider" />
+
+          {/* Right: Preview */}
+          <div
+            ref={proseRef}
+            onScroll={handleProseScroll}
+            className="split-pane prose fade-pane"
+          >
+            <FrontmatterBlock data={frontmatter} />
+            <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
           </div>
         </div>
+      ) : (
+        /* ── Single mode: one centred scrollable column ── */
+        <div className="pane-container fade-pane" ref={paneRef}>
+          {/* Editor pane */}
+          {isEditMode && (
+            <div className="cm-editor-container">
+              <CodeMirror
+                value={markdown}
+                height="auto"
+                minHeight="calc(100vh - 200px)"
+                extensions={extensions}
+                onChange={(val) => setMarkdown(val)}
+                theme={theme}
+                basicSetup={{
+                  lineNumbers: false,
+                  foldGutter: false,
+                  highlightActiveLine: false,
+                }}
+              />
+            </div>
+          )}
 
-        {isSplit && <div className="split-divider" />}
-
-        <div
-          ref={proseRef}
-          onScroll={handleProseScroll}
-          className={`fade-pane prose ${isSplit || !isEditMode ? "visible" : "hidden"}`}
-          style={{
-            display: isSplit || !isEditMode ? "block" : "none",
-            flex: 1,
-            overflowY: isSplit ? "auto" : "visible",
-            paddingLeft: isSplit ? "24px" : "0",
-          }}
-        >
-          <FrontmatterBlock data={frontmatter} />
-          <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+          {/* Preview pane */}
+          {!isEditMode && (
+            <div ref={proseRef} className="prose">
+              <FrontmatterBlock data={frontmatter} />
+              <div dangerouslySetInnerHTML={{ __html: htmlContent }} />
+            </div>
+          )}
         </div>
-      </div>
+      )}
 
       <TableOfContents toc={toc} />
     </>
