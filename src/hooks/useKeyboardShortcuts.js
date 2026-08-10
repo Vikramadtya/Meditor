@@ -3,13 +3,16 @@ import { useUIStore } from "../store/uiStore";
 import { useFileStore } from "../store/fileStore";
 
 /**
- * A custom hook that attaches global keyboard event listeners.
- * Extracts away the messy `window.addEventListener` logic from the UI.
+ * Global keyboard shortcut handler.
+ *
+ * IMPORTANT: We use { capture: true } so the listener fires on the capture
+ * phase — before CodeMirror or any other focused element can consume the event.
+ * Without this, Cmd+S / Cmd+K never fire while the editor is focused.
  *
  * Shortcuts:
- * - Cmd+K: Opens the Command Palette
- * - Cmd+S: Saves the active file
- * - Cmd+E: Toggles between Edit and View mode
+ * - Cmd+S  : Save the active file
+ * - Cmd+K  : Open the Command Palette
+ * - Cmd+E  : Toggle Edit / View mode
  */
 export function useKeyboardShortcuts() {
   const { toggleMode, setCmdPaletteOpen } = useUIStore();
@@ -17,22 +20,32 @@ export function useKeyboardShortcuts() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Listen for Cmd on Mac or Ctrl on Windows
-      if (e.metaKey || e.ctrlKey) {
-        if (e.key === "k") {
+      if (!(e.metaKey || e.ctrlKey)) return;
+
+      switch (e.key.toLowerCase()) {
+        case "s":
           e.preventDefault();
-          setCmdPaletteOpen(true);
-        } else if (e.key === "s") {
-          e.preventDefault();
+          e.stopPropagation();
           saveActiveFile();
-        } else if (e.key === "e") {
+          break;
+        case "k":
           e.preventDefault();
+          e.stopPropagation();
+          setCmdPaletteOpen(true);
+          break;
+        case "e":
+          e.preventDefault();
+          e.stopPropagation();
           toggleMode();
-        }
+          break;
+        default:
+          break;
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // capture: true = intercept before CodeMirror or any child element
+    window.addEventListener("keydown", handleKeyDown, { capture: true });
+    return () =>
+      window.removeEventListener("keydown", handleKeyDown, { capture: true });
   }, [toggleMode, setCmdPaletteOpen, saveActiveFile]);
 }

@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 
 import { useUIStore } from "./store/uiStore";
 import { useFileStore } from "./store/fileStore";
+import { useSettingsStore } from "./store/settingsStore";
 import { fileService } from "./services/fileService";
 import { logger } from "./services/logger";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
@@ -14,11 +15,12 @@ import FloatingActionBar from "./components/FloatingActionBar";
 import SettingsModal from "./components/SettingsModal";
 import CommandPalette from "./components/CommandPalette";
 
-import "./styles/Modals.css"; // Load global modal styles
+import "./styles/Modals.css";
 
 function App() {
   const { theme } = useUIStore();
   const { markdown, autoSaveFile, currentFilePath } = useFileStore();
+  const { typography } = useSettingsStore();
 
   useKeyboardShortcuts();
 
@@ -27,17 +29,34 @@ function App() {
     fileService.initApp();
   }, []);
 
+  // Apply theme class
   useEffect(() => {
     if (theme === "light") document.body.classList.add("light-mode");
     else document.body.classList.remove("light-mode");
   }, [theme]);
 
-  // Debounced Auto-Save Background Daemon
+  // Apply typography settings as CSS custom properties so all prose
+  // styles react instantly without a rebuild.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.style.setProperty("--prose-font", typography.proseFont);
+    root.style.setProperty("--prose-size", `${typography.fontSize}px`);
+    root.style.setProperty("--prose-line-height", typography.lineHeight);
+    root.style.setProperty(
+      "--prose-width",
+      typography.proseWidth ? `${typography.proseWidth}px` : "none",
+    );
+    root.style.setProperty("--prose-h1", `${typography.h1Scale}em`);
+    root.style.setProperty("--prose-h2", `${typography.h2Scale}em`);
+    root.style.setProperty("--prose-h3", `${typography.h3Scale}em`);
+    root.style.setProperty("--prose-h4", `${typography.h4Scale}em`);
+    document.body.setAttribute("data-table", typography.tableStyle);
+  }, [typography]);
+
+  // Debounced auto-save (2s after last keystroke)
   useEffect(() => {
     if (!currentFilePath) return;
-    const timer = setTimeout(() => {
-      autoSaveFile();
-    }, 2000);
+    const timer = setTimeout(() => autoSaveFile(), 2000);
     return () => clearTimeout(timer);
   }, [markdown, currentFilePath, autoSaveFile]);
 
