@@ -104,6 +104,7 @@ export default function EditorPane() {
   // Setup CodeMirror extensions
   const extensions = useMemo(() => {
     const exts = [
+      EditorView.lineWrapping, // ← fills the full column width
       cmMarkdown({ base: markdownLanguage, codeLanguages: languages }),
       dndExtension,
       search({ top: true }),
@@ -114,7 +115,7 @@ export default function EditorPane() {
       exts.push(vim());
     }
 
-    // Setup Keybindings for Formatting (Cmd+Shift+F)
+    // Cmd+Shift+F → Prettier format
     const keymapExt = EditorView.domEventHandlers({
       keydown: (e) => {
         if (e.metaKey && e.shiftKey && e.key.toLowerCase() === "f") {

@@ -101,15 +101,19 @@
 /* ── CodeMirror Editor ────────────────────────────────────────── */
 .cm-editor-container {
   width: 100%;
-  height: 100%;
   font-family: var(--font-mono);
+}
+
+/* The react-codemirror wrapper div */
+.cm-editor-container > div {
+  width: 100%;
 }
 
 .cm-editor-container .cm-scroller {
   font-family: var(--font-mono);
   /* Match the prose font size so editing & preview feel identical */
-  font-size: var(--prose-size, 16px);
-  line-height: var(--prose-line-height, 1.75);
+  font-size: var(--prose-size, 17px);
+  line-height: var(--prose-line-height, 1.8);
 }
 
 .cm-editor-container .cm-editor {
@@ -121,10 +125,12 @@
   outline: none !important;
 }
 
-/* Make the content div inside CM fill the width */
-.cm-editor .cm-content {
-  max-width: none !important;
+/* Content inside CM must fill full width — lineWrapping needs this */
+.cm-editor .cm-content,
+.cm-editor .cm-line {
+  max-width: 100% !important;
   width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Prose / Preview Typography ───────────────────────────────── */
