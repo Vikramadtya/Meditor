@@ -44,7 +44,7 @@ function App() {
     root.style.setProperty("--prose-line-height", typography.lineHeight);
     root.style.setProperty(
       "--prose-width",
-      typography.proseWidth ? `${typography.proseWidth}px` : "none",
+      typography.proseWidth > 0 ? `${typography.proseWidth}px` : "none",
     );
     root.style.setProperty("--prose-h1", `${typography.h1Scale}em`);
     root.style.setProperty("--prose-h2", `${typography.h2Scale}em`);

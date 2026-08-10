@@ -18,7 +18,7 @@
   --prose-font: "Inter", system-ui, sans-serif;
   --prose-size: 17px;
   --prose-line-height: 1.8;
-  --prose-width: 900px;
+  --prose-width: none;
   --prose-h1: 2em;
   --prose-h2: 1.5em;
   --prose-h3: 1.25em;

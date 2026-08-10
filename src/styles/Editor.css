@@ -71,9 +71,7 @@
   flex: 1;
   height: 100%;
   overflow-y: auto;
-  /* Generous side padding so content feels centred like a real page */
-  padding: 48px max(64px, calc((100% - var(--prose-width, 900px)) / 2));
-  padding-bottom: 120px; /* extra bottom space so FAB never covers text */
+  padding: 48px 80px 120px;
   width: 100%;
   position: relative;
   display: flex;
@@ -132,9 +130,11 @@
 /* ── Prose / Preview Typography ───────────────────────────────── */
 .prose {
   font-family: var(--prose-font, "Inter", system-ui, sans-serif);
-  font-size: var(--prose-size, 16px);
-  line-height: var(--prose-line-height, 1.75);
+  font-size: var(--prose-size, 17px);
+  line-height: var(--prose-line-height, 1.8);
   color: var(--text-primary);
+  width: 100%;
+  /* Optional max-width column — set to 0 in settings for full width */
   max-width: var(--prose-width, none);
 }
 

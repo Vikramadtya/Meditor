@@ -29,8 +29,8 @@ export const useSettingsStore = create((set) => ({
     fontSize: 17,
     // Line height multiplier
     lineHeight: 1.8,
-    // Max width of the prose column (px) — 0 means full width
-    proseWidth: 900,
+    // Max width of the prose column (px) — 0 means fill available width
+    proseWidth: 0,
     // Heading scale: multipliers relative to base fontSize
     h1Scale: 2.0,
     h2Scale: 1.5,
