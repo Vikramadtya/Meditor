@@ -3,10 +3,20 @@ import { fileService } from "../services/fileService";
 import { logger } from "../services/logger";
 import toast from "react-hot-toast";
 
+const WELCOME_CONTENT =
+  "# Welcome to meditor\n\nA beautiful, super lightweight markdown editor.\n\n## Features\n- Toggle between Edit and View mode\n- Folder navigation sidebar\n- Glassmorphism design";
+
 export const useFileStore = create((set, get) => ({
-  markdown:
-    "# Welcome to meditor\n\nA beautiful, super lightweight markdown editor.\n\n## Features\n- Toggle between Edit and View mode\n- Folder navigation sidebar\n- Glassmorphism design",
-  setMarkdown: (markdown) => set({ markdown }),
+  markdown: WELCOME_CONTENT,
+  savedMarkdown: WELCOME_CONTENT, // tracks the last-saved snapshot
+  isDirty: false, // true when unsaved changes exist
+
+  setMarkdown: (markdown) =>
+    set((state) => ({
+      markdown,
+      isDirty: markdown !== state.savedMarkdown,
+    })),
+
   fileName: "Untitled.md",
   setFileName: (fileName) => set({ fileName }),
 
@@ -79,6 +89,8 @@ export const useFileStore = create((set, get) => ({
       const content = await fileService.readFile(fullPath);
       set({
         markdown: content,
+        savedMarkdown: content,
+        isDirty: false,
         fileName: file.entry,
         currentFilePath: fullPath,
       });
@@ -103,6 +115,8 @@ export const useFileStore = create((set, get) => ({
         set({
           fileName: savePath.split(/[\\/]/).pop(),
           currentFilePath: savePath,
+          savedMarkdown: markdown,
+          isDirty: false,
         });
         if (currentFolder) {
           await get().loadWorkspace(currentFolder);
@@ -176,11 +190,45 @@ export const useFileStore = create((set, get) => ({
     if (!currentFilePath) return;
     try {
       await fileService.writeFile(currentFilePath, markdown);
+      set({ savedMarkdown: markdown, isDirty: false });
       logger.info(`Auto-saved file to: ${currentFilePath}`);
-      // Visually silent on success so it doesn't spam the user every 2 seconds.
     } catch (err) {
       logger.error("Auto-save failed", err);
       toast.error("Auto-save failed!");
+    }
+  },
+
+  /**
+   * Creates a new .md file inside the current workspace folder,
+   * then immediately opens it in the editor.
+   * @param {string} fileName - The desired filename (e.g. "Notes.md")
+   */
+  createNewFile: async (rawName) => {
+    const { currentFolder } = get();
+    if (!currentFolder) {
+      toast.error("Open a workspace folder first.");
+      return;
+    }
+    // Ensure the file ends with .md
+    const fileName = rawName.endsWith(".md") ? rawName : `${rawName}.md`;
+    const filePath = `${currentFolder}/${fileName}`;
+    const initialContent = `# ${rawName.replace(/\.md$/, "")}\n`;
+
+    try {
+      await fileService.writeFile(filePath, initialContent);
+      set({
+        markdown: initialContent,
+        savedMarkdown: initialContent,
+        isDirty: false,
+        fileName,
+        currentFilePath: filePath,
+      });
+      await get().loadWorkspace(currentFolder);
+      logger.info(`Created new file: ${filePath}`);
+      toast.success(`Created ${fileName}`);
+    } catch (err) {
+      logger.error(`Failed to create file: ${filePath}`, err);
+      toast.error("Failed to create file.");
     }
   },
 }));

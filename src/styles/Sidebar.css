@@ -9,8 +9,9 @@
   overflow-y: auto;
 }
 
+/* ── Header ──────────────────────────────────────── */
 .sidebar-header {
-  padding: 0 16px 16px;
+  padding: 0 12px 12px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -18,17 +19,80 @@
   color: var(--text-secondary);
   border-bottom: 1px solid var(--glass-border);
   margin-bottom: 8px;
+
+  /* layout: name + button side by side */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
+.sidebar-workspace-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.sidebar-new-file-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 3px 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.sidebar-new-file-btn:hover {
+  color: var(--accent);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* ── New-file inline input row ───────────────────── */
+.new-file-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 12px 5px 16px;
+  margin-bottom: 4px;
+  background: rgba(59, 130, 246, 0.06);
+  border-left: 2px solid var(--accent);
+}
+
+.new-file-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: var(--font-mono);
+  caret-color: var(--accent);
+  min-width: 0;
+}
+
+.new-file-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+/* ── File list items ─────────────────────────────── */
 .file-item {
   padding: 8px 16px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13.5px;
   display: flex;
   align-items: center;
   gap: 8px;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
+  border-left: 2px solid transparent;
 }
 
 .file-item:hover {

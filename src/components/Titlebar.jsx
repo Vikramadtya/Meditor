@@ -3,7 +3,7 @@ import { FileText } from "lucide-react";
 import { useFileStore } from "../store/fileStore";
 
 export default function Titlebar() {
-  const { fileName, markdown } = useFileStore();
+  const { fileName, markdown, isDirty } = useFileStore();
 
   const stats = useMemo(() => {
     const text = markdown.trim();
@@ -24,10 +24,30 @@ export default function Titlebar() {
           paddingRight: "16px",
         }}
       >
+        {/* File name + unsaved indicator */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <FileText size={14} />
-          {fileName} - meditor
+          <span>{fileName}</span>
+          {isDirty && (
+            <span
+              title="Unsaved changes — press Cmd+S to save"
+              style={{
+                width: 7,
+                height: 7,
+                borderRadius: "50%",
+                background: "var(--accent)",
+                display: "inline-block",
+                flexShrink: 0,
+                boxShadow: "0 0 6px var(--accent)",
+              }}
+            />
+          )}
+          <span style={{ color: "var(--text-secondary)", opacity: 0.4 }}>
+            — meditor
+          </span>
         </div>
+
+        {/* Doc stats */}
         <div
           style={{
             fontSize: "11px",
