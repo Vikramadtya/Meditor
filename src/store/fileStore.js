@@ -22,6 +22,8 @@ export const useFileStore = create((set, get) => ({
 
   currentFolder: null,
   setCurrentFolder: (currentFolder) => set({ currentFolder }),
+  workspaceRoot: null, // Tracks the root folder opened by the user
+  setWorkspaceRoot: (workspaceRoot) => set({ workspaceRoot }),
   files: [],
   setFiles: (files) => set({ files }),
   currentFilePath: null,
@@ -32,7 +34,26 @@ export const useFileStore = create((set, get) => ({
   loadWorkspace: async (folderPath) => {
     try {
       set({ currentFolder: folderPath });
-      const entries = await fileService.readDirectory(folderPath);
+      let entries = await fileService.readDirectory(folderPath);
+      let { workspaceRoot } = get();
+
+      // If we don't have a workspace root yet, use the current folder
+      if (!workspaceRoot) {
+        workspaceRoot = folderPath;
+        set({ workspaceRoot });
+      }
+
+      // If we are inside a subfolder of the workspace root, inject a ".." directory
+      if (
+        folderPath.length > workspaceRoot.length &&
+        folderPath.startsWith(workspaceRoot)
+      ) {
+        // Ensure we don't duplicate it if the OS actually returned it
+        if (!entries.some((e) => e.entry === "..")) {
+          entries.unshift({ entry: "..", type: "DIRECTORY" });
+        }
+      }
+
       set({ files: entries });
       logger.info(`Loaded workspace directory: ${folderPath}`);
     } catch (err) {
@@ -46,6 +67,7 @@ export const useFileStore = create((set, get) => ({
     try {
       const entry = await fileService.showOpenFolderDialog();
       if (entry) {
+        set({ workspaceRoot: entry });
         await get().loadWorkspace(entry);
         toast.success("Workspace opened");
       }
@@ -53,6 +75,7 @@ export const useFileStore = create((set, get) => ({
       logger.error("Error opening folder dialog", err);
       set({
         currentFolder: `Error: ${err.message || "Dialog failed"}`,
+        workspaceRoot: null,
         files: [],
       });
       toast.error("Failed to open folder dialog");
