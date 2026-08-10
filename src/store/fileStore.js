@@ -231,4 +231,26 @@ export const useFileStore = create((set, get) => ({
       toast.error("Failed to create file.");
     }
   },
+
+  /**
+   * Creates a new folder inside the current workspace folder.
+   * @param {string} folderName - The desired folder name
+   */
+  createNewFolder: async (folderName) => {
+    const { currentFolder } = get();
+    if (!currentFolder) {
+      toast.error("Open a workspace folder first.");
+      return;
+    }
+    const folderPath = `${currentFolder}/${folderName}`;
+    try {
+      await fileService.createDirectory(folderPath);
+      await get().loadWorkspace(currentFolder);
+      logger.info(`Created new folder: ${folderPath}`);
+      toast.success(`Created folder ${folderName}`);
+    } catch (err) {
+      logger.error(`Failed to create folder: ${folderPath}`, err);
+      toast.error("Failed to create folder.");
+    }
+  },
 }));

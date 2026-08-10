@@ -1,75 +1,118 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Folder, FileText, CornerLeftUp, FilePlus } from "lucide-react";
+import {
+  Folder,
+  FileText,
+  CornerLeftUp,
+  FilePlus,
+  FolderPlus,
+} from "lucide-react";
 import { useUIStore } from "../store/uiStore";
 import { useFileStore } from "../store/fileStore";
 import "../styles/Sidebar.css";
 
 export default function Sidebar() {
   const { theme } = useUIStore();
-  const { currentFolder, files, fileName, openFileFromSidebar, createNewFile } =
-    useFileStore();
+  const {
+    currentFolder,
+    files,
+    fileName,
+    openFileFromSidebar,
+    createNewFile,
+    createNewFolder,
+  } = useFileStore();
 
-  const [isCreating, setIsCreating] = useState(false);
-  const [newFileName, setNewFileName] = useState("");
+  const [creatingType, setCreatingType] = useState(null); // 'file' | 'folder' | null
+  const [newName, setNewName] = useState("");
   const inputRef = useRef(null);
 
   // Focus the input as soon as it appears
   useEffect(() => {
-    if (isCreating && inputRef.current) {
+    if (creatingType && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isCreating]);
+  }, [creatingType]);
 
   const handleNewFileClick = () => {
-    setNewFileName("");
-    setIsCreating(true);
+    setNewName("");
+    setCreatingType("file");
+  };
+
+  const handleNewFolderClick = () => {
+    setNewName("");
+    setCreatingType("folder");
   };
 
   const handleCreate = async () => {
-    const trimmed = newFileName.trim();
+    const trimmed = newName.trim();
     if (!trimmed) {
-      setIsCreating(false);
+      setCreatingType(null);
       return;
     }
-    setIsCreating(false);
-    await createNewFile(trimmed);
+
+    const type = creatingType;
+    setCreatingType(null);
+
+    if (type === "file") {
+      await createNewFile(trimmed);
+    } else if (type === "folder") {
+      await createNewFolder(trimmed);
+    }
   };
 
   const handleInputKeyDown = (e) => {
     if (e.key === "Enter") handleCreate();
-    if (e.key === "Escape") setIsCreating(false);
+    if (e.key === "Escape") setCreatingType(null);
   };
 
   if (!currentFolder) return null;
 
   return (
     <div className="sidebar">
-      {/* Header row with workspace name + New File button */}
+      {/* Header row with workspace name + Action buttons */}
       <div className="sidebar-header">
         <span className="sidebar-workspace-name">
           {currentFolder.split(/[/\\]/).pop() || "Workspace"}
         </span>
-        <button
-          className="sidebar-new-file-btn"
-          onClick={handleNewFileClick}
-          title="New File"
-        >
-          <FilePlus size={14} />
-        </button>
+        <div style={{ display: "flex", gap: "4px" }}>
+          <button
+            className="sidebar-new-file-btn"
+            onClick={handleNewFileClick}
+            title="New File"
+          >
+            <FilePlus size={14} />
+          </button>
+          <button
+            className="sidebar-new-file-btn"
+            onClick={handleNewFolderClick}
+            title="New Folder"
+          >
+            <FolderPlus size={14} />
+          </button>
+        </div>
       </div>
 
-      {/* Inline new-file input row */}
-      {isCreating && (
+      {/* Inline new file/folder input row */}
+      {creatingType && (
         <div className="new-file-input-row">
-          <FileText size={13} style={{ flexShrink: 0, opacity: 0.5 }} />
+          {creatingType === "folder" ? (
+            <Folder
+              size={13}
+              style={{ flexShrink: 0, opacity: 0.5 }}
+              color={theme === "light" ? "#ca8a04" : "#facc15"}
+            />
+          ) : (
+            <FileText size={13} style={{ flexShrink: 0, opacity: 0.5 }} />
+          )}
           <input
             ref={inputRef}
             className="new-file-input"
-            value={newFileName}
-            onChange={(e) => setNewFileName(e.target.value)}
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
             onKeyDown={handleInputKeyDown}
             onBlur={handleCreate}
-            placeholder="filename.md"
+            placeholder={
+              creatingType === "folder" ? "folder_name" : "filename.md"
+            }
             spellCheck={false}
           />
         </div>
