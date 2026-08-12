@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <input type="text" id="t1" value="Hello">
+  <input type="text" id="t2">
+  <script>
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey) {
+        if (e.key === 'c') document.execCommand('copy');
+        if (e.key === 'v') document.execCommand('paste');
+        if (e.key === 'x') document.execCommand('cut');
+        if (e.key === 'a') document.execCommand('selectAll');
+        if (e.key === 'z' && !e.shiftKey) document.execCommand('undo');
+        if (e.key === 'z' && e.shiftKey) document.execCommand('redo');
+      }
+    });
+  </script>
+</body>
+</html>

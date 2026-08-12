@@ -38,6 +38,30 @@ export function useKeyboardShortcuts() {
           e.stopPropagation();
           toggleMode();
           break;
+
+        /* ── macOS Native Shortcut Fallbacks ──
+           Neutralino on macOS doesn't have an Edit menu, so standard WebView
+           shortcuts (Cmd+C, V, X) are often swallowed. We manually trigger them. */
+        case "c":
+          document.execCommand("copy");
+          break;
+        case "x":
+          document.execCommand("cut");
+          break;
+        case "v":
+          document.execCommand("paste");
+          break;
+        case "a":
+          document.execCommand("selectAll");
+          break;
+        case "z":
+          if (e.shiftKey) {
+            document.execCommand("redo");
+          } else {
+            document.execCommand("undo");
+          }
+          break;
+
         default:
           break;
       }
