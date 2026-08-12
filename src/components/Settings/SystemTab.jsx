@@ -1,0 +1,68 @@
+import React from "react";
+import { Trash2 } from "lucide-react";
+import { Section, Row, inputStyle, chipStyle } from "./SettingsUI";
+import { useSettingsStore } from "../../store/settingsStore";
+
+export default function SystemTab() {
+  const { cacheLocation, setCacheLocation } = useSettingsStore();
+
+  return (
+    <Section label="Storage & Caching">
+      <Row label="Cache Directory">
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            width: "100%",
+            maxWidth: "300px",
+          }}
+        >
+          <input
+            type="text"
+            value={cacheLocation}
+            onChange={(e) => setCacheLocation(e.target.value)}
+            style={{ ...inputStyle, flex: 1 }}
+            placeholder="/tmp/meditor_cache"
+          />
+          <button
+            onClick={async () => {
+              try {
+                const entry = await window.Neutralino.os.showFolderDialog(
+                  "Select Cache Folder",
+                );
+                if (entry) {
+                  setCacheLocation(entry);
+                }
+              } catch (e) {
+                // dialog error
+              }
+            }}
+            style={{
+              ...chipStyle,
+              background: "rgba(255,255,255,0.1)",
+              borderRadius: "6px",
+            }}
+          >
+            Browse
+          </button>
+        </div>
+      </Row>
+      <Row label="Manual Actions">
+        <button
+          onClick={async () => {
+            const { fileService } = await import("../../services/fileService");
+            fileService.clearDirectoryCache();
+            alert("Cache cleared successfully!");
+          }}
+          style={{
+            ...chipStyle,
+            background: "var(--error, #ff5252)",
+            color: "#fff",
+          }}
+        >
+          <Trash2 size={14} /> Clear Disk Cache
+        </button>
+      </Row>
+    </Section>
+  );
+}

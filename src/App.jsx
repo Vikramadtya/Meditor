@@ -12,7 +12,7 @@ import Titlebar from "./components/Titlebar";
 import Sidebar from "./components/Sidebar";
 import EditorPane from "./components/EditorPane";
 import FloatingActionBar from "./components/FloatingActionBar";
-import SettingsModal from "./components/SettingsModal";
+import SettingsModal from "./components/Settings/SettingsModal";
 import CommandPalette from "./components/CommandPalette";
 import GlobalSearchModal from "./components/GlobalSearchModal";
 

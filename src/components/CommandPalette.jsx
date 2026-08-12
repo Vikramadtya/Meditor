@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useUIStore } from "../store/uiStore";
 import { useFileStore } from "../store/fileStore";
+import { exportService } from "../services/exportService";
 
 export default function CommandPalette() {
   const {
@@ -26,8 +27,7 @@ export default function CommandPalette() {
     toggleToc,
     setSettingsOpen,
   } = useUIStore();
-  const { saveActiveFile, openWorkspaceDialog, exportToHTML, exportToPDF } =
-    useFileStore();
+  const { saveActiveFile, openWorkspaceDialog } = useFileStore();
   const [cmdSearch, setCmdSearch] = useState("");
 
   const cmdActions = [
@@ -83,7 +83,9 @@ export default function CommandPalette() {
       name: "Export to HTML",
       icon: <FileCode size={16} />,
       action: () => {
-        exportToHTML(document.querySelector(".prose")?.innerHTML || "");
+        exportService.exportToHTML(
+          document.querySelector(".prose")?.innerHTML || "",
+        );
         setCmdPaletteOpen(false);
       },
     },
@@ -91,7 +93,7 @@ export default function CommandPalette() {
       name: "Export to PDF",
       icon: <FileText size={16} />,
       action: () => {
-        exportToPDF();
+        exportService.exportToPDF();
         setCmdPaletteOpen(false);
       },
     },
