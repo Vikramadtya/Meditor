@@ -3,6 +3,7 @@ import markdownItTaskLists from "markdown-it-task-lists";
 import markdownItKatex from "markdown-it-katex";
 import admonitionPlugin from "../utils/markdown-it-admonitions";
 import customRulesPlugin from "../utils/markdown-it-custom-rules";
+import markdownItMkDocsTabs from "../utils/markdown-it-mkdocs-tabs";
 
 import markdownItAnchor from "markdown-it-anchor";
 
@@ -26,6 +27,7 @@ function getMarkdownInstance(mdConfig) {
   parser.use(markdownItKatex);
   parser.use(admonitionPlugin);
   parser.use(customRulesPlugin, { customRules: mdConfig.customRules });
+  parser.use(markdownItMkDocsTabs);
   parser.use(markdownItAnchor, {
     level: 1,
     permalink: false,

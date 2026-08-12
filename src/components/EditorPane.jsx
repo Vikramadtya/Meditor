@@ -31,6 +31,7 @@ import { useScrollSync } from "../hooks/useScrollSync";
 import { useImageInterceptor } from "../hooks/useImageInterceptor";
 import { useMermaidRenderer } from "../hooks/useMermaidRenderer";
 import { useDragAndDrop } from "../hooks/useDragAndDrop";
+import { useMkDocsTabs } from "../hooks/useMkDocsTabs";
 
 import TableOfContents from "./TableOfContents";
 import FrontmatterBlock from "./FrontmatterBlock";
@@ -90,6 +91,7 @@ export default function EditorPane() {
   const { handleProseScroll } = useScrollSync(isSplit, proseRef);
   useImageInterceptor(proseRef, currentFolder, htmlContent);
   useMermaidRenderer(proseRef, htmlContent, theme);
+  useMkDocsTabs(proseRef, htmlContent);
   const dndExtension = useDragAndDrop(
     currentFolder,
     mdConfig.imageSavePath,

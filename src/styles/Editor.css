@@ -364,6 +364,66 @@ body[data-table="striped"] .prose tbody tr:nth-child(even) {
   display: none;
 }
 
+/* ── MkDocs Tabs ───────────────────────────────────────── */
+.mkdocs-tabs {
+  margin: 1.5em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.mkdocs-tabs-nav {
+  display: flex;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  overflow-x: auto;
+}
+
+.mkdocs-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  padding: 10px 16px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.mkdocs-tab-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mkdocs-tab-btn.active {
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
+  background: var(--bg-primary);
+}
+
+.mkdocs-tab-pane {
+  display: none;
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+
+.mkdocs-tab-pane.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Add custom chevron for details */
 .prose details.admonition summary::after {
   content: "";
