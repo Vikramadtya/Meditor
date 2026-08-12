@@ -12,6 +12,8 @@ export default function SettingsModal() {
     setTypography,
     customRules,
     setCustomRules,
+    cacheLocation,
+    setCacheLocation,
   } = useSettingsStore();
 
   const [activeTab, setActiveTab] = useState("general");
@@ -52,6 +54,12 @@ export default function SettingsModal() {
               onClick={() => setActiveTab("rules")}
             >
               Custom Rules
+            </button>
+            <button
+              className={`settings-nav-item ${activeTab === "system" ? "active" : ""}`}
+              onClick={() => setActiveTab("system")}
+            >
+              System / Storage
             </button>
           </div>
         </div>
@@ -250,6 +258,70 @@ export default function SettingsModal() {
 
             {activeTab === "rules" && (
               <CustomRulesTab rules={customRules} setRules={setCustomRules} />
+            )}
+
+            {activeTab === "system" && (
+              <>
+                <Section label="Storage & Caching">
+                  <Row label="Cache Directory">
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        width: "100%",
+                        maxWidth: "300px",
+                      }}
+                    >
+                      <input
+                        type="text"
+                        value={cacheLocation}
+                        onChange={(e) => setCacheLocation(e.target.value)}
+                        style={{ ...inputStyle, flex: 1 }}
+                        placeholder="/tmp/meditor_cache"
+                      />
+                      <button
+                        onClick={async () => {
+                          try {
+                            const entry =
+                              await window.Neutralino.os.showFolderDialog(
+                                "Select Cache Folder",
+                              );
+                            if (entry) {
+                              setCacheLocation(entry);
+                            }
+                          } catch (e) {
+                            // dialog error
+                          }
+                        }}
+                        style={{
+                          ...chipStyle,
+                          background: "rgba(255,255,255,0.1)",
+                          borderRadius: "6px",
+                        }}
+                      >
+                        Browse
+                      </button>
+                    </div>
+                  </Row>
+                  <Row label="Manual Actions">
+                    <button
+                      onClick={async () => {
+                        const { fileService } =
+                          await import("../services/fileService");
+                        fileService.clearDirectoryCache();
+                        alert("Cache cleared successfully!");
+                      }}
+                      style={{
+                        ...chipStyle,
+                        background: "var(--error, #ff5252)",
+                        color: "#fff",
+                      }}
+                    >
+                      <Trash2 size={14} /> Clear Disk Cache
+                    </button>
+                  </Row>
+                </Section>
+              </>
             )}
           </div>
         </div>

@@ -1,3 +1,6 @@
+import { logger } from "./logger";
+import { useSettingsStore } from "../store/settingsStore";
+
 /**
  * @fileoverview Abstracts away all Native OS interactions via Neutralino.js
  * Keeps the rest of the application completely decoupled from the desktop environment.
@@ -39,17 +42,26 @@ export const fileService = {
 
   /**
    * Recursively reads a directory to find all markdown files.
-   * Utilizes sessionStorage as temporary storage to cache the index.
+   * Utilizes disk storage as temporary storage to cache the index.
    * @param {string} folderPath - The absolute path of the directory.
    * @returns {Promise<Array<string>>} List of absolute paths to markdown files.
    */
   async readDirectoryRecursive(folderPath) {
     if (!this.isAvailable()) throw new Error("Neutralino not available");
 
-    const cacheKey = `meditor_dir_cache_${folderPath}`;
-    const cached = sessionStorage.getItem(cacheKey);
-    if (cached) {
-      return JSON.parse(cached);
+    const cacheLocation = useSettingsStore.getState().cacheLocation;
+    await this.createDirectory(cacheLocation);
+
+    // Hash the folder path to create a safe filename
+    // We just encode the path to base64 to avoid slash issues
+    const safeName = btoa(folderPath).replace(/[/+=]/g, "_");
+    const cacheFile = `${cacheLocation}/meditor_cache_${safeName}.json`;
+
+    try {
+      const cachedStr = await this.readFile(cacheFile);
+      if (cachedStr) return JSON.parse(cachedStr);
+    } catch (e) {
+      // Cache miss or read error
     }
 
     let results = [];
@@ -66,9 +78,6 @@ export const fileService = {
 
         const fullPath = `${folderPath}/${entry.entry}`;
         if (entry.type === "DIRECTORY") {
-          // Note: we don't use the cache wrapper for recursive calls to avoid key pollution,
-          // we just do the native read. Wait, actually, let's keep it simple.
-          // To avoid infinite complexity, we'll just implement a helper.
           const subEntries =
             await this._readDirectoryRecursiveInternal(fullPath);
           results = results.concat(subEntries);
@@ -83,7 +92,12 @@ export const fileService = {
       // Ignore permission errors on specific subfolders
     }
 
-    sessionStorage.setItem(cacheKey, JSON.stringify(results));
+    try {
+      await this.writeFile(cacheFile, JSON.stringify(results));
+    } catch (e) {
+      logger.error("Failed to write to cache location", e);
+    }
+
     return results;
   },
 
@@ -118,13 +132,23 @@ export const fileService = {
   /**
    * Clears the directory cache for a folder, or all caches to be safe.
    */
-  clearDirectoryCache() {
-    // SessionStorage iteration
-    const keys = Object.keys(sessionStorage);
-    for (const key of keys) {
-      if (key.startsWith("meditor_dir_cache_")) {
-        sessionStorage.removeItem(key);
+  async clearDirectoryCache() {
+    try {
+      const cacheLocation = useSettingsStore.getState().cacheLocation;
+      const entries =
+        await window.Neutralino.filesystem.readDirectory(cacheLocation);
+      for (const entry of entries) {
+        if (
+          entry.entry.startsWith("meditor_cache_") &&
+          entry.entry.endsWith(".json")
+        ) {
+          await window.Neutralino.filesystem.removeFile(
+            `${cacheLocation}/${entry.entry}`,
+          );
+        }
       }
+    } catch (e) {
+      // ignore
     }
   },
 

@@ -60,6 +60,10 @@ export const useSettingsStore = create(
         set((state) => ({
           typography: { ...state.typography, ...patch },
         })),
+
+      // ── System / Storage ───────────────────────────────────────
+      cacheLocation: "/tmp/meditor_cache",
+      setCacheLocation: (location) => set({ cacheLocation: location }),
     }),
     {
       name: "meditor-settings", // key in localStorage
