@@ -1,13 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import mermaid from "mermaid";
 import { logger } from "../services/logger";
 
 let mermaidRenderQueue = Promise.resolve();
+const mermaidCache = new Map();
 
 export function useMermaidRenderer(proseRef, htmlContent, theme) {
   const effectIdRef = useRef(0);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!proseRef.current) return;
     mermaid.initialize({
       startOnLoad: false,
@@ -31,6 +32,20 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
           const node = mermaidNodes[i];
           const parent = node.parentElement; // The <pre> tag
           if (parent && parent.tagName === "PRE") {
+            const rawText = node.textContent;
+
+            // If we have a cached SVG for this exact text, inject it synchronously!
+            if (mermaidCache.has(rawText)) {
+              const svg = mermaidCache.get(rawText);
+              if (svg) {
+                const div = document.createElement("div");
+                div.className = "mermaid-diagram";
+                div.innerHTML = svg;
+                parent.replaceWith(div);
+              }
+              continue; // Skip async render
+            }
+
             const id = `mermaid-svg-${Date.now()}-${i}-${currentEffectId}`;
 
             // Queue mermaid renders to prevent concurrent render errors
@@ -41,7 +56,7 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
                     return { svg: null };
                   }
                   try {
-                    const result = await mermaid.render(id, node.textContent);
+                    const result = await mermaid.render(id, rawText);
                     resolve(result);
                   } catch (e) {
                     reject(e);
@@ -53,6 +68,7 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
             });
 
             if (svg && isMounted && currentEffectId === effectIdRef.current) {
+              mermaidCache.set(rawText, svg);
               const div = document.createElement("div");
               div.className = "mermaid-diagram";
               div.innerHTML = svg;
@@ -62,6 +78,9 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
         }
       } catch (err) {
         logger.warn("Mermaid rendering error", err);
+        import("react-hot-toast").then(({ default: toast }) => {
+          toast.error("Mermaid error: " + err.message);
+        });
       }
     };
 
