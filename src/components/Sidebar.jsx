@@ -93,17 +93,6 @@ export default function Sidebar() {
           >
             <FolderPlus size={14} />
           </button>
-          <button
-            className="sidebar-new-file-btn"
-            onClick={toggleSidebar}
-            title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
-          >
-            {isSidebarOpen ? (
-              <PanelLeftClose size={14} />
-            ) : (
-              <PanelLeft size={14} />
-            )}
-          </button>
         </div>
       </div>
 

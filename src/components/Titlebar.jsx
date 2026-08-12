@@ -1,9 +1,11 @@
 import React, { useMemo } from "react";
-import { FileText } from "lucide-react";
+import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useFileStore } from "../store/fileStore";
+import { useUIStore } from "../store/uiStore";
 
 export default function Titlebar() {
   const { fileName, markdown, isDirty } = useFileStore();
+  const { isSidebarOpen, toggleSidebar } = useUIStore();
 
   const stats = useMemo(() => {
     const text = markdown.trim();
@@ -26,6 +28,27 @@ export default function Titlebar() {
       >
         {/* File name + unsaved indicator */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <button
+            onClick={toggleSidebar}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--text-secondary)",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              padding: "2px",
+              marginLeft: "70px", // space for macOS window controls
+            }}
+            title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+          >
+            {isSidebarOpen ? (
+              <PanelLeftClose size={14} />
+            ) : (
+              <PanelLeft size={14} />
+            )}
+          </button>
+
           <FileText size={14} />
           <span>{fileName}</span>
           {isDirty && (
