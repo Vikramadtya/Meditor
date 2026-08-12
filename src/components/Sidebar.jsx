@@ -5,13 +5,15 @@ import {
   CornerLeftUp,
   FilePlus,
   FolderPlus,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 import { useUIStore } from "../store/uiStore";
 import { useFileStore } from "../store/fileStore";
 import "../styles/Sidebar.css";
 
 export default function Sidebar() {
-  const { theme } = useUIStore();
+  const { theme, isSidebarOpen, toggleSidebar } = useUIStore();
   const {
     currentFolder,
     files,
@@ -67,13 +69,16 @@ export default function Sidebar() {
   if (!currentFolder) return null;
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${isSidebarOpen ? "" : "closed"}`}>
       {/* Header row with workspace name + Action buttons */}
       <div className="sidebar-header">
         <span className="sidebar-workspace-name">
           {currentFolder.split(/[/\\]/).pop() || "Workspace"}
         </span>
-        <div style={{ display: "flex", gap: "4px" }}>
+        <div
+          className="sidebar-actions"
+          style={{ display: "flex", gap: "4px" }}
+        >
           <button
             className="sidebar-new-file-btn"
             onClick={handleNewFileClick}
@@ -87,6 +92,17 @@ export default function Sidebar() {
             title="New Folder"
           >
             <FolderPlus size={14} />
+          </button>
+          <button
+            className="sidebar-new-file-btn"
+            onClick={toggleSidebar}
+            title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+          >
+            {isSidebarOpen ? (
+              <PanelLeftClose size={14} />
+            ) : (
+              <PanelLeft size={14} />
+            )}
           </button>
         </div>
       </div>
@@ -119,7 +135,7 @@ export default function Sidebar() {
       )}
 
       {/* File list */}
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div className="file-list">
         {files.map((file, i) => {
           const isDir = file.type === "DIRECTORY";
           const isBack = file.entry === "..";
