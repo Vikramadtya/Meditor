@@ -239,6 +239,7 @@ export const useFileStore = create((set, get) => ({
 
     try {
       await fileService.writeFile(filePath, initialContent);
+      fileService.clearDirectoryCache(currentFolder); // clear cache
       set({
         markdown: initialContent,
         savedMarkdown: initialContent,
@@ -268,6 +269,7 @@ export const useFileStore = create((set, get) => ({
     const folderPath = `${currentFolder}/${folderName}`;
     try {
       await fileService.createDirectory(folderPath);
+      fileService.clearDirectoryCache(currentFolder); // clear cache
       await get().loadWorkspace(currentFolder);
       logger.info(`Created new folder: ${folderPath}`);
       toast.success(`Created folder ${folderName}`);

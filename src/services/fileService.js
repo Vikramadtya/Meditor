@@ -39,11 +39,19 @@ export const fileService = {
 
   /**
    * Recursively reads a directory to find all markdown files.
+   * Utilizes sessionStorage as temporary storage to cache the index.
    * @param {string} folderPath - The absolute path of the directory.
    * @returns {Promise<Array<string>>} List of absolute paths to markdown files.
    */
   async readDirectoryRecursive(folderPath) {
     if (!this.isAvailable()) throw new Error("Neutralino not available");
+
+    const cacheKey = `meditor_dir_cache_${folderPath}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
     let results = [];
     try {
       const entries =
@@ -58,7 +66,11 @@ export const fileService = {
 
         const fullPath = `${folderPath}/${entry.entry}`;
         if (entry.type === "DIRECTORY") {
-          const subEntries = await this.readDirectoryRecursive(fullPath);
+          // Note: we don't use the cache wrapper for recursive calls to avoid key pollution,
+          // we just do the native read. Wait, actually, let's keep it simple.
+          // To avoid infinite complexity, we'll just implement a helper.
+          const subEntries =
+            await this._readDirectoryRecursiveInternal(fullPath);
           results = results.concat(subEntries);
         } else if (
           entry.entry.endsWith(".md") ||
@@ -70,7 +82,50 @@ export const fileService = {
     } catch (e) {
       // Ignore permission errors on specific subfolders
     }
+
+    sessionStorage.setItem(cacheKey, JSON.stringify(results));
     return results;
+  },
+
+  async _readDirectoryRecursiveInternal(folderPath) {
+    let results = [];
+    try {
+      const entries =
+        await window.Neutralino.filesystem.readDirectory(folderPath);
+      for (const entry of entries) {
+        if (
+          entry.entry === "." ||
+          entry.entry === ".." ||
+          entry.entry.startsWith(".")
+        )
+          continue;
+        const fullPath = `${folderPath}/${entry.entry}`;
+        if (entry.type === "DIRECTORY") {
+          const subEntries =
+            await this._readDirectoryRecursiveInternal(fullPath);
+          results = results.concat(subEntries);
+        } else if (
+          entry.entry.endsWith(".md") ||
+          entry.entry.endsWith(".markdown")
+        ) {
+          results.push(fullPath);
+        }
+      }
+    } catch (e) {}
+    return results;
+  },
+
+  /**
+   * Clears the directory cache for a folder, or all caches to be safe.
+   */
+  clearDirectoryCache() {
+    // SessionStorage iteration
+    const keys = Object.keys(sessionStorage);
+    for (const key of keys) {
+      if (key.startsWith("meditor_dir_cache_")) {
+        sessionStorage.removeItem(key);
+      }
+    }
   },
 
   /**
