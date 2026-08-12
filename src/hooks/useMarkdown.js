@@ -5,6 +5,7 @@ import markdownItTaskLists from "markdown-it-task-lists";
 import markdownItKatex from "markdown-it-katex";
 import admonitionPlugin from "../utils/markdown-it-admonitions";
 import customRulesPlugin from "../utils/markdown-it-custom-rules";
+import markdownItMkDocsTabs from "../utils/markdown-it-mkdocs-tabs";
 
 let mdInstance = null;
 let currentConfigStr = "";
@@ -26,6 +27,7 @@ function getMarkdownInstance(mdConfig) {
   parser.use(markdownItTaskLists, { enabled: true });
   parser.use(markdownItKatex);
   parser.use(admonitionPlugin);
+  parser.use(markdownItMkDocsTabs);
   parser.use(customRulesPlugin, { customRules: mdConfig.customRules });
 
   mdInstance = parser;
@@ -63,6 +65,27 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
             }
           });
         }
+
+        // Pre-process MkDocs tabs: strip 4 spaces of indentation
+        // so markdown-it parses fenced code blocks correctly inside tabs.
+        const lines = content.split("\n");
+        let inTab = false;
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          if (line.match(/^===\s+["“][^"”]+["”]\s*$/)) {
+            inTab = true;
+            continue;
+          }
+          if (inTab) {
+            if (line.startsWith("    ")) {
+              lines[i] = line.substring(4);
+            } else if (line.trim() !== "") {
+              // End of tab content
+              inTab = false;
+            }
+          }
+        }
+        content = lines.join("\n");
 
         const md = getMarkdownInstance(mdConfig);
         const env = {};
