@@ -219,7 +219,7 @@ export default function EditorPane() {
                 onChange={(val) => setMarkdown(val)}
                 theme={theme}
                 basicSetup={{
-                  lineNumbers: false,
+                  lineNumbers: true,
                   foldGutter: false,
                   highlightActiveLine: false,
                 }}
@@ -254,7 +254,7 @@ export default function EditorPane() {
                 onChange={(val) => setMarkdown(val)}
                 theme={theme}
                 basicSetup={{
-                  lineNumbers: false,
+                  lineNumbers: true,
                   foldGutter: false,
                   highlightActiveLine: false,
                 }}
