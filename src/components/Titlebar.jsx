@@ -38,7 +38,7 @@ export default function Titlebar() {
               display: "flex",
               alignItems: "center",
               padding: "2px",
-              marginLeft: "70px", // space for macOS window controls
+              marginLeft: "16px",
             }}
             title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
           >
