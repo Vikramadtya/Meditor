@@ -24,246 +24,234 @@ export default function SettingsModal() {
         className="modal-content settings-modal"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="settings-header" style={{ paddingBottom: 0 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "12px",
-            }}
-          >
+        <div className="settings-sidebar">
+          <div className="settings-sidebar-header">
             <h2 className="settings-title">Settings</h2>
-            <button onClick={() => setSettingsOpen(false)} style={iconBtnStyle}>
-              <X size={18} />
-            </button>
           </div>
-          <div
-            className="settings-tabs"
-            style={{ display: "flex", gap: "16px" }}
-          >
+          <div className="settings-sidebar-nav">
             <button
-              className={`settings-tab ${activeTab === "general" ? "active" : ""}`}
+              className={`settings-nav-item ${activeTab === "general" ? "active" : ""}`}
               onClick={() => setActiveTab("general")}
-              style={{
-                ...tabStyle,
-                borderBottom:
-                  activeTab === "general"
-                    ? "2px solid var(--accent)"
-                    : "2px solid transparent",
-                color:
-                  activeTab === "general"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-              }}
             >
-              General
+              Appearance
             </button>
             <button
-              className={`settings-tab ${activeTab === "rules" ? "active" : ""}`}
+              className={`settings-nav-item ${activeTab === "typography" ? "active" : ""}`}
+              onClick={() => setActiveTab("typography")}
+            >
+              Typography
+            </button>
+            <button
+              className={`settings-nav-item ${activeTab === "markdown" ? "active" : ""}`}
+              onClick={() => setActiveTab("markdown")}
+            >
+              Markdown Engine
+            </button>
+            <button
+              className={`settings-nav-item ${activeTab === "rules" ? "active" : ""}`}
               onClick={() => setActiveTab("rules")}
-              style={{
-                ...tabStyle,
-                borderBottom:
-                  activeTab === "rules"
-                    ? "2px solid var(--accent)"
-                    : "2px solid transparent",
-                color:
-                  activeTab === "rules"
-                    ? "var(--text-primary)"
-                    : "var(--text-secondary)",
-              }}
             >
               Custom Rules
             </button>
           </div>
         </div>
 
-        <div className="settings-body">
-          {activeTab === "general" ? (
-            <>
-              {/* ── Appearance ────────────────────────────────── */}
-              <Section label="Appearance">
-                <Row label="Theme">
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    <ThemeBtn
-                      active={theme === "dark"}
-                      onClick={() => setTheme("dark")}
-                      icon={<Moon size={14} />}
-                      label="Dark"
-                    />
-                    <ThemeBtn
-                      active={theme === "light"}
-                      onClick={() => setTheme("light")}
-                      icon={<Sun size={14} />}
-                      label="Light"
-                    />
-                  </div>
-                </Row>
-              </Section>
+        <div className="settings-main">
+          <div className="settings-header">
+            <button onClick={() => setSettingsOpen(false)} style={iconBtnStyle}>
+              <X size={18} />
+            </button>
+          </div>
+          <div className="settings-body">
+            {activeTab === "general" && (
+              <>
+                <Section label="Appearance">
+                  <Row label="Theme">
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <ThemeBtn
+                        active={theme === "dark"}
+                        onClick={() => setTheme("dark")}
+                        icon={<Moon size={14} />}
+                        label="Dark"
+                      />
+                      <ThemeBtn
+                        active={theme === "light"}
+                        onClick={() => setTheme("light")}
+                        icon={<Sun size={14} />}
+                        label="Light"
+                      />
+                    </div>
+                  </Row>
+                </Section>
+              </>
+            )}
 
-              {/* ── Typography ────────────────────────────────── */}
-              <Section label="Typography">
-                <Row label="Prose Font">
-                  <select
-                    value={typography.proseFont}
-                    onChange={(e) =>
-                      setTypography({ proseFont: e.target.value })
-                    }
-                    style={selectStyle}
-                  >
-                    {PROSE_FONTS.map((f) => (
-                      <option key={f.value} value={f.value}>
-                        {f.label}
-                      </option>
-                    ))}
-                  </select>
-                </Row>
+            {activeTab === "typography" && (
+              <>
+                <Section label="Typography">
+                  <Row label="Prose Font">
+                    <select
+                      value={typography.proseFont}
+                      onChange={(e) =>
+                        setTypography({ proseFont: e.target.value })
+                      }
+                      style={selectStyle}
+                    >
+                      {PROSE_FONTS.map((f) => (
+                        <option key={f.value} value={f.value}>
+                          {f.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Row>
 
-                <Row label={`Font Size  (${typography.fontSize}px)`}>
-                  <input
-                    type="range"
-                    min={12}
-                    max={22}
-                    step={1}
-                    value={typography.fontSize}
-                    onChange={(e) =>
-                      setTypography({ fontSize: Number(e.target.value) })
-                    }
-                    style={rangeStyle}
-                  />
-                </Row>
-
-                <Row label={`Line Height  (${typography.lineHeight}×)`}>
-                  <input
-                    type="range"
-                    min={1.2}
-                    max={2.2}
-                    step={0.05}
-                    value={typography.lineHeight}
-                    onChange={(e) =>
-                      setTypography({ lineHeight: Number(e.target.value) })
-                    }
-                    style={rangeStyle}
-                  />
-                </Row>
-
-                <Row
-                  label={`Prose Width  (${typography.proseWidth === 0 ? "Full" : typography.proseWidth + "px"})`}
-                >
-                  <input
-                    type="range"
-                    min={0}
-                    max={1200}
-                    step={40}
-                    value={typography.proseWidth}
-                    onChange={(e) =>
-                      setTypography({ proseWidth: Number(e.target.value) })
-                    }
-                    style={rangeStyle}
-                  />
-                </Row>
-              </Section>
-
-              {/* ── Heading Scales ────────────────────────────── */}
-              <Section label="Heading Scale">
-                {[
-                  { key: "h1Scale", label: "H1" },
-                  { key: "h2Scale", label: "H2" },
-                  { key: "h3Scale", label: "H3" },
-                  { key: "h4Scale", label: "H4" },
-                ].map(({ key, label }) => (
-                  <Row key={key} label={`${label}  (${typography[key]}×)`}>
+                  <Row label={`Font Size (${typography.fontSize}px)`}>
                     <input
                       type="range"
-                      min={0.9}
-                      max={3.0}
-                      step={0.05}
-                      value={typography[key]}
+                      min={12}
+                      max={22}
+                      step={1}
+                      value={typography.fontSize}
                       onChange={(e) =>
-                        setTypography({ [key]: Number(e.target.value) })
+                        setTypography({ fontSize: Number(e.target.value) })
                       }
                       style={rangeStyle}
                     />
                   </Row>
-                ))}
-              </Section>
 
-              {/* ── Tables ────────────────────────────────────── */}
-              <Section label="Table Style">
-                <Row label="Style">
-                  <div style={{ display: "flex", gap: "8px" }}>
-                    {["minimal", "bordered", "striped"].map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setTypography({ tableStyle: s })}
-                        style={{
-                          ...chipStyle,
-                          background:
-                            typography.tableStyle === s
-                              ? "var(--accent)"
-                              : "rgba(255,255,255,0.05)",
-                          color:
-                            typography.tableStyle === s
-                              ? "#fff"
-                              : "var(--text-secondary)",
-                        }}
-                      >
-                        {s[0].toUpperCase() + s.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                </Row>
-              </Section>
+                  <Row label={`Line Height (${typography.lineHeight}×)`}>
+                    <input
+                      type="range"
+                      min={1.2}
+                      max={2.2}
+                      step={0.05}
+                      value={typography.lineHeight}
+                      onChange={(e) =>
+                        setTypography({ lineHeight: Number(e.target.value) })
+                      }
+                      style={rangeStyle}
+                    />
+                  </Row>
 
-              {/* ── Markdown Engine ───────────────────────────── */}
-              <Section label="Markdown Engine">
-                <Row label="Dialect">
-                  <select
-                    value={mdConfig.dialect}
-                    onChange={(e) => setMdConfig({ dialect: e.target.value })}
-                    style={selectStyle}
+                  <Row
+                    label={`Prose Width (${typography.proseWidth === 0 ? "Full" : typography.proseWidth + "px"})`}
                   >
-                    <option value="gfm">GitHub Flavored (GFM)</option>
-                    <option value="commonmark">CommonMark (Strict)</option>
-                  </select>
-                </Row>
-                <ToggleRow
-                  label="Render HTML Tags"
-                  checked={mdConfig.allowHtml}
-                  onChange={(v) => setMdConfig({ allowHtml: v })}
-                />
-                <ToggleRow
-                  label="Auto-linkify URLs"
-                  checked={mdConfig.linkify}
-                  onChange={(v) => setMdConfig({ linkify: v })}
-                />
-                <ToggleRow
-                  label="Smart Typography"
-                  checked={mdConfig.typographer}
-                  onChange={(v) => setMdConfig({ typographer: v })}
-                />
-                <ToggleRow
-                  label="Vim Keybindings"
-                  checked={mdConfig.vimMode}
-                  onChange={(v) => setMdConfig({ vimMode: v })}
-                />
-                <Row label="Image Save Path">
-                  <input
-                    type="text"
-                    value={mdConfig.imageSavePath || "./images"}
-                    onChange={(e) =>
-                      setMdConfig({ imageSavePath: e.target.value })
-                    }
-                    style={{ ...selectStyle, width: "130px" }}
+                    <input
+                      type="range"
+                      min={0}
+                      max={1200}
+                      step={40}
+                      value={typography.proseWidth}
+                      onChange={(e) =>
+                        setTypography({ proseWidth: Number(e.target.value) })
+                      }
+                      style={rangeStyle}
+                    />
+                  </Row>
+                </Section>
+
+                <Section label="Heading Scale">
+                  {[
+                    { key: "h1Scale", label: "H1" },
+                    { key: "h2Scale", label: "H2" },
+                    { key: "h3Scale", label: "H3" },
+                    { key: "h4Scale", label: "H4" },
+                  ].map(({ key, label }) => (
+                    <Row key={key} label={`${label} (${typography[key]}×)`}>
+                      <input
+                        type="range"
+                        min={0.9}
+                        max={3.0}
+                        step={0.05}
+                        value={typography[key]}
+                        onChange={(e) =>
+                          setTypography({ [key]: Number(e.target.value) })
+                        }
+                        style={rangeStyle}
+                      />
+                    </Row>
+                  ))}
+                </Section>
+
+                <Section label="Table Style">
+                  <Row label="Style">
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      {["minimal", "bordered", "striped"].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setTypography({ tableStyle: s })}
+                          style={{
+                            ...chipStyle,
+                            background:
+                              typography.tableStyle === s
+                                ? "var(--accent)"
+                                : "rgba(255,255,255,0.05)",
+                            color:
+                              typography.tableStyle === s
+                                ? "#fff"
+                                : "var(--text-secondary)",
+                          }}
+                        >
+                          {s[0].toUpperCase() + s.slice(1)}
+                        </button>
+                      ))}
+                    </div>
+                  </Row>
+                </Section>
+              </>
+            )}
+
+            {activeTab === "markdown" && (
+              <>
+                <Section label="Markdown Engine">
+                  <Row label="Dialect">
+                    <select
+                      value={mdConfig.dialect}
+                      onChange={(e) => setMdConfig({ dialect: e.target.value })}
+                      style={selectStyle}
+                    >
+                      <option value="gfm">GitHub Flavored (GFM)</option>
+                      <option value="commonmark">CommonMark (Strict)</option>
+                    </select>
+                  </Row>
+                  <ToggleRow
+                    label="Render HTML Tags"
+                    checked={mdConfig.allowHtml}
+                    onChange={(v) => setMdConfig({ allowHtml: v })}
                   />
-                </Row>
-              </Section>
-            </>
-          ) : (
-            <CustomRulesTab rules={customRules} setRules={setCustomRules} />
-          )}
+                  <ToggleRow
+                    label="Auto-linkify URLs"
+                    checked={mdConfig.linkify}
+                    onChange={(v) => setMdConfig({ linkify: v })}
+                  />
+                  <ToggleRow
+                    label="Smart Typography"
+                    checked={mdConfig.typographer}
+                    onChange={(v) => setMdConfig({ typographer: v })}
+                  />
+                  <ToggleRow
+                    label="Vim Keybindings"
+                    checked={mdConfig.vimMode}
+                    onChange={(v) => setMdConfig({ vimMode: v })}
+                  />
+                  <Row label="Image Save Path">
+                    <input
+                      type="text"
+                      value={mdConfig.imageSavePath || "./images"}
+                      onChange={(e) =>
+                        setMdConfig({ imageSavePath: e.target.value })
+                      }
+                      style={{ ...selectStyle, width: "130px" }}
+                    />
+                  </Row>
+                </Section>
+              </>
+            )}
+
+            {activeTab === "rules" && (
+              <CustomRulesTab rules={customRules} setRules={setCustomRules} />
+            )}
+          </div>
         </div>
       </div>
     </div>
