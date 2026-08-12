@@ -1,6 +1,7 @@
 import MarkdownIt from "markdown-it";
 import markdownItTaskLists from "markdown-it-task-lists";
 import markdownItKatex from "markdown-it-katex";
+import admonitionPlugin from "../utils/markdown-it-admonitions";
 
 let mdInstance = null;
 let currentConfigStr = "";
@@ -20,6 +21,7 @@ function getMarkdownInstance(mdConfig) {
 
   parser.use(markdownItTaskLists, { enabled: true });
   parser.use(markdownItKatex);
+  parser.use(admonitionPlugin);
 
   mdInstance = parser;
   currentConfigStr = configStr;

@@ -3,6 +3,7 @@ import DOMPurify from "dompurify";
 import MarkdownIt from "markdown-it";
 import markdownItTaskLists from "markdown-it-task-lists";
 import markdownItKatex from "markdown-it-katex";
+import admonitionPlugin from "../utils/markdown-it-admonitions";
 
 let mdInstance = null;
 let currentConfigStr = "";
@@ -18,10 +19,12 @@ function getMarkdownInstance(mdConfig) {
     html: mdConfig.allowHtml,
     linkify: mdConfig.linkify,
     typographer: mdConfig.typographer,
+    breaks: true,
   });
 
   parser.use(markdownItTaskLists, { enabled: true });
   parser.use(markdownItKatex);
+  parser.use(admonitionPlugin);
 
   mdInstance = parser;
   currentConfigStr = configStr;
