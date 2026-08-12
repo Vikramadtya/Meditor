@@ -14,6 +14,7 @@ import EditorPane from "./components/EditorPane";
 import FloatingActionBar from "./components/FloatingActionBar";
 import SettingsModal from "./components/SettingsModal";
 import CommandPalette from "./components/CommandPalette";
+import GlobalSearchModal from "./components/GlobalSearchModal";
 
 import "./styles/Modals.css";
 
@@ -101,6 +102,7 @@ function App() {
       {/* Global Modals */}
       <SettingsModal />
       <CommandPalette />
+      <GlobalSearchModal />
     </>
   );
 }

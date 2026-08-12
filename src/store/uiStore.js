@@ -23,6 +23,9 @@ export const useUIStore = create((set) => ({
   isCmdPaletteOpen: false,
   setCmdPaletteOpen: (isOpen) => set({ isCmdPaletteOpen: isOpen }),
 
+  isGlobalSearchOpen: false,
+  setGlobalSearchOpen: (isOpen) => set({ isGlobalSearchOpen: isOpen }),
+
   isSidebarOpen: true,
   toggleSidebar: () =>
     set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),

@@ -38,6 +38,83 @@ export const fileService = {
   },
 
   /**
+   * Recursively reads a directory to find all markdown files.
+   * @param {string} folderPath - The absolute path of the directory.
+   * @returns {Promise<Array<string>>} List of absolute paths to markdown files.
+   */
+  async readDirectoryRecursive(folderPath) {
+    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    let results = [];
+    try {
+      const entries =
+        await window.Neutralino.filesystem.readDirectory(folderPath);
+      for (const entry of entries) {
+        if (
+          entry.entry === "." ||
+          entry.entry === ".." ||
+          entry.entry.startsWith(".")
+        )
+          continue;
+
+        const fullPath = `${folderPath}/${entry.entry}`;
+        if (entry.type === "DIRECTORY") {
+          const subEntries = await this.readDirectoryRecursive(fullPath);
+          results = results.concat(subEntries);
+        } else if (
+          entry.entry.endsWith(".md") ||
+          entry.entry.endsWith(".markdown")
+        ) {
+          results.push(fullPath);
+        }
+      }
+    } catch (e) {
+      // Ignore permission errors on specific subfolders
+    }
+    return results;
+  },
+
+  /**
+   * Performs an efficient concurrent search across all markdown files in a directory.
+   * @param {string} folderPath - Directory to search in.
+   * @param {string} query - Text to search for.
+   * @returns {Promise<Array>} Array of matches { filePath, snippet }.
+   */
+  async searchInFiles(folderPath, query) {
+    if (!query || query.trim() === "") return [];
+    const files = await this.readDirectoryRecursive(folderPath);
+
+    // Process files in batches to prevent IPC bottlenecks
+    const BATCH_SIZE = 50;
+    const matches = [];
+    const lowerQuery = query.toLowerCase();
+
+    for (let i = 0; i < files.length; i += BATCH_SIZE) {
+      const batch = files.slice(i, i + BATCH_SIZE);
+      const filePromises = batch.map(async (filePath) => {
+        try {
+          const content = await this.readFile(filePath);
+          if (content.toLowerCase().includes(lowerQuery)) {
+            // Find a snippet (context window around the match)
+            const index = content.toLowerCase().indexOf(lowerQuery);
+            const start = Math.max(0, index - 40);
+            const end = Math.min(content.length, index + query.length + 40);
+
+            let snippet = content.slice(start, end).replace(/\n/g, " ");
+            if (start > 0) snippet = "..." + snippet;
+            if (end < content.length) snippet = snippet + "...";
+
+            matches.push({ filePath, snippet });
+          }
+        } catch (e) {
+          // Ignore read errors
+        }
+      });
+      await Promise.all(filePromises);
+    }
+    return matches;
+  },
+
+  /**
    * Reads text content of a file.
    * @param {string} filePath - Absolute path to the file.
    * @returns {Promise<string>} File content as a string.

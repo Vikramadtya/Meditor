@@ -15,7 +15,7 @@ import { useFileStore } from "../store/fileStore";
  * - Cmd+E  : Toggle Edit / View mode
  */
 export function useKeyboardShortcuts() {
-  const { toggleMode, setCmdPaletteOpen } = useUIStore();
+  const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen } = useUIStore();
   const { saveActiveFile } = useFileStore();
 
   useEffect(() => {
@@ -37,6 +37,13 @@ export function useKeyboardShortcuts() {
           e.preventDefault();
           e.stopPropagation();
           toggleMode();
+          break;
+        case "f":
+          if (e.shiftKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            setGlobalSearchOpen(true);
+          }
           break;
 
         /* ── macOS Native Shortcut Fallbacks ──
