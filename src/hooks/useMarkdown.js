@@ -4,6 +4,7 @@ import MarkdownIt from "markdown-it";
 import markdownItTaskLists from "markdown-it-task-lists";
 import markdownItKatex from "markdown-it-katex";
 import admonitionPlugin from "../utils/markdown-it-admonitions";
+import customRulesPlugin from "../utils/markdown-it-custom-rules";
 
 let mdInstance = null;
 let currentConfigStr = "";
@@ -25,6 +26,7 @@ function getMarkdownInstance(mdConfig) {
   parser.use(markdownItTaskLists, { enabled: true });
   parser.use(markdownItKatex);
   parser.use(admonitionPlugin);
+  parser.use(customRulesPlugin, { customRules: mdConfig.customRules });
 
   mdInstance = parser;
   currentConfigStr = configStr;

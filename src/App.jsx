@@ -20,7 +20,7 @@ import "./styles/Modals.css";
 function App() {
   const { theme } = useUIStore();
   const { markdown, autoSaveFile, currentFilePath } = useFileStore();
-  const { typography } = useSettingsStore();
+  const { typography, customRules } = useSettingsStore();
 
   useKeyboardShortcuts();
 
@@ -52,6 +52,18 @@ function App() {
     root.style.setProperty("--prose-h4", `${typography.h4Scale}em`);
     document.body.setAttribute("data-table", typography.tableStyle);
   }, [typography]);
+
+  // Inject Custom Rules CSS
+  useEffect(() => {
+    let styleEl = document.getElementById("custom-rules-css");
+    if (!styleEl) {
+      styleEl = document.createElement("style");
+      styleEl.id = "custom-rules-css";
+      document.head.appendChild(styleEl);
+    }
+    const combinedCSS = customRules.map((rule) => rule.css || "").join("\n");
+    styleEl.innerHTML = combinedCSS;
+  }, [customRules]);
 
   // Debounced auto-save (2s after last keystroke)
   useEffect(() => {

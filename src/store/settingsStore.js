@@ -21,6 +21,20 @@ export const useSettingsStore = create((set) => ({
   setMdConfig: (newConfig) =>
     set((state) => ({ mdConfig: { ...state.mdConfig, ...newConfig } })),
 
+  // --- Custom Markdown Rules ---
+  customRules: [
+    {
+      id: "demo-math-de",
+      name: "Custom Math Demo ($$de$$)",
+      regex: "\\$\\$de\\$\\$(.*?)\\$\\$de\\$\\$",
+      htmlTemplate: "<span class='custom-math-de'>$1</span>",
+      css: ".custom-math-de {\n  color: #ff9100;\n  font-weight: 600;\n  font-family: monospace;\n  background: rgba(255, 145, 0, 0.1);\n  padding: 0 4px;\n  border-radius: 4px;\n}",
+    },
+  ],
+  setCustomRules: (rules) => {
+    set({ customRules: rules });
+  },
+
   // ── Typography / Appearance ───────────────────────────────────────
   typography: {
     // Prose display font
