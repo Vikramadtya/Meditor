@@ -27,7 +27,6 @@
     "markdown-it": "^15.0.0",
     "markdown-it-admonition": "^1.0.4",
     "markdown-it-katex": "^2.0.3",
-    "markdown-it-regexp": "^0.4.0",
     "markdown-it-task-lists": "^2.1.1",
     "mermaid": "^11.16.1",
     "prettier": "^3.9.6",
