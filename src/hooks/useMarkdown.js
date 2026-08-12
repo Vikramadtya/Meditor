@@ -66,37 +66,6 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
           });
         }
 
-        // Pre-process MkDocs tabs
-        const lines = content.split("\n");
-        let newLines = [];
-        let inTab = false;
-        for (let i = 0; i < lines.length; i++) {
-          const line = lines[i];
-          if (line.match(/^===\s+["“][^"”]+["”]\s*$/)) {
-            inTab = true;
-            newLines.push(line);
-            // Ensure there is a blank line after the tab definition
-            // so markdown-it parses it as a separate paragraph.
-            if (i + 1 < lines.length && lines[i + 1].trim() !== "") {
-              newLines.push("");
-            }
-            continue;
-          }
-          if (inTab) {
-            if (line.startsWith("    ")) {
-              newLines.push(line.substring(4));
-            } else if (line.trim() !== "") {
-              inTab = false;
-              newLines.push(line);
-            } else {
-              newLines.push(line);
-            }
-          } else {
-            newLines.push(line);
-          }
-        }
-        content = newLines.join("\n");
-
         const md = getMarkdownInstance(mdConfig);
         const env = {};
         const rawHtml = md.render(content, env);
@@ -114,7 +83,7 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
         }
 
         const cleanHtml = DOMPurify.sanitize(rawHtml, {
-          ADD_ATTR: ["target", "className", "class"],
+          ADD_ATTR: ["target", "className", "class", "data-tab-idx"],
         });
 
         setHtmlContent(cleanHtml);

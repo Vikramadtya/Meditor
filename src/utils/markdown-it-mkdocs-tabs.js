@@ -1,135 +1,174 @@
-// markdown-it-mkdocs-tabs.js
+// Custom Markdown-It plugin for MkDocs Tabs
+// Syntax:
+// === "Tab 1"
+//     Content 1
+//
+// === "Tab 2"
+//     Content 2
+
+function mkdocsTabs(state, startLine, endLine, silent) {
+  let pos = state.bMarks[startLine] + state.tShift[startLine];
+  let max = state.eMarks[startLine];
+
+  const marker = state.src.slice(pos, max).trim();
+  const match = marker.match(/^===\s+["“]([^"”]+)["”]\s*$/);
+  if (!match) return false;
+
+  if (silent) return true;
+
+  const tabName = match[1];
+
+  const oldParent = state.parentType;
+  const oldLineMax = state.lineMax;
+  const oldIndent = state.blkIndent;
+
+  state.parentType = "mkdocs_tab";
+  // MkDocs tab content is indented by exactly 4 spaces
+  state.blkIndent += 4;
+
+  let nextLine = startLine;
+  let wasEmpty = false;
+
+  for (;;) {
+    nextLine++;
+    if (nextLine >= endLine) break;
+
+    pos = state.bMarks[nextLine] + state.tShift[nextLine];
+    max = state.eMarks[nextLine];
+    const isEmpty = state.sCount[nextLine] < state.blkIndent;
+
+    if (isEmpty && wasEmpty) break;
+    wasEmpty = isEmpty;
+
+    if (pos < max && state.sCount[nextLine] < state.blkIndent) {
+      break;
+    }
+  }
+
+  state.lineMax = nextLine;
+
+  const token = state.push("mkdocs_tab_open", "div", 1);
+  token.block = true;
+  token.meta = { tabName };
+  token.map = [startLine, nextLine];
+
+  state.md.block.tokenize(state, startLine + 1, nextLine);
+
+  const tokenClose = state.push("mkdocs_tab_close", "div", -1);
+  tokenClose.block = true;
+
+  state.parentType = oldParent;
+  state.lineMax = oldLineMax;
+  state.blkIndent = oldIndent;
+  state.line = nextLine;
+
+  return true;
+}
+
 export default function markdownItMkDocsTabs(md) {
-  // Regex to match: === "Tab Title" or === “Tab Title”
-  const tabRegex = /^===\s+["“]([^"”]+)["”]\s*$/;
+  md.block.ruler.before("fence", "mkdocs_tabs", mkdocsTabs, {
+    alt: ["paragraph", "reference", "blockquote", "list"],
+  });
 
-  md.core.ruler.after("block", "mkdocs_tabs", (state) => {
+  // Now we need to group adjacent mkdocs_tab tokens into a tab group
+  md.core.ruler.after("block", "mkdocs_tabs_group", (state) => {
     const tokens = state.tokens;
-    let inTabGroup = false;
     let newTokens = [];
+    let i = 0;
 
-    // We need to group tabs together.
-    let currentTabGroup = [];
-    let currentTabName = null;
-    let currentTabContent = [];
-
-    const flushTabGroup = () => {
-      if (currentTabGroup.length === 0) return;
-
-      // Open Tab Group
-      const groupOpen = new state.Token("tabs_open", "div", 1);
-      groupOpen.attrPush(["class", "mkdocs-tabs"]);
-      newTokens.push(groupOpen);
-
-      // Render Tab Headers
-      const navOpen = new state.Token("tabs_nav_open", "div", 1);
-      navOpen.attrPush(["class", "mkdocs-tabs-nav"]);
-      newTokens.push(navOpen);
-
-      currentTabGroup.forEach((tab, index) => {
-        const btnOpen = new state.Token("tabs_btn_open", "button", 1);
-        btnOpen.attrPush([
-          "class",
-          `mkdocs-tab-btn ${index === 0 ? "active" : ""}`,
-        ]);
-        btnOpen.attrPush(["data-tab-idx", index.toString()]);
-        newTokens.push(btnOpen);
-
-        const btnText = new state.Token("text", "", 0);
-        btnText.content = tab.name;
-        newTokens.push(btnText);
-
-        const btnClose = new state.Token("tabs_btn_close", "button", -1);
-        newTokens.push(btnClose);
-      });
-
-      const navClose = new state.Token("tabs_nav_close", "div", -1);
-      newTokens.push(navClose);
-
-      // Render Tab Contents
-      const contentGroupOpen = new state.Token(
-        "tabs_content_group_open",
-        "div",
-        1,
-      );
-      contentGroupOpen.attrPush(["class", "mkdocs-tabs-content-group"]);
-      newTokens.push(contentGroupOpen);
-
-      currentTabGroup.forEach((tab, index) => {
-        const paneOpen = new state.Token("tabs_pane_open", "div", 1);
-        paneOpen.attrPush([
-          "class",
-          `mkdocs-tab-pane ${index === 0 ? "active" : ""}`,
-        ]);
-        paneOpen.attrPush(["data-tab-idx", index.toString()]);
-        newTokens.push(paneOpen);
-
-        // Push the inner tokens
-        newTokens = newTokens.concat(tab.content);
-
-        const paneClose = new state.Token("tabs_pane_close", "div", -1);
-        newTokens.push(paneClose);
-      });
-
-      const contentGroupClose = new state.Token(
-        "tabs_content_group_close",
-        "div",
-        -1,
-      );
-      newTokens.push(contentGroupClose);
-
-      // Close Tab Group
-      const groupClose = new state.Token("tabs_close", "div", -1);
-      newTokens.push(groupClose);
-
-      currentTabGroup = [];
-      currentTabName = null;
-      currentTabContent = [];
-    };
-
-    for (let i = 0; i < tokens.length; i++) {
-      const token = tokens[i];
-
-      // Look for a paragraph containing exactly === "Title"
-      if (token.type === "paragraph_open") {
-        const inlineToken = tokens[i + 1];
-        if (inlineToken && inlineToken.type === "inline") {
-          const match = inlineToken.content.match(tabRegex);
-          if (match) {
-            // We found a tab!
-            // Skip the paragraph_close
-            i += 2;
-
-            if (currentTabName !== null) {
-              // Save the previous tab
-              currentTabGroup.push({
-                name: currentTabName,
-                content: currentTabContent,
-              });
-              currentTabContent = [];
+    while (i < tokens.length) {
+      if (tokens[i].type === "mkdocs_tab_open") {
+        let tabs = [];
+        let j = i;
+        while (j < tokens.length && tokens[j].type === "mkdocs_tab_open") {
+          let tabOpenToken = tokens[j];
+          let tabContent = [];
+          let depth = 1;
+          let k = j + 1;
+          while (k < tokens.length) {
+            if (tokens[k].type === "mkdocs_tab_open") depth++;
+            if (tokens[k].type === "mkdocs_tab_close") depth--;
+            if (depth === 0) {
+              break;
             }
-            currentTabName = match[1];
-            inTabGroup = true;
-            continue;
+            tabContent.push(tokens[k]);
+            k++;
           }
+          tabs.push({
+            name: tabOpenToken.meta.tabName,
+            content: tabContent,
+          });
+          j = k + 1;
         }
-      }
 
-      if (inTabGroup) {
-        currentTabContent.push(token);
+        // Output grouped tabs
+        const groupOpen = new state.Token("tabs_open", "div", 1);
+        groupOpen.attrPush(["class", "mkdocs-tabs"]);
+        newTokens.push(groupOpen);
+
+        const navOpen = new state.Token("tabs_nav_open", "div", 1);
+        navOpen.attrPush(["class", "mkdocs-tabs-nav"]);
+        newTokens.push(navOpen);
+
+        tabs.forEach((tab, index) => {
+          const btnOpen = new state.Token("tabs_btn_open", "button", 1);
+          btnOpen.attrPush([
+            "class",
+            `mkdocs-tab-btn ${index === 0 ? "active" : ""}`,
+          ]);
+          btnOpen.attrPush(["data-tab-idx", index.toString()]);
+          newTokens.push(btnOpen);
+
+          const btnText = new state.Token("text", "", 0);
+          btnText.content = tab.name;
+          newTokens.push(btnText);
+
+          const btnClose = new state.Token("tabs_btn_close", "button", -1);
+          newTokens.push(btnClose);
+        });
+
+        const navClose = new state.Token("tabs_nav_close", "div", -1);
+        newTokens.push(navClose);
+
+        const contentGroupOpen = new state.Token(
+          "tabs_content_group_open",
+          "div",
+          1,
+        );
+        contentGroupOpen.attrPush(["class", "mkdocs-tabs-content-group"]);
+        newTokens.push(contentGroupOpen);
+
+        tabs.forEach((tab, index) => {
+          const paneOpen = new state.Token("tabs_pane_open", "div", 1);
+          paneOpen.attrPush([
+            "class",
+            `mkdocs-tab-pane ${index === 0 ? "active" : ""}`,
+          ]);
+          paneOpen.attrPush(["data-tab-idx", index.toString()]);
+          newTokens.push(paneOpen);
+
+          newTokens = newTokens.concat(tab.content);
+
+          const paneClose = new state.Token("tabs_pane_close", "div", -1);
+          newTokens.push(paneClose);
+        });
+
+        const contentGroupClose = new state.Token(
+          "tabs_content_group_close",
+          "div",
+          -1,
+        );
+        newTokens.push(contentGroupClose);
+
+        const groupClose = new state.Token("tabs_close", "div", -1);
+        newTokens.push(groupClose);
+
+        i = j;
       } else {
-        newTokens.push(token);
+        newTokens.push(tokens[i]);
+        i++;
       }
     }
-
-    if (currentTabName !== null) {
-      currentTabGroup.push({
-        name: currentTabName,
-        content: currentTabContent,
-      });
-      flushTabGroup();
-    }
-
     state.tokens = newTokens;
   });
 }
