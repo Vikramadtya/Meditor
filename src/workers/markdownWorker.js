@@ -4,6 +4,8 @@ import markdownItKatex from "markdown-it-katex";
 import admonitionPlugin from "../utils/markdown-it-admonitions";
 import customRulesPlugin from "../utils/markdown-it-custom-rules";
 
+import markdownItAnchor from "markdown-it-anchor";
+
 let mdInstance = null;
 let currentConfigStr = "";
 
@@ -24,6 +26,10 @@ function getMarkdownInstance(mdConfig) {
   parser.use(markdownItKatex);
   parser.use(admonitionPlugin);
   parser.use(customRulesPlugin, { customRules: mdConfig.customRules });
+  parser.use(markdownItAnchor, {
+    level: 1,
+    permalink: false,
+  });
 
   mdInstance = parser;
   currentConfigStr = configStr;
@@ -67,9 +73,17 @@ self.onmessage = function (e) {
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i].type === "heading_open") {
         const level = parseInt(tokens[i].tag.replace("h", ""), 10);
+
+        // Find the id attribute added by markdown-it-anchor
+        let id = "";
+        if (tokens[i].attrs) {
+          const idAttr = tokens[i].attrs.find((attr) => attr[0] === "id");
+          if (idAttr) id = idAttr[1];
+        }
+
         const textToken = tokens[i + 1];
         if (textToken && textToken.type === "inline") {
-          toc.push({ level, text: textToken.content });
+          toc.push({ level, text: textToken.content, id });
         }
       }
     }

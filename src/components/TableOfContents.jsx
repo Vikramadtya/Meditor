@@ -6,6 +6,14 @@ export default function TableOfContents({ toc }) {
 
   if (!isTocOpen) return null;
 
+  const handleScroll = (id) => {
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   return (
     <div className="toc-sidebar">
       <div className="toc-header">Table of Contents</div>
@@ -14,6 +22,7 @@ export default function TableOfContents({ toc }) {
           toc.map((heading, i) => (
             <div
               key={i}
+              onClick={() => handleScroll(heading.id)}
               className={`toc-item level-${heading.level}`}
               title={heading.text}
             >

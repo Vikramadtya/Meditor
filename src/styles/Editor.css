@@ -440,3 +440,102 @@ body[data-table="striped"] .prose tbody tr:nth-child(even) {
 .prose .admonition.cite {
   --admonition-color: #9e9e9e;
 }
+
+/* ── WYSIWYG CodeMirror Styles ───────────────────────────────── */
+/* These styles make the raw Markdown editor feel like a rich text editor */
+
+.cm-editor .cm-heading1 {
+  font-size: var(--prose-h1, 2em);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.cm-editor .cm-heading2 {
+  font-size: var(--prose-h2, 1.5em);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.cm-editor .cm-heading3 {
+  font-size: var(--prose-h3, 1.25em);
+  font-weight: 600;
+}
+
+.cm-editor .cm-heading4 {
+  font-size: var(--prose-h4, 1.1em);
+  font-weight: 600;
+}
+
+.cm-editor .cm-heading5,
+.cm-editor .cm-heading6 {
+  font-weight: 600;
+}
+
+.cm-editor .cm-strong {
+  font-weight: 700;
+}
+
+.cm-editor .cm-em {
+  font-style: italic;
+}
+
+.cm-editor .cm-inlineCode {
+  font-family: var(--font-mono);
+  background: var(--bg-secondary);
+  padding: 0.15em 0.3em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.cm-editor .cm-link {
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.cm-editor .cm-quote {
+  color: var(--text-secondary);
+  font-style: italic;
+  padding-left: 8px;
+  border-left: 3px solid var(--accent);
+}
+
+/* ── Slash Commands (Autocomplete) Styling ───────────────────── */
+.cm-tooltip.cm-tooltip-autocomplete {
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.5) !important;
+  padding: 4px !important;
+}
+
+.cm-tooltip-autocomplete > ul {
+  max-height: 300px !important;
+}
+
+.cm-tooltip-autocomplete > ul > li {
+  padding: 8px 12px !important;
+  border-radius: 6px !important;
+  font-family: var(--prose-font, "Inter", sans-serif) !important;
+  font-size: 13px !important;
+  color: var(--text-secondary) !important;
+  transition: all 0.15s ease;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.cm-tooltip-autocomplete > ul > li[aria-selected] {
+  background: var(--accent) !important;
+  color: #fff !important;
+}
+
+.cm-completionLabel {
+  font-weight: 600 !important;
+}
+
+.cm-completionInfo {
+  margin-left: auto;
+  opacity: 0.7;
+  font-size: 11px;
+}

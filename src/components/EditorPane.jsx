@@ -1,4 +1,10 @@
-import React, { useEffect, useRef, useMemo, useCallback } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+  useState,
+} from "react";
 import CodeMirror from "@uiw/react-codemirror";
 import { EditorView } from "@codemirror/view";
 import { vim } from "@replit/codemirror-vim";
@@ -28,6 +34,7 @@ import { useDragAndDrop } from "../hooks/useDragAndDrop";
 
 import TableOfContents from "./TableOfContents";
 import FrontmatterBlock from "./FrontmatterBlock";
+import BubbleMenu from "./BubbleMenu";
 import "../styles/Editor.css";
 
 const slashCommands = (context) => {
@@ -66,8 +73,18 @@ export default function EditorPane() {
 
   const paneRef = useRef(null);
   const proseRef = useRef(null);
+  const editorViewRef = useRef(null);
   const scrollRef = useRef(0);
   const isSplit = viewLayout === "split";
+
+  // Bubble Menu State
+  const [bubbleMenu, setBubbleMenu] = useState({
+    show: false,
+    top: 0,
+    left: 0,
+    from: 0,
+    to: 0,
+  });
 
   // Use Custom Hooks
   const { handleProseScroll } = useScrollSync(isSplit, proseRef);
@@ -101,6 +118,26 @@ export default function EditorPane() {
     }
   }, [markdown, setMarkdown]);
 
+  const handleFormat = useCallback((prefix, suffix) => {
+    if (!editorViewRef.current) return;
+    const view = editorViewRef.current;
+    const selection = view.state.selection.main;
+    const text = view.state.sliceDoc(selection.from, selection.to);
+
+    view.dispatch({
+      changes: {
+        from: selection.from,
+        to: selection.to,
+        insert: `${prefix}${text}${suffix}`,
+      },
+      selection: {
+        anchor: selection.from + prefix.length,
+        head: selection.from + prefix.length + text.length,
+      },
+    });
+    view.focus();
+  }, []);
+
   // Setup CodeMirror extensions
   const extensions = useMemo(() => {
     const exts = [
@@ -114,6 +151,42 @@ export default function EditorPane() {
     if (mdConfig.vimMode) {
       exts.push(vim());
     }
+
+    // Bubble Menu Selection Listener
+    exts.push(
+      EditorView.updateListener.of((update) => {
+        if (update.selectionSet || update.docChanged) {
+          const selection = update.state.selection.main;
+          if (!selection.empty && selection.to - selection.from > 0) {
+            // Get screen coordinates of the selection
+            const view = update.view;
+            editorViewRef.current = view;
+
+            // We use setTimeout to let the DOM settle so coordsAtPos gives correct values
+            setTimeout(() => {
+              const startCoords = view.coordsAtPos(selection.from);
+              const endCoords = view.coordsAtPos(selection.to);
+              if (startCoords && endCoords) {
+                // Center above the selection
+                const left =
+                  startCoords.left + (endCoords.right - startCoords.left) / 2;
+                setBubbleMenu({
+                  show: true,
+                  top: startCoords.top,
+                  left: left,
+                  from: selection.from,
+                  to: selection.to,
+                });
+              }
+            }, 0);
+          } else {
+            setBubbleMenu((prev) =>
+              prev.show ? { ...prev, show: false } : prev,
+            );
+          }
+        }
+      }),
+    );
 
     // Cmd+Shift+F → Prettier format
     const keymapExt = EditorView.domEventHandlers({
@@ -200,6 +273,13 @@ export default function EditorPane() {
       )}
 
       <TableOfContents toc={toc} />
+
+      <BubbleMenu
+        show={bubbleMenu.show}
+        top={bubbleMenu.top}
+        left={bubbleMenu.left}
+        onFormat={handleFormat}
+      />
     </>
   );
 }
