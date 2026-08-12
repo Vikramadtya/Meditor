@@ -87,7 +87,8 @@ function admonition(state, startLine, endLine, silent) {
     }
   }
   state.parentType = "admonition";
-  state.blkIndent += blkStart - start;
+  // MkDocs admonition content is always indented by exactly 4 spaces relative to the start
+  state.blkIndent += 4;
 
   let wasEmpty = false;
 
