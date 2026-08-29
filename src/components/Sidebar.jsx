@@ -9,7 +9,8 @@ import {
   PanelLeft,
 } from "lucide-react";
 import { useUIStore } from "../store/uiStore";
-import { useFileStore } from "../store/fileStore";
+import { useDocumentStore } from "../store/documentStore";
+import { useWorkspaceStore } from "../store/workspaceStore";
 import "../styles/Sidebar.css";
 
 export default function Sidebar() {
@@ -17,11 +18,11 @@ export default function Sidebar() {
   const {
     currentFolder,
     files,
-    fileName,
     openFileFromSidebar,
     createNewFile,
     createNewFolder,
-  } = useFileStore();
+  } = useWorkspaceStore();
+  const { fileName } = useDocumentStore();
 
   const [creatingType, setCreatingType] = useState(null); // 'file' | 'folder' | null
   const [newName, setNewName] = useState("");

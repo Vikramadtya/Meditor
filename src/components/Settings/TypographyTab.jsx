@@ -1,5 +1,6 @@
 import React from "react";
-import { Section, Row, selectStyle, rangeStyle, chipStyle } from "./SettingsUI";
+import { Section, Row } from "./SettingsUI";
+import { selectStyle, rangeStyle, chipStyle } from "./SettingsStyles";
 import { useSettingsStore, PROSE_FONTS } from "../../store/settingsStore";
 
 export default function TypographyTab() {

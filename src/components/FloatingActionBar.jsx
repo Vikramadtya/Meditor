@@ -10,7 +10,8 @@ import {
   Columns,
 } from "lucide-react";
 import { useUIStore } from "../store/uiStore";
-import { useFileStore } from "../store/fileStore";
+import { useDocumentStore } from "../store/documentStore";
+import { useWorkspaceStore } from "../store/workspaceStore";
 
 export default function FloatingActionBar() {
   const {
@@ -22,7 +23,8 @@ export default function FloatingActionBar() {
     viewLayout,
     toggleLayout,
   } = useUIStore();
-  const { saveActiveFile, openWorkspaceDialog } = useFileStore();
+  const { saveActiveFile } = useDocumentStore();
+  const { openWorkspaceDialog } = useWorkspaceStore();
 
   return (
     <div className="fab">

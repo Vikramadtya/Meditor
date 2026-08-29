@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
 import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
-import { useFileStore } from "../store/fileStore";
+import { useDocumentStore } from "../store/documentStore";
 import { useUIStore } from "../store/uiStore";
 
 export default function Titlebar() {
-  const { fileName, markdown, isDirty } = useFileStore();
+  const { fileName, markdown, isDirty } = useDocumentStore();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
 
   const stats = useMemo(() => {

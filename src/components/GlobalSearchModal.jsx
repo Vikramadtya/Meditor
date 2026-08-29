@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Search, FileText } from "lucide-react";
 import { useUIStore } from "../store/uiStore";
-import { useFileStore } from "../store/fileStore";
+import { useDocumentStore } from "../store/documentStore";
+import { useWorkspaceStore } from "../store/workspaceStore";
 import { fileService } from "../services/fileService";
 
 export default function GlobalSearchModal() {
   const { isGlobalSearchOpen, setGlobalSearchOpen } = useUIStore();
-  const { currentFolder, openFile } = useFileStore();
+  const { openFile } = useDocumentStore();
+  const { currentFolder } = useWorkspaceStore();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState([]);

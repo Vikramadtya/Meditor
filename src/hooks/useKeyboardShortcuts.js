@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useUIStore } from "../store/uiStore";
-import { useFileStore } from "../store/fileStore";
+import { useDocumentStore } from "../store/documentStore";
 
 /**
  * Global keyboard shortcut handler.
@@ -16,7 +16,7 @@ import { useFileStore } from "../store/fileStore";
  */
 export function useKeyboardShortcuts() {
   const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen } = useUIStore();
-  const { saveActiveFile } = useFileStore();
+  const { saveActiveFile } = useDocumentStore();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -78,5 +78,5 @@ export function useKeyboardShortcuts() {
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     return () =>
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
-  }, [toggleMode, setCmdPaletteOpen, saveActiveFile]);
+  }, [toggleMode, setCmdPaletteOpen, setGlobalSearchOpen, saveActiveFile]);
 }

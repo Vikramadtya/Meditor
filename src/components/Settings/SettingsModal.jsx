@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { useUIStore } from "../../store/uiStore";
-import { iconBtnStyle } from "./SettingsUI";
+import { iconBtnStyle } from "./SettingsStyles";
 
 import AppearanceTab from "./AppearanceTab";
 import TypographyTab from "./TypographyTab";

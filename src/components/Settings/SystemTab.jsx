@@ -1,6 +1,7 @@
 import React from "react";
 import { Trash2 } from "lucide-react";
-import { Section, Row, inputStyle, chipStyle } from "./SettingsUI";
+import { Section, Row } from "./SettingsUI";
+import { inputStyle, chipStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
 
 export default function SystemTab() {

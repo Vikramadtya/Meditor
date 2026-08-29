@@ -21,7 +21,13 @@ export const fileService = {
    * @returns {Promise<Array>} Sorted array of file/folder objects.
    */
   async readDirectory(folderPath) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn("Neutralino not available: returning mock directory data");
+      return [
+        { entry: "Mock File.md", type: "FILE" },
+        { entry: "Mock Folder", type: "DIRECTORY" },
+      ];
+    }
     const entries =
       await window.Neutralino.filesystem.readDirectory(folderPath);
     const filtered = entries.filter((e) => {
@@ -47,7 +53,10 @@ export const fileService = {
    * @returns {Promise<Array<string>>} List of absolute paths to markdown files.
    */
   async readDirectoryRecursive(folderPath) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn("Neutralino not available: returning mock recursive data");
+      return [`${folderPath}/Mock File.md`];
+    }
 
     const cacheLocation = useSettingsStore.getState().cacheLocation;
     await this.createDirectory(cacheLocation);
@@ -199,7 +208,10 @@ export const fileService = {
    * @returns {Promise<string>} File content as a string.
    */
   async readFile(filePath) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn(`Neutralino not available: mock read ${filePath}`);
+      return `# Mock Content\nThis is mock content for \`${filePath}\` because Neutralino is not running.`;
+    }
     return await window.Neutralino.filesystem.readFile(filePath);
   },
 
@@ -209,7 +221,10 @@ export const fileService = {
    * @param {string} content - Text content to save.
    */
   async writeFile(filePath, content) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn(`Neutralino not available: mock write ${filePath}`);
+      return;
+    }
     return await window.Neutralino.filesystem.writeFile(filePath, content);
   },
 
@@ -218,7 +233,10 @@ export const fileService = {
    * @returns {Promise<string>} Selected folder path.
    */
   async showOpenFolderDialog(title = "Open Folder") {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn("Neutralino not available: mock folder dialog");
+      return "/mock/workspace";
+    }
     return await window.Neutralino.os.showFolderDialog(title);
   },
 
@@ -227,7 +245,10 @@ export const fileService = {
    * @returns {Promise<string>} Selected file path.
    */
   async showSaveDialog(title = "Save File", defaultName = "Untitled.md") {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn("Neutralino not available: mock save dialog");
+      return "/mock/workspace/Saved.md";
+    }
     return await window.Neutralino.os.showSaveDialog(title, {
       defaultPath: defaultName,
       filters: [{ name: "Markdown files", extensions: ["md", "markdown"] }],
@@ -256,7 +277,10 @@ export const fileService = {
    * @returns {Promise<ArrayBuffer>} File content as binary.
    */
   async readBinaryFile(filePath) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn(`Neutralino not available: mock readBinary ${filePath}`);
+      return new ArrayBuffer(0);
+    }
     return await window.Neutralino.filesystem.readBinaryFile(filePath);
   },
 
@@ -266,7 +290,10 @@ export const fileService = {
    * @param {ArrayBuffer} buffer - File content as binary.
    */
   async writeBinaryFile(filePath, buffer) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn(`Neutralino not available: mock writeBinary ${filePath}`);
+      return;
+    }
     return await window.Neutralino.filesystem.writeBinaryFile(filePath, buffer);
   },
 
@@ -276,7 +303,12 @@ export const fileService = {
    * @param {string} destination - Absolute destination path.
    */
   async copyFile(source, destination) {
-    if (!this.isAvailable()) throw new Error("Neutralino not available");
+    if (!this.isAvailable()) {
+      logger.warn(
+        `Neutralino not available: mock copy ${source} to ${destination}`,
+      );
+      return;
+    }
     return await window.Neutralino.filesystem.copyFile(source, destination);
   },
 

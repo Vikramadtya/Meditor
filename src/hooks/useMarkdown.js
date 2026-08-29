@@ -82,9 +82,21 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
           }
         }
 
+        DOMPurify.addHook("afterSanitizeAttributes", function (node) {
+          if (
+            node.tagName === "INPUT" &&
+            node.type === "checkbox" &&
+            node.classList.contains("task-list-item-checkbox")
+          ) {
+            node.removeAttribute("disabled");
+          }
+        });
+
         const cleanHtml = DOMPurify.sanitize(rawHtml, {
           ADD_ATTR: ["target", "className", "class", "data-tab-idx"],
         });
+
+        DOMPurify.removeHook("afterSanitizeAttributes");
 
         setHtmlContent(cleanHtml);
         setToc(parsedToc);

@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
 import { useUIStore } from "./store/uiStore";
-import { useFileStore } from "./store/fileStore";
+import { useDocumentStore } from "./store/documentStore";
 import { useSettingsStore } from "./store/settingsStore";
 import { fileService } from "./services/fileService";
 import { logger } from "./services/logger";
@@ -12,15 +12,13 @@ import Titlebar from "./components/Titlebar";
 import Sidebar from "./components/Sidebar";
 import EditorPane from "./components/EditorPane";
 import FloatingActionBar from "./components/FloatingActionBar";
-import SettingsModal from "./components/Settings/SettingsModal";
-import CommandPalette from "./components/CommandPalette";
-import GlobalSearchModal from "./components/GlobalSearchModal";
+import ModalManager from "./components/ModalManager";
 
 import "./styles/Modals.css";
 
 function App() {
   const { theme } = useUIStore();
-  const { markdown, autoSaveFile, currentFilePath } = useFileStore();
+  const { markdown, autoSaveFile, currentFilePath } = useDocumentStore();
   const { typography, customRules } = useSettingsStore();
 
   useKeyboardShortcuts();
@@ -99,10 +97,7 @@ function App() {
       </div>
       <FloatingActionBar />
 
-      {/* Global Modals */}
-      <SettingsModal />
-      <CommandPalette />
-      <GlobalSearchModal />
+      <ModalManager />
     </>
   );
 }

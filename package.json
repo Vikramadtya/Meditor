@@ -21,6 +21,7 @@
     "@uiw/react-codemirror": "^4.25.11",
     "dompurify": "^3.4.13",
     "html2pdf.js": "^0.14.0",
+    "jsdom": "^27.0.1",
     "katex": "^0.18.1",
     "lucide-react": "^1.29.0",
     "markdown-it": "^15.0.0",

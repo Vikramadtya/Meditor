@@ -1,5 +1,6 @@
 import React from "react";
-import { Section, Row, ToggleRow, selectStyle } from "./SettingsUI";
+import { Section, Row, ToggleRow } from "./SettingsUI";
+import { selectStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
 
 export default function MarkdownTab() {

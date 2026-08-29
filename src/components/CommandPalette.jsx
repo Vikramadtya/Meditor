@@ -13,7 +13,8 @@ import {
   FileText,
 } from "lucide-react";
 import { useUIStore } from "../store/uiStore";
-import { useFileStore } from "../store/fileStore";
+import { useDocumentStore } from "../store/documentStore";
+import { useWorkspaceStore } from "../store/workspaceStore";
 import { exportService } from "../services/exportService";
 
 export default function CommandPalette() {
@@ -27,7 +28,8 @@ export default function CommandPalette() {
     toggleToc,
     setSettingsOpen,
   } = useUIStore();
-  const { saveActiveFile, openWorkspaceDialog } = useFileStore();
+  const { saveActiveFile } = useDocumentStore();
+  const { openWorkspaceDialog } = useWorkspaceStore();
   const [cmdSearch, setCmdSearch] = useState("");
 
   const cmdActions = [
