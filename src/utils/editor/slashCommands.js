@@ -49,6 +49,17 @@ export const slashCommands = (context) => {
         info: "Project Plan Template",
       },
       {
+        label: "/date",
+        type: "text",
+        info: "Schedule this note on the Agenda",
+        apply: (view, completion, from, to) => {
+          view.dispatch({ changes: { from, to, insert: "" } });
+          import("../../store/index").then((m) =>
+            m.useStore.getState().setTagModalOpen(true),
+          );
+        },
+      },
+      {
         label: "/bug",
         type: "text",
         apply:

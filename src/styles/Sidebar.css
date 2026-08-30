@@ -102,29 +102,46 @@
 }
 
 .file-item {
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 13px;
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-secondary);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 6px 12px;
+  margin: 2px 8px;
   border-radius: 6px;
-  margin-bottom: 2px;
-  border-left: none;
-  transform: translateX(0);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 13.5px;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
 }
 
 .file-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-border);
   color: var(--text-primary);
-  transform: translateX(4px);
+  transform: translateX(2px);
 }
 
 .file-item.active {
-  background: var(--accent); /* Vibrant background */
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateX(2px);
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--accent);
+  font-weight: 500;
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.vault-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.vault-item-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.vault-item:hover .vault-item-actions {
+  opacity: 1;
 }

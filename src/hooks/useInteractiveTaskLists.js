@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useDocumentStore } from "../store/documentStore";
+import { useStore as useDocumentStore } from "../store/index";
 
 export function useInteractiveTaskLists(ref) {
   useEffect(() => {

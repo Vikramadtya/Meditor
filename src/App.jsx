@@ -1,24 +1,26 @@
 import React, { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
 
-import { useUIStore } from "./store/uiStore";
-import { useDocumentStore } from "./store/documentStore";
+import { useStore } from "./store/index";
+
 import { useSettingsStore } from "./store/settingsStore";
-import { fileService } from "./services/fileService";
-import { logger } from "./services/logger";
+import { fileSystem as fileService } from "./infrastructure/NeutralinoFileSystem";
+import { Logger } from "./infrastructure/Logger";
+const logger = Logger.forContext("App");
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
-import Titlebar from "./components/Titlebar";
-import Sidebar from "./components/Sidebar";
-import EditorPane from "./components/EditorPane";
-import FloatingActionBar from "./components/FloatingActionBar";
-import ModalManager from "./components/ModalManager";
+import Titlebar from "./components/layout/Titlebar";
+import Sidebar from "./components/layout/Sidebar";
+import EditorPane from "./components/editor/EditorPane";
+import FloatingActionBar from "./components/layout/FloatingActionBar";
+import ModalManager from "./components/modals/ModalManager";
+import WelcomeScreen from "./components/layout/WelcomeScreen";
 
 import "./styles/Modals.css";
 
 function App() {
-  const { theme } = useUIStore();
-  const { markdown, autoSaveFile, currentFilePath } = useDocumentStore();
+  const { theme, markdown, autoSaveFile, currentFilePath, currentFolder } =
+    useStore();
   const { typography, customRules } = useSettingsStore();
 
   useKeyboardShortcuts();
@@ -66,7 +68,11 @@ function App() {
 
   // Debounced auto-save (2s after last keystroke)
   useEffect(() => {
-    if (!currentFilePath) return;
+    if (
+      !currentFilePath ||
+      useSettingsStore.getState().editorConfig.autoSaveMode !== "delay"
+    )
+      return;
     const timer = setTimeout(() => autoSaveFile(), 2000);
     return () => clearTimeout(timer);
   }, [markdown, currentFilePath, autoSaveFile]);
@@ -92,8 +98,14 @@ function App() {
 
       <Titlebar />
       <div className="app-container">
-        <Sidebar />
-        <EditorPane />
+        {!currentFolder ? (
+          <WelcomeScreen />
+        ) : (
+          <>
+            <Sidebar />
+            <EditorPane />
+          </>
+        )}
       </div>
       <FloatingActionBar />
 

@@ -1,74 +1,237 @@
+/**
+ * @fileoverview Drag-and-drop + paste image handler for the CodeMirror editor.
+ *
+ * On drop or paste of an image:
+ * 1. Prompts the user for a filename.
+ * 2. Saves the image to the correct vault assets folder.
+ * 3. Inserts a markdown image reference at the cursor.
+ * 4. Copies the markdown link to the clipboard.
+ * 5. Records the image in the vault DB.
+ */
+
 import { useMemo } from "react";
 import { EditorView } from "@codemirror/view";
 import toast from "react-hot-toast";
-import { fileService } from "../services/fileService";
-import { logger } from "../services/logger";
+import { fileSystem as fileService } from "../infrastructure/NeutralinoFileSystem";
+import { Logger } from "../infrastructure/Logger";
+import { useStore } from "../store/index";
+import { vaultRepository } from "../infrastructure/SqliteVaultRepository";
+import { vaultService } from "../application/vault/VaultService";
+import { generateId } from "../utils/generateId";
+import { clearImageCache } from "./useMarkdown";
+
+const logger = Logger.forContext("DragAndDrop");
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Sanitise a path segment so it's filesystem-safe. */
+const sanitize = (s) => s.replace(/[/\\:*?"<>|]/g, "_");
+
+/**
+ * Resolves vault-relative asset path for a note.
+ * Returns { destFolder, markdownPath } or null if the note can't be located.
+ */
+function resolveVaultImagePaths(noteId, currentFolder) {
+  const lp = vaultRepository.getLogicalPath(noteId);
+  if (!lp) return null;
+  const pathSegment = `${sanitize(lp.group)}/${sanitize(lp.collection)}/${sanitize(lp.module)}`;
+  return {
+    destFolder: `${currentFolder}/assets/${pathSegment}`,
+    // Notes live at: vault/notes/<group>/<collection>/<module>/<note>.md
+    // Assets live at: vault/assets/<group>/<collection>/<module>/
+    // Relative from note → asset: ../../../../../assets/<segment>/
+    // Simpler: store as vault-absolute path the image interceptor will handle
+    markdownPath: `../assets/${pathSegment}`,
+  };
+}
+
+/**
+ * Ensures all directories in a path exist (best-effort).
+ * Only creates directories inside the currentFolder boundary.
+ */
+async function ensureDir(dirPath, currentFolder) {
+  const parts = dirPath.split("/");
+  let current = "";
+  for (const part of parts) {
+    if (!part) continue;
+    current += (current ? "/" : "") + part;
+    if (current.startsWith(currentFolder)) {
+      try {
+        await fileService.createDirectory(current);
+      } catch (_) {}
+    }
+  }
+}
+
+/**
+ * Saves an image ArrayBuffer to disk and records it in the vault DB.
+ */
+async function persistImage(arrayBuffer, destPath, noteId, fileName) {
+  await fileService.writeBinaryFile(destPath, arrayBuffer);
+
+  // Record in vault DB (best-effort — non-fatal if it fails)
+  try {
+    const imageId = generateId();
+    vaultRepository.insertImage(imageId, noteId, fileName, Date.now());
+    await vaultService.save();
+  } catch (err) {
+    logger.warn("Could not record image in DB:", err);
+  }
+}
+
+/**
+ * Reads a File object as an ArrayBuffer via FileReader.
+ */
+function readAsArrayBuffer(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => resolve(e.target.result);
+    reader.onerror = () => reject(new Error("FileReader failed"));
+    reader.readAsArrayBuffer(file);
+  });
+}
+
+/**
+ * Prompts for a filename, processes the image, and inserts the markdown.
+ * Shared by both drop and paste handlers.
+ */
+async function handleImageFile(
+  file,
+  insertPos,
+  view,
+  currentFolder,
+  imageSavePath,
+) {
+  const ext = (file.type.split("/")[1] || "png").replace("jpeg", "jpg");
+  const defaultName = file.name ? file.name.replace(/\.[^.]+$/, "") : "image";
+
+  const imageName = window.prompt("Save image as (no extension):", defaultName);
+  if (!imageName) return; // User cancelled
+
+  const safeBaseName = imageName.replace(/[^a-z0-9_\-]/gi, "_");
+  const fileName = `${safeBaseName}.${ext}`;
+
+  const {
+    workspaceMode,
+    currentFilePath,
+    currentFolder: storeFolder,
+    activeVaultItem,
+  } = useStore.getState();
+  const folder = currentFolder || storeFolder;
+
+  if (!folder) {
+    toast.error("Open a workspace folder first.");
+    return;
+  }
+
+  let destFolder;
+  let markdownPath;
+  let noteId = null;
+
+  if (workspaceMode === "vault") {
+    if (!currentFilePath) {
+      toast.error("Open a note first before pasting images.");
+      return;
+    }
+    // Use activeVaultItem.id (the DB UUID) — NOT the filename, which is the note name
+    noteId = activeVaultItem?.type === "note" ? activeVaultItem.id : null;
+    if (!noteId) {
+      toast.error("Could not identify the current note.");
+      return;
+    }
+    const paths = resolveVaultImagePaths(noteId, folder);
+    if (!paths) {
+      toast.error("Could not locate note in vault hierarchy.");
+      return;
+    }
+    destFolder = paths.destFolder;
+    markdownPath = `${paths.markdownPath}/${fileName}`;
+  } else {
+    const saveDirName = (imageSavePath || "./images").replace(/^\.\//, "");
+    destFolder = `${folder}/${saveDirName}`;
+    markdownPath = `./${saveDirName}/${fileName}`;
+  }
+
+  try {
+    await ensureDir(destFolder, folder);
+
+    const destPath = `${destFolder}/${fileName}`;
+    const arrayBuffer = await readAsArrayBuffer(file);
+    await persistImage(arrayBuffer, destPath, noteId, fileName);
+
+    const insertText = `![${imageName}](${markdownPath})`;
+
+    // Clear the image cache so the newly-saved image renders immediately
+    clearImageCache();
+
+    // Insert markdown at cursor position
+    view.dispatch({
+      changes: { from: insertPos, to: insertPos, insert: insertText },
+    });
+    // Keep setMarkdown in sync
+    const { setMarkdown } = useStore.getState();
+    setMarkdown(view.state.doc.toString());
+
+    // Copy link to clipboard
+    try {
+      await navigator.clipboard.writeText(insertText);
+    } catch (_) {}
+
+    toast.success(`Image saved! Link copied to clipboard.`);
+    logger.info(`Image saved: ${destPath}`);
+  } catch (err) {
+    logger.error("Failed to save image", err);
+    toast.error(`Failed to save image: ${err.message ?? "Unknown error"}`);
+  }
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
 
 export function useDragAndDrop(currentFolder, imageSavePath, setMarkdown) {
-  return useMemo(() => {
-    return EditorView.domEventHandlers({
-      drop(event, view) {
-        const files = event.dataTransfer?.files;
-        if (files && files.length > 0 && files[0].type.startsWith("image/")) {
+  return useMemo(
+    () =>
+      EditorView.domEventHandlers({
+        drop(event, view) {
+          const files = event.dataTransfer?.files;
+          if (!files?.length || !files[0].type.startsWith("image/"))
+            return false;
+
           event.preventDefault();
           const file = files[0];
 
-          // Get the exact document position where the image was dropped
           const posObj = view.posAtCoords({
             x: event.clientX,
             y: event.clientY,
           });
-          if (!posObj) return false;
-          const pos = typeof posObj === "object" ? posObj.pos : posObj;
+          const pos =
+            typeof posObj === "object" ? (posObj?.pos ?? 0) : (posObj ?? 0);
 
-          if (!currentFolder) {
-            toast.error("Please open a workspace folder first!");
-            return true;
-          }
+          handleImageFile(file, pos, view, currentFolder, imageSavePath);
+          return true;
+        },
 
-          (async () => {
-            try {
-              // Create the directory if it doesn't exist
-              const saveDirName = imageSavePath || "./images";
-              const cleanSaveDirName = saveDirName.replace(/^\.\//, "");
-              const destFolder = `${currentFolder}/${cleanSaveDirName}`;
+        paste(event, view) {
+          const items = event.clipboardData?.items;
+          if (!items) return false;
 
-              await fileService.createDirectory(destFolder);
-
-              const destPath = `${destFolder}/${file.name}`;
-
-              // Use FileReader to extract the ArrayBuffer and write it natively
-              const reader = new FileReader();
-              reader.onload = async (e) => {
-                const arrayBuffer = e.target.result;
-                await fileService.writeBinaryFile(destPath, arrayBuffer);
-
-                // Insert the markdown image text
-                const insertText = `![${file.name}](${saveDirName}/${file.name})`;
-                view.dispatch({
-                  changes: { from: pos, to: pos, insert: insertText },
-                });
-
-                // Update Zustand store so the changes persist
-                setMarkdown(view.state.doc.toString());
-                toast.success("Image saved and inserted!");
-                logger.info(
-                  `Successfully processed dropped image: ${file.name}`,
-                );
-              };
-              reader.onerror = () => {
-                toast.error("Failed to read dropped file");
-              };
-              reader.readAsArrayBuffer(file);
-            } catch (err) {
-              toast.error("Failed to save image");
-              logger.error("Drop error", err);
+          let imageItem = null;
+          for (let i = 0; i < items.length; i++) {
+            if (items[i].type.startsWith("image/")) {
+              imageItem = items[i];
+              break;
             }
-          })();
-          return true; // Stop browser from opening the image full screen
-        }
-        return false;
-      },
-    });
-  }, [currentFolder, imageSavePath, setMarkdown]);
+          }
+          if (!imageItem) return false;
+
+          event.preventDefault();
+          const file = imageItem.getAsFile();
+          if (!file) return false;
+
+          const pos = view.state.selection.main.head;
+          handleImageFile(file, pos, view, currentFolder, imageSavePath);
+          return true;
+        },
+      }),
+    [currentFolder, imageSavePath, setMarkdown],
+  );
 }

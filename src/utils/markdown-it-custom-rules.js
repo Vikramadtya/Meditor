@@ -1,3 +1,4 @@
+import { Logger } from "../infrastructure/Logger";
 export default function customRulesPlugin(md, options = {}) {
   const customRules = options.customRules || [];
   if (customRules.length === 0) return;
@@ -23,7 +24,7 @@ export default function customRulesPlugin(md, options = {}) {
             name: rule.name,
           };
         } catch (e) {
-          console.warn(`Invalid regex in custom rule [${rule.name}]`, e);
+          Logger.warn(`Invalid regex in custom rule [${rule.name}]`, e);
           return null;
         }
       })

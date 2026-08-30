@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 build/
 
-neutralinojs.log
+neutralinojs.log.tmp/

@@ -22,7 +22,7 @@
       "minHeight": 400,
       "fullScreen": false,
       "alwaysOnTop": false,
-      "icon": "/public/app-icon.png",
+      "icon": "/public/typewriter.svg",
       "enableInspector": true,
       "borderlessWindow": true,
       "maximize": false,

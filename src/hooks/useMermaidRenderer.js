@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import mermaid from "mermaid";
-import { logger } from "../services/logger";
+import { Logger } from "../infrastructure/Logger";
+const logger = Logger.forContext("App");
 
 let mermaidRenderQueue = Promise.resolve();
 const mermaidCache = new Map();

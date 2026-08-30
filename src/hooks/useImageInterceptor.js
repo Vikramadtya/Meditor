@@ -1,54 +1,67 @@
+/**
+ * @fileoverview useImageInterceptor
+ *
+ * IMPORTANT: In vault mode, images are now resolved to base64 data URIs INSIDE
+ * useMarkdown before htmlContent is set. This hook therefore only needs to handle
+ * the legacy FOLDER mode where markdown files live anywhere on disk and have
+ * relative image references (e.g. ./images/foo.png).
+ *
+ * Vault-mode images no longer go through this hook at all — they are inlined
+ * during the markdown render pipeline. This eliminates the race condition where
+ * dangerouslySetInnerHTML was resetting img.src back to the placeholder.
+ */
+
 import { useEffect } from "react";
-import { fileService } from "../services/fileService";
-import { logger } from "../services/logger";
+import { fileSystem as fileService } from "../infrastructure/NeutralinoFileSystem";
+import { Logger } from "../infrastructure/Logger";
+import { useStore } from "../store/index";
 
-const imageCache = new Map();
+const logger = Logger.forContext("ImageInterceptor");
 
-// Helper to resolve relative path
-const resolvePath = (basePath, relativePath) => {
-  // Decode URI components in case there are %20 etc.
+/** Persistent cache for folder-mode images: absolute path → base64 data URI */
+const folderImageCache = new Map();
+
+const MIME_MAP = {
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  webp: "image/webp",
+  gif: "image/gif",
+  svg: "image/svg+xml",
+  bmp: "image/bmp",
+};
+
+function getMimeType(path) {
+  const ext = path.split(".").pop().toLowerCase();
+  return MIME_MAP[ext] ?? "application/octet-stream";
+}
+
+function arrayBufferToBase64(buffer) {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  for (let i = 0; i < bytes.byteLength; i++)
+    binary += String.fromCharCode(bytes[i]);
+  return window.btoa(binary);
+}
+
+function resolvePath(basePath, relativePath) {
   try {
     relativePath = decodeURIComponent(relativePath);
-  } catch (e) {
-    // ignore
-  }
-
+  } catch (_) {}
   const parts = basePath.split(/[/\\]/);
-  parts.pop(); // remove file name or trailing slash, now it's directory
-
-  const relativeParts = relativePath.split("/");
-  for (const part of relativeParts) {
-    if (part === "." || part === "") continue;
-    if (part === "..") {
-      parts.pop();
-    } else {
-      parts.push(part);
-    }
+  parts.pop();
+  for (const segment of relativePath.split("/")) {
+    if (segment === "." || segment === "") continue;
+    if (segment === "..") parts.pop();
+    else parts.push(segment);
   }
   return parts.join("/");
-};
+}
 
-const getMimeType = (path) => {
-  const ext = path.split(".").pop().toLowerCase();
-  switch (ext) {
-    case "png":
-      return "image/png";
-    case "jpg":
-    case "jpeg":
-      return "image/jpeg";
-    case "webp":
-      return "image/webp";
-    case "gif":
-      return "image/gif";
-    case "svg":
-      return "image/svg+xml";
-    case "bmp":
-      return "image/bmp";
-    default:
-      return "application/octet-stream";
-  }
-};
-
+/**
+ * Patches images in FOLDER mode only.
+ * Vault mode images are handled upstream inside useMarkdown.
+ */
 export function useImageInterceptor(
   proseRef,
   currentFilePath,
@@ -56,62 +69,58 @@ export function useImageInterceptor(
   htmlContent,
 ) {
   useEffect(() => {
-    if (!proseRef.current) return;
+    const workspaceMode = useStore.getState().workspaceMode;
 
-    // We need either the file path or the workspace folder to resolve relative images
+    // Vault images are already inlined as base64 by useMarkdown — nothing to do.
+    if (workspaceMode === "vault") return;
+
+    if (!proseRef.current) return;
     const basePath = currentFilePath || currentFolder;
     if (!basePath) return;
 
     const images = proseRef.current.querySelectorAll("img");
 
     images.forEach(async (img) => {
-      let src = img.getAttribute("src");
+      // In folder mode, useMarkdown still uses the regex to replace local src with
+      // data:image/gif + data-src. So we look at data-src here.
+      const src = img.getAttribute("data-src") || img.getAttribute("src");
       if (!src) return;
-
-      // Check if it's a local file relative or absolute path
+      // Already resolved or a remote URL
       if (
-        !src.startsWith("http://") &&
-        !src.startsWith("https://") &&
-        !src.startsWith("data:") &&
-        !src.startsWith("blob:")
-      ) {
-        let absolutePath;
-        if (src.startsWith("/")) {
-          absolutePath = src;
-        } else {
-          absolutePath = resolvePath(basePath, src);
-        }
+        src.startsWith("data:") ||
+        src.startsWith("blob:") ||
+        src.startsWith("http://") ||
+        src.startsWith("https://")
+      )
+        return;
 
-        // If we already resolved this image (or it failed), use the cache
-        if (imageCache.has(absolutePath)) {
-          const cachedUrl = imageCache.get(absolutePath);
-          if (cachedUrl) {
-            img.src = cachedUrl;
-          }
-          return;
-        }
+      const absolutePath = src.startsWith("/")
+        ? src
+        : resolvePath(basePath, src);
 
-        try {
-          const buffer = await fileService.readBinaryFile(absolutePath);
+      let decodedPath;
+      try {
+        decodedPath = decodeURIComponent(absolutePath);
+      } catch (_) {
+        decodedPath = absolutePath;
+      }
 
-          const mimeType = getMimeType(absolutePath);
-          const blob = new Blob([buffer], { type: mimeType });
-          const url = URL.createObjectURL(blob);
+      if (folderImageCache.has(decodedPath)) {
+        const cached = folderImageCache.get(decodedPath);
+        if (cached) img.src = cached;
+        return;
+      }
 
-          imageCache.set(absolutePath, url);
-
-          // Revoke the old URL if it was already an Object URL to prevent memory leaks
-          const oldSrc = img.src;
-          if (oldSrc && oldSrc.startsWith("blob:")) {
-            URL.revokeObjectURL(oldSrc);
-          }
-
-          img.src = url;
-        } catch (e) {
-          // Cache the failure as null so we don't infinitely retry missing images
-          imageCache.set(absolutePath, null);
-          logger.warn(`Could not load local image: ${absolutePath}`, e);
-        }
+      try {
+        const buffer = await fileService.readBinaryFile(decodedPath);
+        const mimeType = getMimeType(decodedPath);
+        const b64 = arrayBufferToBase64(buffer);
+        const dataUri = `data:${mimeType};base64,${b64}`;
+        folderImageCache.set(decodedPath, dataUri);
+        img.src = dataUri;
+      } catch (err) {
+        folderImageCache.set(decodedPath, null);
+        logger.warn(`Could not load folder-mode image: ${decodedPath}`, err);
       }
     });
   }, [htmlContent, currentFilePath, currentFolder, proseRef]);

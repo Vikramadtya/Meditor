@@ -2,9 +2,13 @@ import React from "react";
 import { Section, Row, ToggleRow } from "./SettingsUI";
 import { selectStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
+import { useStore } from "../../store/index";
 
 export default function MarkdownTab() {
   const { mdConfig, setMdConfig } = useSettingsStore();
+  const { workspaceMode } = useStore();
+
+  const isVault = workspaceMode === "vault";
 
   return (
     <Section label="Markdown Engine">
@@ -38,14 +42,26 @@ export default function MarkdownTab() {
         checked={mdConfig.vimMode}
         onChange={(v) => setMdConfig({ vimMode: v })}
       />
-      <Row label="Image Save Path">
-        <input
-          type="text"
-          value={mdConfig.imageSavePath || "./images"}
-          onChange={(e) => setMdConfig({ imageSavePath: e.target.value })}
-          style={{ ...selectStyle, width: "130px" }}
-        />
-      </Row>
+      <div style={{ opacity: isVault ? 0.5 : 1 }}>
+        <Row label="Image Save Path">
+          <input
+            type="text"
+            value={mdConfig.imageSavePath || "./images"}
+            onChange={(e) => setMdConfig({ imageSavePath: e.target.value })}
+            style={{
+              ...selectStyle,
+              width: "130px",
+              cursor: isVault ? "not-allowed" : "text",
+            }}
+            disabled={isVault}
+            title={
+              isVault
+                ? "Images are managed automatically in the vault's assets folder."
+                : ""
+            }
+          />
+        </Row>
+      </div>
     </Section>
   );
 }

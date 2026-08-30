@@ -1,10 +1,10 @@
 import React from "react";
 import { Moon, Sun } from "lucide-react";
 import { Section, Row, ThemeBtn } from "./SettingsUI";
-import { useUIStore } from "../../store/uiStore";
+import { useStore } from "../../store/index";
 
 export default function AppearanceTab() {
-  const { theme, setTheme } = useUIStore();
+  const { theme, setTheme } = useStore();
 
   return (
     <Section label="Appearance">

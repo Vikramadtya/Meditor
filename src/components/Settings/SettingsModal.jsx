@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { useUIStore } from "../../store/uiStore";
+import { useStore } from "../../store/index";
 import { iconBtnStyle } from "./SettingsStyles";
 
 import AppearanceTab from "./AppearanceTab";
 import TypographyTab from "./TypographyTab";
 import MarkdownTab from "./MarkdownTab";
 import CustomRulesTab from "./CustomRulesTab";
+import EditorTab from "./EditorTab";
 import SystemTab from "./SystemTab";
 
 export default function SettingsModal() {
-  const { isSettingsOpen, setSettingsOpen } = useUIStore();
+  const { isSettingsOpen, setSettingsOpen } = useStore();
   const [activeTab, setActiveTab] = useState("general");
 
   if (!isSettingsOpen) return null;
@@ -37,6 +38,12 @@ export default function SettingsModal() {
               onClick={() => setActiveTab("typography")}
             >
               Typography
+            </button>
+            <button
+              className={`settings-nav-item ${activeTab === "editor" ? "active" : ""}`}
+              onClick={() => setActiveTab("editor")}
+            >
+              Editor
             </button>
             <button
               className={`settings-nav-item ${activeTab === "markdown" ? "active" : ""}`}
@@ -68,6 +75,7 @@ export default function SettingsModal() {
           <div className="settings-body">
             {activeTab === "general" && <AppearanceTab />}
             {activeTab === "typography" && <TypographyTab />}
+            {activeTab === "editor" && <EditorTab />}
             {activeTab === "markdown" && <MarkdownTab />}
             {activeTab === "rules" && <CustomRulesTab />}
             {activeTab === "system" && <SystemTab />}

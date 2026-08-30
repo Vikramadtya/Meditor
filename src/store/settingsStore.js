@@ -13,6 +13,15 @@ export const PROSE_FONTS = [
 export const useSettingsStore = create(
   persist(
     (set) => ({
+      editorConfig: {
+        autoSaveMode: "delay", // 'manual', 'delay', 'blur'
+        autoFormatOnSave: false, // Prettier formatting
+      },
+      setEditorConfig: (newConfig) =>
+        set((state) => ({
+          editorConfig: { ...state.editorConfig, ...newConfig },
+        })),
+
       mdConfig: {
         dialect: "gfm",
         allowHtml: true,
@@ -47,7 +56,7 @@ export const useSettingsStore = create(
         // Line height multiplier
         lineHeight: 1.8,
         // Max width of the prose column (px) — 0 means fill available width
-        proseWidth: 0,
+        proseWidth: 800,
         // Heading scale: multipliers relative to base fontSize
         h1Scale: 2.0,
         h2Scale: 1.5,

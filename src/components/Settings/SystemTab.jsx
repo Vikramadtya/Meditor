@@ -51,8 +51,9 @@ export default function SystemTab() {
       <Row label="Manual Actions">
         <button
           onClick={async () => {
-            const { fileService } = await import("../../services/fileService");
-            fileService.clearDirectoryCache();
+            const { fileSystem } =
+              await import("../../infrastructure/NeutralinoFileSystem");
+            fileSystem.clearDirectoryCache();
             alert("Cache cleared successfully!");
           }}
           style={{

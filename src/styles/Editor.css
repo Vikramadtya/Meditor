@@ -28,11 +28,13 @@
 }
 
 .toc-item {
-  padding: 6px 16px;
+  padding: 6px 12px;
+  margin: 1px 8px;
+  border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -40,7 +42,8 @@
 
 .toc-item:hover {
   color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-border);
+  transform: translateX(2px);
 }
 
 .toc-item.level-1 {
@@ -156,6 +159,7 @@
   width: 100%;
   /* Optional max-width column — set to 0 in settings for full width */
   max-width: var(--prose-width, none);
+  margin: 0 auto;
 }
 
 /* Headings */
@@ -261,7 +265,9 @@
 .prose img {
   max-width: 100%;
   border-radius: 8px;
-  margin: 1em 0;
+  margin: 1.5em auto;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* Horizontal rule */

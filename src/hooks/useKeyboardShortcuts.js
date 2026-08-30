@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useUIStore } from "../store/uiStore";
-import { useDocumentStore } from "../store/documentStore";
+import { useStore as useUIStore } from "../store/index";
+import { useStore as useDocumentStore } from "../store/index";
 
 /**
  * Global keyboard shortcut handler.
@@ -68,7 +68,17 @@ export function useKeyboardShortcuts() {
             document.execCommand("undo");
           }
           break;
-
+        case "enter":
+          if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveActiveFile();
+            const { isEditMode } = useUIStore.getState();
+            if (isEditMode) {
+              toggleMode();
+            }
+          }
+          break;
         default:
           break;
       }
