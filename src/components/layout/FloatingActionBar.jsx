@@ -143,7 +143,7 @@ function EditorActions() {
  * @returns {React.ReactElement} The rendered fragment of vault note actions.
  */
 function VaultNoteActions() {
-  const { setFlashcardModalOpen, activeVaultItem } = useStore();
+  const { activeVaultItem } = useStore();
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
@@ -174,12 +174,6 @@ function VaultNoteActions() {
         activeColor="#f59e0b"
       >
         <Star size={18} fill={isFavorite ? "#f59e0b" : "none"} />
-      </FabBtn>
-      <FabBtn
-        onClick={() => setFlashcardModalOpen(true)}
-        title="Active Recall Flashcard"
-      >
-        <Layers size={18} />
       </FabBtn>
     </>
   );

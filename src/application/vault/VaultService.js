@@ -1,12 +1,14 @@
 import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { Logger } from "../../infrastructure/Logger";
+import initSqlJs from "sql.js";
+import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
 class VaultService {
   constructor() {
     this._log = Logger.forContext("VaultService");
     this.vaultPath = null;
-    this._sqlPromise = null;
+    this._sqlPromise = initSqlJs({ locateFile: () => wasmUrl });
     this.isSyncing = false;
   }
 

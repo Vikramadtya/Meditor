@@ -1,15 +1,8 @@
 const fs = require('fs');
+let code = fs.readFileSync('src/infrastructure/Logger.js', 'utf8');
 
-let code = fs.readFileSync('src/hooks/useMarkdown.js', 'utf8');
-
-if (!code.includes('import { Logger } from')) {
-  code = code.replace(
-    'import { useStore } from "../store/index";', 
-    'import { useStore } from "../store/index";\nimport { Logger } from "../infrastructure/Logger";'
-  );
-  code = code.replace(/logger\.warn/g, 'Logger.warn');
-  code = code.replace(/logger\.error/g, 'Logger.error');
-}
-
-fs.writeFileSync('src/hooks/useMarkdown.js', code);
-console.log('Fixed Logger in useMarkdown.js');
+code = code.replace(
+  'meta instanceof Error\n          ? meta.stack',
+  'meta instanceof Error\n          ? meta.message + "\\n" + meta.stack'
+);
+fs.writeFileSync('src/infrastructure/Logger.js', code);

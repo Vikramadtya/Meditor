@@ -80,7 +80,7 @@ export class Logger {
       const logFile = `${dataDir}/meditor.log`;
       const metaStr = meta
         ? meta instanceof Error
-          ? meta.stack
+          ? meta.message + "\n" + meta.stack
           : typeof meta === "object"
             ? JSON.stringify(meta)
             : String(meta)

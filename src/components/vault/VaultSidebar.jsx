@@ -142,30 +142,7 @@ export default function VaultSidebar() {
               setActiveVaultItem({ type: "tags", id: "tags", name: "Tags" })
             }
           />
-          <SidebarLink
-            icon={<BrainCircuit size={14} />}
-            label="Flashcard Review"
-            isActive={activeVaultItem?.type === "flashcards"}
-            onClick={() =>
-              setActiveVaultItem({
-                type: "flashcards",
-                id: "flashcards",
-                name: "Flashcard Review",
-              })
-            }
-          />
-          <SidebarLink
-            icon={<Network size={14} />}
-            label="Knowledge Graph"
-            isActive={activeVaultItem?.type === "graph"}
-            onClick={() =>
-              setActiveVaultItem({
-                type: "graph",
-                id: "graph",
-                name: "Knowledge Graph",
-              })
-            }
-          />
+
           <SidebarLink
             icon={<BarChart2 size={14} />}
             label="Analytics"

@@ -5,12 +5,10 @@ import SettingsModal from "../Settings/SettingsModal";
 import GlobalSearchModal from "./GlobalSearchModal";
 import CreateVaultItemModal from "./CreateVaultItemModal";
 import TrashModal from "./TrashModal";
-import GraphModal from "./GraphModal";
 import StatsModal from "./StatsModal";
 import GitModal from "./GitModal";
 import GitHistoryModal from "./GitHistoryModal";
 import TagModal from "./TagModal";
-import FlashcardModal from "./FlashcardModal";
 
 /**
  * Manager component that renders all global modals in the application.

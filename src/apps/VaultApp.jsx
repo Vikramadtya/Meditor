@@ -5,9 +5,6 @@ import GlobalDashboard from "../components/vault/GlobalDashboard";
 import ContainerDashboard from "../components/vault/ContainerDashboard";
 import FavoritesDashboard from "../components/vault/FavoritesDashboard";
 import TodayPage from "../components/vault/TodayPage";
-import AgendaPage from "../components/vault/AgendaPage";
-import FlashcardReviewPage from "../components/vault/FlashcardReviewPage";
-import KnowledgeGraphPage from "../components/vault/KnowledgeGraphPage";
 import AnalyticsPage from "../components/vault/AnalyticsPage";
 import TagsPage from "../components/vault/TagsPage";
 
@@ -16,8 +13,6 @@ const PAGE_MAP = {
   favorites: FavoritesDashboard,
   today: TodayPage,
   agenda: AgendaPage,
-  flashcards: FlashcardReviewPage,
-  graph: KnowledgeGraphPage,
   analytics: AnalyticsPage,
   tags: TagsPage,
 };
