@@ -31,6 +31,16 @@ import { noteService } from "../../application/vault/NoteService";
  *
  * @returns {JSX.Element} The rendered VaultSidebar component.
  */
+
+function containsItem(node, targetItem) {
+  if (!node.children) return false;
+  return node.children.some(
+    (child) =>
+      (child.id === targetItem.id && child.type === targetItem.type) ||
+      containsItem(child, targetItem),
+  );
+}
+
 export default function VaultSidebar() {
   const {
     setCommandPaletteOpen,
@@ -322,6 +332,12 @@ function VaultGroupNode({ group }) {
     activeVaultItem.id === group.id &&
     activeVaultItem.type === "group";
 
+  useEffect(() => {
+    if (activeVaultItem && containsItem(group, activeVaultItem)) {
+      setExpanded(true);
+    }
+  }, [activeVaultItem, group]);
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <div
@@ -420,9 +436,18 @@ function VaultNode({ item, level }) {
   const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal } =
     useStore();
   const isActive =
-    activeVaultItem &&
-    activeVaultItem.id === item.id &&
-    activeVaultItem.type === item.type;
+    (activeVaultItem &&
+      activeVaultItem.id === item.id &&
+      activeVaultItem.type === item.type) ||
+    (activeVaultItem?.type === "note" &&
+      item.type === "module" &&
+      containsItem(item, activeVaultItem));
+
+  useEffect(() => {
+    if (activeVaultItem && containsItem(item, activeVaultItem)) {
+      setExpanded(true);
+    }
+  }, [activeVaultItem, item]);
 
   // Do not render notes in the sidebar
   if (item.type === "note") return null;
