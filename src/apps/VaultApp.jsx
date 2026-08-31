@@ -1,6 +1,6 @@
 import React from "react";
 import { useStore } from "../store/index";
-import Sidebar from "../components/layout/Sidebar";
+
 import VaultDashboard from "../components/vault/VaultDashboard";
 import CollectionDashboard from "../components/vault/CollectionDashboard";
 import FavoritesDashboard from "../components/vault/FavoritesDashboard";
@@ -36,7 +36,6 @@ export default function VaultApp() {
 
   return (
     <>
-      <Sidebar />
       <div className="pane-container" style={{ overflow: "hidden", flex: 1 }}>
         {PageComponent ? <PageComponent /> : <VaultDashboard />}
       </div>

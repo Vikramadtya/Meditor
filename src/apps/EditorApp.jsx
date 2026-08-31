@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "../components/layout/Sidebar";
+
 import EditorPane from "../components/editor/EditorPane";
 import FloatingActionBar from "../components/layout/FloatingActionBar";
 
@@ -12,7 +12,6 @@ import FloatingActionBar from "../components/layout/FloatingActionBar";
 export default function EditorApp() {
   return (
     <>
-      <Sidebar />
       <EditorPane />
       <FloatingActionBar />
     </>

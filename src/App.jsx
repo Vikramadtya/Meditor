@@ -7,6 +7,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useSystemEffects } from "./hooks/useSystemEffects";
 
 import Titlebar from "./components/layout/Titlebar";
+import Sidebar from "./components/layout/Sidebar";
 import ModalManager from "./components/modals/ModalManager";
 import WelcomeScreen from "./components/layout/WelcomeScreen";
 import VaultApp from "./apps/VaultApp";
@@ -44,10 +45,15 @@ function App() {
       <div className="app-container">
         {!currentFolder ? (
           <WelcomeScreen />
-        ) : workspaceMode === "vault" && showDashboard ? (
-          <VaultApp />
         ) : (
-          <EditorApp />
+          <>
+            <Sidebar />
+            {workspaceMode === "vault" && showDashboard ? (
+              <VaultApp />
+            ) : (
+              <EditorApp />
+            )}
+          </>
         )}
       </div>
 
