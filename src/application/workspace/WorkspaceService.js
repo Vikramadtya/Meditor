@@ -39,7 +39,7 @@ export class WorkspaceService {
     // Try to load as vault first (reads vault.db from disk)
     const loaded = await vaultService.loadVault(folderPath);
     if (loaded) {
-      const hierarchy = vaultService.getHierarchy();
+      const hierarchy = await vaultService.getFolderContents("notes");
       this._log.info(
         `Opened vault at ${folderPath} — ${hierarchy.length} groups`,
       );

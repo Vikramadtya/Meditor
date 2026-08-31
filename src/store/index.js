@@ -141,10 +141,12 @@ export const useStore = create(
       },
 
       /** Reloads vault hierarchy from the repository (after CRUD ops). */
-      reloadVaultHierarchy: () => {
+      reloadVaultHierarchy: async () => {
         if (get().workspaceMode === "vault") {
           set((s) => {
-            s.vaultHierarchy = vaultService.getHierarchy();
+            vaultService
+              .getFolderContents("notes")
+              .then((h) => useStore.getState().setVaultHierarchy(h));
           });
         }
       },

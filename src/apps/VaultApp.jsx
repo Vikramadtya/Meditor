@@ -2,8 +2,7 @@ import React from "react";
 import { useStore } from "../store/index";
 
 import GlobalDashboard from "../components/vault/GlobalDashboard";
-import GroupDashboard from "../components/vault/GroupDashboard";
-import CollectionDashboard from "../components/vault/CollectionDashboard";
+import ContainerDashboard from "../components/vault/ContainerDashboard";
 import FavoritesDashboard from "../components/vault/FavoritesDashboard";
 import TodayPage from "../components/vault/TodayPage";
 import AgendaPage from "../components/vault/AgendaPage";
@@ -13,8 +12,7 @@ import AnalyticsPage from "../components/vault/AnalyticsPage";
 import TagsPage from "../components/vault/TagsPage";
 
 const PAGE_MAP = {
-  group: GroupDashboard,
-  collection: CollectionDashboard,
+  container: ContainerDashboard,
   favorites: FavoritesDashboard,
   today: TodayPage,
   agenda: AgendaPage,
@@ -24,12 +22,6 @@ const PAGE_MAP = {
   tags: TagsPage,
 };
 
-/**
- * The main application component when in Vault mode.
- * Routes to the correct dashboard based on the active vault item.
- *
- * @returns {import("react").JSX.Element} The rendered component.
- */
 export default function VaultApp() {
   const { activeVaultItem } = useStore();
   const PageComponent = activeVaultItem?.type

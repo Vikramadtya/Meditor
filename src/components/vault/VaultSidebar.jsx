@@ -24,6 +24,7 @@ import { noteService } from "../../application/vault/NoteService";
 import { vaultService } from "../../application/vault/VaultService";
 import SidebarLink from "./sidebar/SidebarLink";
 import VaultGroupNode from "./sidebar/VaultGroupNode";
+import VaultNode from "./sidebar/VaultNode";
 
 /**
  * VaultSidebar Component
@@ -235,7 +236,13 @@ export default function VaultSidebar() {
             </button>
           </div>
           {vaultHierarchy.map((g) => (
-            <VaultGroupNode key={g.id} group={g} />
+            <React.Fragment key={g.id}>
+              {g.type === "note" ? (
+                <VaultNode item={g} level={0} />
+              ) : (
+                <VaultGroupNode group={g} />
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>

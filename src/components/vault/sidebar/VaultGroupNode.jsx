@@ -1,41 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Circle,
-  CircleDashed,
-  Calendar,
-  Network,
-  BarChart2,
-  ChevronRight,
-  ChevronDown,
-  Plus,
-  Trash2,
-  FileText,
-  RefreshCw,
-  Archive,
-  Settings,
-  Star,
-  CalendarDays,
-  BrainCircuit,
-  Tag,
-} from "lucide-react";
+import { ChevronRight, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useStore } from "../../../store/index";
-import { noteService } from "../../../application/vault/NoteService";
 import { vaultService } from "../../../application/vault/VaultService";
 import VaultNode from "./VaultNode";
 
-/**
- * VaultGroupNode Component
- *
- * Renders a group node in the vault hierarchy, allowing expansion and
- * collection creation.
- *
- * @param {Object} props - The component props.
- * @param {Object} props.group - The group data object from the vault hierarchy.
- * @returns {JSX.Element} The rendered VaultGroupNode component.
- */
 export default function VaultGroupNode({ group }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
+  const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
   const {
     setActiveVaultItem,
@@ -43,16 +14,21 @@ export default function VaultGroupNode({ group }) {
     openCreateVaultItemModal,
     reloadVaultHierarchy,
   } = useStore();
-  const isActive =
-    activeVaultItem &&
-    activeVaultItem.id === group.id &&
-    activeVaultItem.type === "group";
+  const isActive = activeVaultItem && activeVaultItem.id === group.id;
+
+  const loadChildren = async () => {
+    const res = await vaultService.getFolderContents(group.path);
+    setChildren(res);
+  };
 
   useEffect(() => {
-    if (activeVaultItem && containsItem(group, activeVaultItem)) {
-      setExpanded(true);
-    }
-  }, [activeVaultItem, group]);
+    if (expanded) loadChildren();
+  }, [expanded]);
+
+  // Handle reloads globally
+  useEffect(() => {
+    if (expanded) loadChildren();
+  }, [group]); // if group object changes, maybe reload? Actually we need an event, but reloadVaultHierarchy will trigger top-level re-render
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -87,12 +63,6 @@ export default function VaultGroupNode({ group }) {
             e.stopPropagation();
             setExpanded(!expanded);
           }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "2px",
-            borderRadius: "4px",
-          }}
         >
           {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </div>
@@ -102,15 +72,13 @@ export default function VaultGroupNode({ group }) {
           onClick={(e) => {
             e.stopPropagation();
             setExpanded(true);
-            openCreateVaultItemModal("collection", group.id);
+            openCreateVaultItemModal("container", group.path);
           }}
           style={{
             opacity: hovered ? 1 : 0,
-            transition: "opacity 0.1s",
             display: "flex",
             alignItems: "center",
           }}
-          title="Add Collection"
         >
           <Plus size={14} />
         </div>
@@ -118,30 +86,25 @@ export default function VaultGroupNode({ group }) {
           onClick={async (e) => {
             e.stopPropagation();
             if (
-              window.confirm(
-                `Are you sure you want to delete the group "${group.name}" and all its contents?`,
-              )
+              window.confirm(`Are you sure you want to delete "${group.name}"?`)
             ) {
-              await vaultService.deleteItem("group", group.id, true);
-              if (activeVaultItem?.id === group.id) setActiveVaultItem(null);
+              await vaultService.deleteItem("container", group.id, group.path);
               reloadVaultHierarchy();
             }
           }}
           style={{
             opacity: hovered ? 1 : 0,
-            transition: "opacity 0.1s",
             display: "flex",
             alignItems: "center",
             marginLeft: "4px",
-            color: "var(--error, #ff5252)",
+            color: "#ff5252",
           }}
-          title="Delete Group"
         >
           <Trash2 size={13} />
         </div>
       </div>
 
-      {expanded && group.children && (
+      {expanded && (
         <div
           style={{
             display: "flex",
@@ -151,7 +114,7 @@ export default function VaultGroupNode({ group }) {
             gap: "2px",
           }}
         >
-          {group.children.map((child) => (
+          {children.map((child) => (
             <VaultNode key={child.id} item={child} level={1} />
           ))}
         </div>
