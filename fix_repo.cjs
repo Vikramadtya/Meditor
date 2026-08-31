@@ -1,75 +1,53 @@
 const fs = require('fs');
-let code = fs.readFileSync('src/infrastructure/SqliteVaultRepository.js', 'utf8');
+let repo = fs.readFileSync('src/infrastructure/SqliteVaultRepository.js', 'utf8');
 
-const schemaSearch = `  init() {
+const classEnd = `\n}\n\nexport const vaultRepository`;
+const agendaMethods = `
+  // ─── Agenda ─────────────────────────────────────────────────────────────
+
+  getAgendaDays() {
     this._assertDb();
-    this.db.run(\`
-      CREATE TABLE IF NOT EXISTS groups (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        created_at INTEGER
-      );
-      CREATE TABLE IF NOT EXISTS collections (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        group_id INTEGER,
-        name TEXT NOT NULL,
-        created_at INTEGER,
-        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE
-      );
-      CREATE TABLE IF NOT EXISTS modules (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        collection_id INTEGER,
-        name TEXT NOT NULL,
-        created_at INTEGER,
-        FOREIGN KEY (collection_id) REFERENCES collections(id) ON DELETE CASCADE
-      );
-      CREATE TABLE IF NOT EXISTS notes (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        module_id INTEGER,
-        name TEXT NOT NULL,
-        content TEXT,
-        tags TEXT DEFAULT "",
-        is_favorite INTEGER DEFAULT 0,
-        flashcard_question TEXT DEFAULT "",
-        flashcard_answer TEXT DEFAULT "",
-        srs_ease REAL DEFAULT 2.5,
-        srs_interval INTEGER DEFAULT 0,
-        srs_next_review INTEGER DEFAULT 0,
-        created_at INTEGER,
-        updated_at INTEGER,
-        is_deleted INTEGER DEFAULT 0,
-        FOREIGN KEY (module_id) REFERENCES modules(id) ON DELETE CASCADE
-      );
-    \`);
-  }`;
+    try {
+      const res = this.db.exec("SELECT DISTINCT agenda_date FROM notes WHERE is_deleted=0 AND agenda_date > 0");
+      if (!res[0]) return [];
+      return res[0].values.map(v => v[0]);
+    } catch { return []; }
+  }
 
-const schemaReplace = `  init() {
+  getNotesForDate(startTs, endTs) {
     this._assertDb();
-    this.db.run(\`
-      CREATE TABLE IF NOT EXISTS containers (
-        id TEXT PRIMARY KEY,
-        path TEXT UNIQUE NOT NULL,
-        name TEXT,
-        metadata TEXT
-      );
-      CREATE TABLE IF NOT EXISTS notes (
-        id TEXT PRIMARY KEY,
-        path TEXT UNIQUE NOT NULL,
-        name TEXT NOT NULL,
-        tags TEXT DEFAULT "",
-        is_favorite INTEGER DEFAULT 0,
-        flashcard_question TEXT DEFAULT "",
-        flashcard_answer TEXT DEFAULT "",
-        srs_ease REAL DEFAULT 2.5,
-        srs_interval INTEGER DEFAULT 0,
-        srs_next_review INTEGER DEFAULT 0,
-        created_at INTEGER,
-        updated_at INTEGER,
-        is_deleted INTEGER DEFAULT 0
-      );
-    \`);
-  }`;
+    return this._queryAll("SELECT * FROM notes WHERE is_deleted=0 AND agenda_date >= ? AND agenda_date <= ?", [startTs, endTs]);
+  }
 
-code = code.replace(schemaSearch, schemaReplace);
-fs.writeFileSync('src/infrastructure/SqliteVaultRepository.js', code);
-console.log('Updated schema in SqliteVaultRepository');
+  setNoteAgendaDate(noteId, dateTs) {
+    this._assertDb();
+    this.db.run("UPDATE notes SET agenda_date = ? WHERE id = ?", [dateTs, noteId]);
+  }
+
+  getAgendaNotes() {
+    const now = Date.now();
+    return this._queryAll(
+      "SELECT * FROM notes WHERE is_deleted=0 AND agenda_date > 0 AND agenda_date <= ? ORDER BY agenda_date ASC",
+      [now]
+    );
+  }
+`;
+
+repo = repo.replace(classEnd, agendaMethods + classEnd);
+
+// Also add the ALTER TABLE
+const assertDb = `  _assertDb() {`;
+const alterDb = `  _assertDb() {
+    try {
+      this.db.run("ALTER TABLE notes ADD COLUMN agenda_date INTEGER DEFAULT 0");
+    } catch(e) {}
+`;
+repo = repo.replace(assertDb, alterDb);
+
+fs.writeFileSync('src/infrastructure/SqliteVaultRepository.js', repo);
+
+let app = fs.readFileSync('src/apps/VaultApp.jsx', 'utf8');
+app = app.replace('import AgendaPage from "../components/vault/AgendaPage";\\nimport AgendaPage', 'import AgendaPage');
+fs.writeFileSync('src/apps/VaultApp.jsx', app);
+
+console.log('Fixed repo injection');

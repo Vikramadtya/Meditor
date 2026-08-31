@@ -9,10 +9,6 @@ export class SqliteVaultRepository {
   }
 
   _assertDb() {
-    try {
-      this.db.run("ALTER TABLE notes ADD COLUMN agenda_date INTEGER DEFAULT 0");
-    } catch (e) {}
-
     if (!this.db) throw new Error("Database not initialized");
   }
 
@@ -202,44 +198,6 @@ export class SqliteVaultRepository {
     return Object.entries(tagCounts)
       .map(([tag, count]) => ({ tag, count }))
       .sort((a, b) => b.count - a.count);
-  }
-  // ─── Agenda ─────────────────────────────────────────────────────────────
-
-  getAgendaDays() {
-    this._assertDb();
-    try {
-      const res = this.db.exec(
-        "SELECT DISTINCT agenda_date FROM notes WHERE is_deleted=0 AND agenda_date > 0",
-      );
-      if (!res[0]) return [];
-      return res[0].values.map((v) => v[0]);
-    } catch {
-      return [];
-    }
-  }
-
-  getNotesForDate(startTs, endTs) {
-    this._assertDb();
-    return this._queryAll(
-      "SELECT * FROM notes WHERE is_deleted=0 AND agenda_date >= ? AND agenda_date <= ?",
-      [startTs, endTs],
-    );
-  }
-
-  setNoteAgendaDate(noteId, dateTs) {
-    this._assertDb();
-    this.db.run("UPDATE notes SET agenda_date = ? WHERE id = ?", [
-      dateTs,
-      noteId,
-    ]);
-  }
-
-  getAgendaNotes() {
-    const now = Date.now();
-    return this._queryAll(
-      "SELECT * FROM notes WHERE is_deleted=0 AND agenda_date > 0 AND agenda_date <= ? ORDER BY agenda_date ASC",
-      [now],
-    );
   }
 }
 

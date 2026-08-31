@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+const fs = require('fs');
+const code = `import React, { useState, useEffect } from "react";
 import { Folder, FileText, Book } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
@@ -16,64 +17,29 @@ export default function ContainerDashboard() {
   if (!activeVaultItem) return null;
 
   return (
-    <div
-      style={{
-        padding: "40px",
-        height: "100%",
-        overflowY: "auto",
-        backgroundColor: "var(--bg-primary)",
-      }}
-    >
+    <div style={{ padding: "40px", height: "100%", overflowY: "auto", backgroundColor: "var(--bg-primary)" }}>
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "12px",
-          marginBottom: "32px",
-        }}
-      >
+      <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "32px" }}>
         <Book size={32} style={{ color: "var(--accent)" }} />
         <div>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: 700,
-              margin: 0,
-              color: "var(--text-primary)",
-            }}
-          >
+          <h1 style={{ fontSize: "28px", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>
             {activeVaultItem.name}
           </h1>
-          <div
-            style={{
-              color: "var(--text-secondary)",
-              fontSize: "14px",
-              marginTop: "4px",
-            }}
-          >
+          <div style={{ color: "var(--text-secondary)", fontSize: "14px", marginTop: "4px" }}>
             Your collection of {children.length} items.
           </div>
         </div>
       </div>
 
       {/* Grid */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-          gap: "24px",
-        }}
-      >
-        {children.map((child) => {
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "24px" }}>
+        {children.map(child => {
           const isNote = child.type === "note";
           const childCount = child.metadata?.children_order?.length || 0;
           return (
             <div
               key={child.id}
-              onClick={() =>
-                isNote ? openNoteFromVault(child) : setActiveVaultItem(child)
-              }
+              onClick={() => isNote ? openNoteFromVault(child) : setActiveVaultItem(child)}
               style={{
                 backgroundColor: "var(--bg-secondary)",
                 border: "1px solid var(--glass-border)",
@@ -83,13 +49,13 @@ export default function ContainerDashboard() {
                 transition: "transform 0.2s, box-shadow 0.2s",
                 boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
                 display: "flex",
-                flexDirection: "column",
+                flexDirection: "column"
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={e => {
                 e.currentTarget.style.transform = "translateY(-4px)";
                 e.currentTarget.style.boxShadow = "0 10px 15px rgba(0,0,0,0.1)";
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={e => {
                 e.currentTarget.style.transform = "translateY(0)";
                 e.currentTarget.style.boxShadow = "0 4px 6px rgba(0,0,0,0.05)";
               }}
@@ -100,7 +66,7 @@ export default function ContainerDashboard() {
                   height: "120px",
                   backgroundColor: "#3b82f6", // Blue color matching the image
                   position: "relative",
-                  overflow: "hidden",
+                  overflow: "hidden"
                 }}
               >
                 <Book
@@ -110,7 +76,7 @@ export default function ContainerDashboard() {
                     bottom: "-15px",
                     right: "10px",
                     color: "rgba(255,255,255,0.2)",
-                    transform: "rotate(15deg)",
+                    transform: "rotate(15deg)"
                   }}
                 />
               </div>
@@ -124,20 +90,13 @@ export default function ContainerDashboard() {
                   justifyContent: "space-between",
                   flex: 1,
                   minHeight: "130px",
-                  backgroundColor: "var(--bg-primary)",
+                  backgroundColor: "var(--bg-primary)"
                 }}
               >
-                <div
-                  style={{
-                    fontWeight: 700,
-                    fontSize: "15px",
-                    color: "var(--text-primary)",
-                    lineHeight: "1.4",
-                  }}
-                >
+                <div style={{ fontWeight: 700, fontSize: "15px", color: "var(--text-primary)", lineHeight: "1.4" }}>
                   {child.name}
                 </div>
-
+                
                 <div style={{ marginTop: "16px" }}>
                   <span
                     style={{
@@ -146,26 +105,20 @@ export default function ContainerDashboard() {
                       borderRadius: "12px",
                       fontSize: "11px",
                       fontWeight: 600,
-                      color: "var(--text-secondary)",
+                      color: "var(--text-secondary)"
                     }}
                   >
-                    {isNote ? "1 note" : `${childCount} items`}
+                    {isNote ? "1 note" : \`\${childCount} items\`}
                   </span>
                 </div>
               </div>
             </div>
-          );
+          )
         })}
       </div>
-
+      
       {children.length === 0 && (
-        <div
-          style={{
-            textAlign: "center",
-            color: "var(--text-secondary)",
-            marginTop: "100px",
-          }}
-        >
+        <div style={{ textAlign: "center", color: "var(--text-secondary)", marginTop: "100px" }}>
           <Folder size={48} style={{ opacity: 0.2, margin: "0 auto 16px" }} />
           <h3>This folder is empty</h3>
           <p>Create a note or subfolder from the sidebar to get started.</p>
@@ -174,3 +127,5 @@ export default function ContainerDashboard() {
     </div>
   );
 }
+`;
+fs.writeFileSync('src/components/vault/ContainerDashboard.jsx', code);

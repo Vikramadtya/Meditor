@@ -1,45 +1,127 @@
 const fs = require('fs');
-const code = fs.readFileSync('src/components/vault/VaultDashboard.jsx', 'utf8');
 
-const lines = code.split('\n');
-const imports = lines.slice(0, 16).join('\n');
-const globalDashboardContent = lines.slice(43, 397).join('\n'); // Everything inside "if (!activeVaultItem) { ... }"
-const groupDashboardContent = lines.slice(399, 756).join('\n'); // Everything after "if (!activeVaultItem)"
+let code = `import React, { useState, useEffect } from "react";
+import { format } from "date-fns";
+import { useStore } from "../../store/index";
+import { Folder, FileText, CalendarDays } from "lucide-react";
+import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
-const globalDashboardCode = imports + '\n\n' +
-'export default function GlobalDashboard() {\n' +
-'  const { activeVaultItem, openCreateVaultItemModal } = useStore();\n' +
-'  const [todayNotes, setTodayNotes] = React.useState([]);\n' +
-'  const [dashboardTab, setDashboardTab] = React.useState("overview");\n' +
-'  const [agendaNotes, setAgendaNotes] = React.useState([]);\n' +
-'  const [activeCardId, setActiveCardId] = React.useState(null);\n\n' +
-'  React.useEffect(() => {\n' +
-'    if (vaultRepository.db) {\n' +
-'      const todayStart = startOfDay(new Date()).getTime();\n' +
-'      try {\n' +
-'        setTodayNotes(vaultRepository.findNotesEditedSince(todayStart));\n' +
-'        setAgendaNotes(vaultRepository.getAgendaNotes());\n' +
-'      } catch (e) {}\n' +
-'    }\n' +
-'  }, []);\n\n' +
-  globalDashboardContent + '\n' +
-'}\n';
+export default function GlobalDashboard() {
+  const { vaultHierarchy, activeVaultItem, openNoteFromVault } = useStore();
+  const [agendaNotes, setAgendaNotes] = useState([]);
 
-const groupDashboardCode = imports + '\n\n' +
-'export default function GroupDashboard() {\n' +
-'  const { activeVaultItem, openCreateVaultItemModal } = useStore();\n' +
-  groupDashboardContent + '\n' +
-'}\n';
+  useEffect(() => {
+    setAgendaNotes(vaultRepository.getAgendaNotes());
+  }, [vaultHierarchy]);
 
-fs.writeFileSync('src/components/vault/GlobalDashboard.jsx', globalDashboardCode);
-fs.writeFileSync('src/components/vault/GroupDashboard.jsx', groupDashboardCode);
+  return (
+    <div
+      style={{
+        padding: "40px",
+        height: "100%",
+        overflowY: "auto",
+        backgroundColor: "var(--bg-primary)",
+      }}
+    >
+      <div style={{ marginBottom: "40px" }}>
+        <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 8px 0" }}>
+          Welcome back
+        </h1>
+        <div style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+          {format(new Date(), "EEEE, MMMM do")}
+        </div>
+      </div>
 
-// Update VaultApp.jsx
-let appCode = fs.readFileSync('src/apps/VaultApp.jsx', 'utf8');
-appCode = appCode.replace('import VaultDashboard from "../components/vault/VaultDashboard";', 'import GlobalDashboard from "../components/vault/GlobalDashboard";\nimport GroupDashboard from "../components/vault/GroupDashboard";');
-appCode = appCode.replace('  collection: CollectionDashboard,', '  group: GroupDashboard,\n  collection: CollectionDashboard,');
-appCode = appCode.replace('<VaultDashboard />', '<GlobalDashboard />');
-fs.writeFileSync('src/apps/VaultApp.jsx', appCode);
+      <div style={{ display: "flex", gap: "40px", flexWrap: "wrap" }}>
+        <div style={{ flex: 2, minWidth: "300px" }}>
+          <h2 style={{ fontSize: "18px", borderBottom: "1px solid var(--glass-border)", paddingBottom: "12px", marginBottom: "16px" }}>
+            Vault Root
+          </h2>
+          {vaultHierarchy.length === 0 ? (
+            <div style={{ padding: "20px", textAlign: "center", color: "var(--text-secondary)", fontStyle: "italic" }}>
+              Your vault is empty. Create a container or note from the sidebar.
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "16px" }}>
+              {vaultHierarchy.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => item.type === "note" ? openNoteFromVault(item) : useStore.getState().setActiveVaultItem(item)}
+                  style={{
+                    padding: "16px",
+                    borderRadius: "12px",
+                    border: "1px solid var(--glass-border)",
+                    backgroundColor: "var(--bg-secondary)",
+                    cursor: "pointer"
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", color: item.type === "note" ? "var(--text-primary)" : "var(--accent)", fontWeight: 600 }}>
+                    {item.type === "note" ? <FileText size={18} /> : <Folder size={18} />}
+                    {item.name}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-fs.unlinkSync('src/components/vault/VaultDashboard.jsx');
-console.log('Split successfully!');
+        {/* Agenda Column */}
+        <div style={{ flex: 1, minWidth: "300px" }}>
+          <h2
+            style={{
+              fontSize: "18px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              borderBottom: "1px solid var(--glass-border)",
+              paddingBottom: "12px",
+            }}
+          >
+            <CalendarDays size={18} style={{ color: "var(--accent)" }} />
+            Agenda
+          </h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "16px" }}>
+            {agendaNotes.length === 0 ? (
+              <div style={{ color: "var(--text-secondary)", fontSize: "14px", fontStyle: "italic", padding: "12px" }}>
+                Nothing scheduled for today.
+              </div>
+            ) : (
+              agendaNotes.map((note) => (
+                <div
+                  key={note.id}
+                  onClick={() => openNoteFromVault(note)}
+                  style={{
+                    borderRadius: "12px",
+                    border: "1px solid var(--glass-border)",
+                    backgroundColor: "var(--bg-secondary)",
+                    padding: "16px",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.transform = "translateY(-2px)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--glass-border)";
+                    e.currentTarget.style.transform = "translateY(0)";
+                  }}
+                >
+                  <div style={{ fontWeight: 600, fontSize: "14px", marginBottom: "4px" }}>
+                    {note.name}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                    Due today
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+`;
+fs.writeFileSync('src/components/vault/GlobalDashboard.jsx', code);

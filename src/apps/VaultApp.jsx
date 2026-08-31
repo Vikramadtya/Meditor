@@ -1,6 +1,7 @@
 import React from "react";
 import { useStore } from "../store/index";
 
+import AgendaPage from "../components/vault/AgendaPage";
 import GlobalDashboard from "../components/vault/GlobalDashboard";
 import ContainerDashboard from "../components/vault/ContainerDashboard";
 import FavoritesDashboard from "../components/vault/FavoritesDashboard";
@@ -9,6 +10,7 @@ import AnalyticsPage from "../components/vault/AnalyticsPage";
 import TagsPage from "../components/vault/TagsPage";
 
 const PAGE_MAP = {
+  agenda: AgendaPage,
   container: ContainerDashboard,
   favorites: FavoritesDashboard,
   today: TodayPage,
