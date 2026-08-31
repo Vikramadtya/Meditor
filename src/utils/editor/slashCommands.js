@@ -1,3 +1,9 @@
+/**
+ * CodeMirror autocomplete source for slash commands.
+ *
+ * @param {import("@codemirror/autocomplete").CompletionContext} context - The autocomplete context.
+ * @returns {import("@codemirror/autocomplete").CompletionResult|null} The autocomplete result or null if no match.
+ */
 export const slashCommands = (context) => {
   let word = context.matchBefore(/\/.*/);
   if (!word) return null;

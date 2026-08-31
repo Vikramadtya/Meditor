@@ -5,6 +5,12 @@ import { vaultService } from "../../application/vault/VaultService";
 
 import { iconBtnStyle } from "../Settings/SettingsStyles";
 
+/**
+ * Modal component for managing deleted notes in the trash bin.
+ * Allows users to restore notes or permanently delete them.
+ *
+ * @returns {React.ReactElement|null} The trash modal or null if not open.
+ */
 export default function TrashModal() {
   const { isTrashModalOpen, setTrashModalOpen, reloadVaultHierarchy } =
     useStore();

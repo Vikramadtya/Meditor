@@ -4,6 +4,12 @@ import { Section, Row } from "./SettingsUI";
 import { inputStyle, chipStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
 
+/**
+ * Settings tab for configuring system and storage preferences.
+ * Provides options to set the cache directory and clear disk cache.
+ *
+ * @returns {React.ReactElement} The system settings tab component.
+ */
 export default function SystemTab() {
   const { cacheLocation, setCacheLocation } = useSettingsStore();
 

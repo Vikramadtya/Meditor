@@ -3,6 +3,12 @@ import { Section, Row } from "./SettingsUI";
 import { selectStyle, rangeStyle, chipStyle } from "./SettingsStyles";
 import { useSettingsStore, PROSE_FONTS } from "../../store/settingsStore";
 
+/**
+ * Settings tab for configuring typography preferences.
+ * Provides controls for prose font, sizes, line height, prose width, heading scales, and table styles.
+ *
+ * @returns {React.ReactElement} The typography settings tab component.
+ */
 export default function TypographyTab() {
   const { typography, setTypography } = useSettingsStore();
 

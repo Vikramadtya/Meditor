@@ -33,6 +33,12 @@ const log = Logger.forContext("Store");
 
 // ── Prettier (lazy loaded) ────────────────────────────────────────────────
 
+/**
+ * Formats Markdown text using Prettier.
+ *
+ * @param {string} text - The raw Markdown text.
+ * @returns {Promise<string>} The formatted Markdown text, or original text if formatting fails.
+ */
 async function formatMarkdown(text) {
   try {
     const prettier = (await import("prettier/standalone.js")).default;
@@ -50,6 +56,9 @@ async function formatMarkdown(text) {
 
 // ── Store ─────────────────────────────────────────────────────────────────
 
+/**
+ * The main unified Zustand store containing editor, UI, and vault slices.
+ */
 export const useStore = create(
   persist(
     immer((set, get) => ({
@@ -70,7 +79,10 @@ export const useStore = create(
           set((s) => {
             s.workspaceMode = result.mode;
             s.currentFolder = folderPath;
-            s.workspaceRoot = result.mode === "vault" ? folderPath : null;
+            s.workspaceRoot =
+              s.workspaceRoot && folderPath.startsWith(s.workspaceRoot)
+                ? s.workspaceRoot
+                : folderPath;
             s.files = result.files;
             s.vaultHierarchy = result.hierarchy;
             s.activeVaultItem = null;
@@ -143,6 +155,37 @@ export const useStore = create(
        * Opens a vault note in the editor.
        * @param {{ id: string, name: string }} note
        */
+
+      // Helper to open a note by logical name (wiki-link name)
+      openNoteByName: async (noteName) => {
+        const {
+          workspaceMode,
+          workspaceRoot,
+          currentFolder,
+          openNoteFromVault,
+          openFile,
+        } = get();
+
+        if (workspaceMode === "vault") {
+          const { vaultRepository } =
+            await import("../infrastructure/SqliteVaultRepository.js");
+          const dbRes = vaultRepository.db?.exec(
+            "SELECT id, name FROM notes WHERE name=?",
+            [noteName],
+          );
+          if (dbRes && dbRes[0] && dbRes[0].values.length > 0) {
+            const row = dbRes[0].values[0];
+            await openNoteFromVault({ id: row[0], name: row[1] });
+          } else {
+            console.warn("Note not found in vault: " + noteName);
+          }
+        } else {
+          const searchRoot = workspaceRoot || currentFolder;
+          const fullPath = `${searchRoot}/${noteName}.md`;
+          await openFile(fullPath);
+        }
+      },
+
       openNoteFromVault: async (note) => {
         const { workspaceRoot } = get();
         if (!workspaceRoot) return;

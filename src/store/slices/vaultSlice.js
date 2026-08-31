@@ -3,6 +3,13 @@
  * Pure state mutations only. Async operations live in workspaceStore actions.
  */
 
+/**
+ * Creates the vault state slice.
+ *
+ * @param {Function} set - Zustand set function.
+ * @param {Function} _get - Zustand get function.
+ * @returns {Object} The vault state slice.
+ */
 export const createVaultSlice = (set, _get) => ({
   workspaceMode: "none",
   workspaceRoot: null,

@@ -5,6 +5,12 @@ import { useStore } from "../../store/index";
 
 import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
 
+/**
+ * Modal component providing global file search capabilities across the workspace.
+ * Displays matching files and snippets using debounced file system search.
+ *
+ * @returns {React.ReactElement} The global search modal component.
+ */
 export default function GlobalSearchModal() {
   const { isGlobalSearchOpen, setGlobalSearchOpen } = useStore();
   const { openFile } = useStore();

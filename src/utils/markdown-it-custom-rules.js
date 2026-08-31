@@ -1,4 +1,11 @@
 import { Logger } from "../infrastructure/Logger";
+/**
+ * Markdown-It plugin to apply custom regex-based replacements to inline text.
+ *
+ * @param {import("markdown-it")} md - The Markdown-It instance.
+ * @param {Object} [options={}] - Plugin options.
+ * @param {Array<Object>} [options.customRules=[]] - List of custom rule definitions.
+ */
 export default function customRulesPlugin(md, options = {}) {
   const customRules = options.customRules || [];
   if (customRules.length === 0) return;

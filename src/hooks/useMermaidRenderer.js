@@ -6,6 +6,14 @@ const logger = Logger.forContext("App");
 let mermaidRenderQueue = Promise.resolve();
 const mermaidCache = new Map();
 
+/**
+ * Hook to render Mermaid diagrams in markdown content.
+ * Replaces `code.language-mermaid` blocks with rendered SVG diagrams.
+ *
+ * @param {import("react").RefObject<HTMLElement>} proseRef - Reference to the element containing the rendered markdown.
+ * @param {string} htmlContent - The rendered HTML content.
+ * @param {string} theme - The current UI theme ("light" or "dark").
+ */
 export function useMermaidRenderer(proseRef, htmlContent, theme) {
   const effectIdRef = useRef(0);
 
@@ -54,7 +62,8 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
               mermaidRenderQueue = mermaidRenderQueue
                 .then(async () => {
                   if (!isMounted || currentEffectId !== effectIdRef.current) {
-                    return { svg: null };
+                    resolve({ svg: null });
+                    return;
                   }
                   try {
                     const result = await mermaid.render(id, rawText);
@@ -63,8 +72,8 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
                     reject(e);
                   }
                 })
-                .catch(() => {
-                  // Catch any previous errors so the queue doesn't stay rejected
+                .catch((err) => {
+                  reject(err);
                 });
             });
 

@@ -3,6 +3,12 @@ import { Section, Row, ToggleRow } from "./SettingsUI";
 import { selectStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
 
+/**
+ * Settings tab for configuring editor preferences.
+ * Provides options for auto-saving strategy and auto-formatting.
+ *
+ * @returns {React.ReactElement} The editor settings tab component.
+ */
 export default function EditorTab() {
   const { editorConfig, setEditorConfig } = useSettingsStore();
 

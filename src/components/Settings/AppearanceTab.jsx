@@ -3,6 +3,12 @@ import { Moon, Sun } from "lucide-react";
 import { Section, Row, ThemeBtn } from "./SettingsUI";
 import { useStore } from "../../store/index";
 
+/**
+ * Settings tab for configuring application appearance.
+ * Provides controls for switching between light and dark themes.
+ *
+ * @returns {React.ReactElement} The appearance settings tab component.
+ */
 export default function AppearanceTab() {
   const { theme, setTheme } = useStore();
 

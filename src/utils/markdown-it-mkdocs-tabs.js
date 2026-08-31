@@ -65,6 +65,11 @@ function mkdocsTabs(state, startLine, endLine, silent) {
   return true;
 }
 
+/**
+ * Markdown-It plugin for MkDocs tabbed content (=== "Tab Name").
+ *
+ * @param {import("markdown-it")} md - The Markdown-It instance.
+ */
 export default function markdownItMkDocsTabs(md) {
   md.block.ruler.before("fence", "mkdocs_tabs", mkdocsTabs, {
     alt: ["paragraph", "reference", "blockquote", "list"],

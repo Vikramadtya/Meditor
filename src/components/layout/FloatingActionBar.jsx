@@ -9,19 +9,26 @@ import {
   Settings,
   Columns,
   Layers,
-  Tag,
   Star,
   History,
 } from "lucide-react";
 import { useStore } from "../../store/index";
-import {
-  selectShowDashboard,
-  selectIsVaultNote,
-} from "../../store/selectors/index";
+import { selectIsVaultNote } from "../../store/selectors/index";
 import { noteService } from "../../application/vault/NoteService";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
-/** Small reusable FAB button with hover highlight */
+/**
+ * A reusable floating action button component.
+ *
+ * @param {Object} props - The component props.
+ * @param {function} props.onClick - Click handler.
+ * @param {string} props.title - Tooltip title.
+ * @param {React.ReactNode} props.children - Icon or content.
+ * @param {boolean} [props.active=false] - Whether the button is in an active state.
+ * @param {string} [props.activeColor="var(--accent)"] - Color when active.
+ * @param {Object} [props.extraStyle={}] - Additional inline styles.
+ * @returns {React.ReactElement} The rendered button component.
+ */
 function FabBtn({
   onClick,
   title,
@@ -56,7 +63,11 @@ function FabBtn({
   );
 }
 
-/** Thin vertical separator */
+/**
+ * A separator for the floating action bar.
+ *
+ * @returns {React.ReactElement} The rendered separator component.
+ */
 function FabSep() {
   return (
     <div
@@ -70,51 +81,25 @@ function FabSep() {
   );
 }
 
-export default function FloatingActionBar() {
+/**
+ * Group of editor-specific actions for the floating action bar.
+ *
+ * @returns {React.ReactElement} The rendered fragment of editor actions.
+ */
+function EditorActions() {
   const {
     isEditMode,
     toggleMode,
     toggleToc,
-    setCmdPaletteOpen,
-    setSettingsOpen,
     viewLayout,
     toggleLayout,
-    setFlashcardModalOpen,
     saveActiveFile,
     openWorkspaceDialog,
-    activeVaultItem,
     workspaceMode,
   } = useStore();
 
-  const showDashboard = useStore(selectShowDashboard);
-  const isVaultNote = useStore(selectIsVaultNote);
-
-  const [isFavorite, setIsFavorite] = useState(false);
-
-  // Sync favourite state when active note changes
-  useEffect(() => {
-    if (isVaultNote && activeVaultItem?.id) {
-      try {
-        setIsFavorite(vaultRepository.isFavorite(activeVaultItem.id));
-      } catch {
-        setIsFavorite(false);
-      }
-    } else {
-      setIsFavorite(false);
-    }
-  }, [activeVaultItem?.id, isVaultNote]);
-
-  const handleToggleFavorite = async () => {
-    if (!activeVaultItem?.id) return;
-    await noteService.toggleFavorite(activeVaultItem.id);
-    setIsFavorite((prev) => !prev);
-  };
-
-  if (showDashboard) return null;
-
   return (
-    <div className="fab">
-      {/* Layout / view controls */}
+    <>
       <FabBtn
         onClick={toggleLayout}
         title="Toggle Split View"
@@ -122,23 +107,17 @@ export default function FloatingActionBar() {
       >
         <Columns size={18} />
       </FabBtn>
-
       {viewLayout === "single" && (
         <FabBtn onClick={toggleMode} title="Toggle Mode (Cmd+E)">
           {isEditMode ? <Eye size={18} /> : <Edit3 size={18} />}
         </FabBtn>
       )}
-
       <FabSep />
-
-      {/* Workspace open (folder mode only) */}
       {workspaceMode !== "vault" && (
         <FabBtn onClick={openWorkspaceDialog} title="Open Workspace">
           <FolderTree size={18} />
         </FabBtn>
       )}
-
-      {/* Common note actions */}
       <FabBtn onClick={toggleToc} title="Table of Contents">
         <List size={18} />
       </FabBtn>
@@ -154,27 +133,72 @@ export default function FloatingActionBar() {
       >
         <History size={18} />
       </FabBtn>
+    </>
+  );
+}
 
-      {/* Vault-note-specific actions */}
-      {isVaultNote && (
-        <>
-          <FabSep />
-          <FabBtn
-            onClick={handleToggleFavorite}
-            title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
-            active={isFavorite}
-            activeColor="#f59e0b"
-          >
-            <Star size={18} fill={isFavorite ? "#f59e0b" : "none"} />
-          </FabBtn>
-          <FabBtn
-            onClick={() => setFlashcardModalOpen(true)}
-            title="Active Recall Flashcard"
-          >
-            <Layers size={18} />
-          </FabBtn>
-        </>
-      )}
+/**
+ * Group of vault-specific actions for the floating action bar.
+ *
+ * @returns {React.ReactElement} The rendered fragment of vault note actions.
+ */
+function VaultNoteActions() {
+  const { setFlashcardModalOpen, activeVaultItem } = useStore();
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  useEffect(() => {
+    if (activeVaultItem?.id) {
+      try {
+        setIsFavorite(vaultRepository.isFavorite(activeVaultItem.id));
+      } catch {
+        setIsFavorite(false);
+      }
+    } else {
+      setIsFavorite(false);
+    }
+  }, [activeVaultItem?.id]);
+
+  const handleToggleFavorite = async () => {
+    if (!activeVaultItem?.id) return;
+    await noteService.toggleFavorite(activeVaultItem.id);
+    setIsFavorite((prev) => !prev);
+  };
+
+  return (
+    <>
+      <FabSep />
+      <FabBtn
+        onClick={handleToggleFavorite}
+        title={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+        active={isFavorite}
+        activeColor="#f59e0b"
+      >
+        <Star size={18} fill={isFavorite ? "#f59e0b" : "none"} />
+      </FabBtn>
+      <FabBtn
+        onClick={() => setFlashcardModalOpen(true)}
+        title="Active Recall Flashcard"
+      >
+        <Layers size={18} />
+      </FabBtn>
+    </>
+  );
+}
+
+/**
+ * A floating action bar that provides quick access to common actions and settings.
+ * Renders editor, vault (if applicable), and global actions.
+ *
+ * @returns {React.ReactElement} The rendered FloatingActionBar component.
+ */
+export default function FloatingActionBar() {
+  const { setCmdPaletteOpen, setSettingsOpen } = useStore();
+  const isVaultNote = useStore(selectIsVaultNote);
+
+  return (
+    <div className="fab">
+      <EditorActions />
+      {isVaultNote && <VaultNoteActions />}
 
       <FabSep />
 

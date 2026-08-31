@@ -8,6 +8,14 @@ import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { noteService } from "../../application/vault/NoteService";
 import toast from "react-hot-toast";
 
+/**
+ * AgendaPage Component
+ *
+ * Displays a calendar and a list of notes scheduled for the selected date.
+ * Allows viewing and removing scheduled notes.
+ *
+ * @returns {JSX.Element} The rendered AgendaPage component.
+ */
 export default function AgendaPage() {
   const { openNoteFromVault } = useStore();
   const [selectedDate, setSelectedDate] = useState(new Date());

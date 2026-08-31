@@ -30,6 +30,16 @@ const logger = Logger.forContext("App");
 import BubbleMenu from "./BubbleMenu";
 import { slashCommands } from "../../utils/editor/slashCommands";
 
+/**
+ * Renders the CodeMirror-based markdown editor.
+ * Includes extensions for drag and drop, vim mode, search, autocompletion, formatting, and a bubble menu.
+ *
+ * @param {Object} props - The component props.
+ * @param {import("@uiw/react-codemirror").ThemeInput} props.theme - The CodeMirror theme to apply.
+ * @param {string} [props.height] - The height of the editor (e.g., "100%", "auto").
+ * @param {string} [props.minHeight] - The minimum height of the editor.
+ * @returns {React.ReactElement} The rendered CodeEditor component.
+ */
 export default function CodeEditor({ theme, height, minHeight }) {
   const { markdown, setMarkdown } = useStore();
   const { currentFolder } = useStore();

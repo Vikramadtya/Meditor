@@ -6,6 +6,12 @@ import { format, subYears } from "date-fns";
 import { useStore } from "../../store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
+/**
+ * Modal component for displaying user analytics and activity.
+ * Shows contribution heatmap, note/flashcard counts, and review statistics.
+ *
+ * @returns {React.ReactElement|null} The statistics modal or null if not open.
+ */
 export default function StatsModal() {
   const { isStatsModalOpen, setStatsModalOpen, theme } = useStore();
   useModalEscape(isStatsModalOpen, () => setStatsModalOpen(false));
@@ -258,6 +264,15 @@ export default function StatsModal() {
   );
 }
 
+/**
+ * Sub-component for displaying a single statistic.
+ *
+ * @param {Object} props - The component props.
+ * @param {string} props.label - The label for the statistic.
+ * @param {number|string} props.value - The value to display.
+ * @param {string} [props.color="var(--text-primary)"] - Optional color for the value text.
+ * @returns {React.ReactElement} The rendered statistic card.
+ */
 function StatCard({ label, value, color = "var(--text-primary)" }) {
   return (
     <div

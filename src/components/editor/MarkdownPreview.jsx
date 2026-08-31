@@ -2,7 +2,7 @@ import React, { forwardRef, useEffect, useState } from "react";
 import FrontmatterBlock from "./FrontmatterBlock";
 import { useStore } from "../../store/index";
 
-import { linkService } from "../../services/linkService";
+import { searchService } from "../../application/editor/SearchService.js";
 import { Link } from "lucide-react";
 
 import { useImageInterceptor } from "../../hooks/useImageInterceptor";
@@ -11,6 +11,18 @@ import { useMkDocsTabs } from "../../hooks/useMkDocsTabs";
 import { useInteractiveTaskLists } from "../../hooks/useInteractiveTaskLists";
 import { useWikilinks } from "../../hooks/useWikilinks";
 
+/**
+ * Markdown preview component that renders HTML content with various custom extensions
+ * like images, mermaid diagrams, interactive task lists, and wikilinks. Also displays backlinks.
+ *
+ * @param {Object} props - The component props.
+ * @param {function} props.onScroll - Callback for scroll events, used for scroll syncing.
+ * @param {string} props.className - CSS class name for styling.
+ * @param {string} props.htmlContent - The HTML string to render.
+ * @param {Object} props.frontmatter - The parsed frontmatter data.
+ * @param {React.Ref<HTMLDivElement>} ref - Ref forwarded to the container div.
+ * @returns {React.ReactElement} The rendered MarkdownPreview component.
+ */
 const MarkdownPreview = forwardRef(
   ({ onScroll, className, htmlContent, frontmatter }, ref) => {
     const { theme } = useStore();
@@ -29,7 +41,14 @@ const MarkdownPreview = forwardRef(
 
         // Strip .md
         const logicalName = fileName.replace(".md", "");
-        const links = await linkService.getBacklinksForNote(logicalName);
+        const links = await (async () => {
+          const state = useStore.getState();
+          return searchService.getBacklinks(
+            logicalName,
+            state.workspaceMode,
+            state.workspaceRoot || state.currentFolder,
+          );
+        })();
         if (isMounted) {
           setBacklinks(links);
         }
@@ -90,7 +109,7 @@ const MarkdownPreview = forwardRef(
                 <div
                   key={i}
                   className="wikilink-card"
-                  onClick={() => linkService.openNoteByName(bl.name)}
+                  onClick={() => useStore.getState().openNoteByName(bl.name)}
                   style={{
                     padding: "12px",
                     backgroundColor: "var(--bg-secondary)",

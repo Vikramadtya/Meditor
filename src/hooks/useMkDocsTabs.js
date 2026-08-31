@@ -1,5 +1,11 @@
 import { useEffect } from "react";
 
+/**
+ * Hook to manage MkDocs-style tab switching in rendered Markdown.
+ *
+ * @param {import("react").RefObject<HTMLElement>} proseRef - Reference to the element containing rendered markdown.
+ * @param {string} htmlContent - The rendered HTML content.
+ */
 export function useMkDocsTabs(proseRef, htmlContent) {
   useEffect(() => {
     if (!proseRef.current) return;

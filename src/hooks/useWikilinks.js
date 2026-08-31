@@ -1,6 +1,13 @@
 import { useEffect } from "react";
-import { linkService } from "../services/linkService";
+import { searchService } from "../application/editor/SearchService.js";
+import { useStore } from "../store/index.js";
 
+/**
+ * Hook to handle clicks on wikilinks in rendered Markdown.
+ * Prevents default navigation and opens the target note using the store.
+ *
+ * @param {import("react").RefObject<HTMLElement>} ref - Reference to the container element with rendered markdown.
+ */
 export function useWikilinks(ref) {
   useEffect(() => {
     if (!ref.current) return;
@@ -12,7 +19,7 @@ export function useWikilinks(ref) {
           e.preventDefault();
           const noteName = target.getAttribute("data-note");
           if (noteName) {
-            linkService.openNoteByName(noteName);
+            useStore.getState().openNoteByName(noteName);
           }
           return;
         }

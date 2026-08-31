@@ -22,6 +22,15 @@ import {
 import { useStore } from "../../store/index";
 import { noteService } from "../../application/vault/NoteService";
 
+/**
+ * VaultSidebar Component
+ *
+ * Renders the main sidebar for the vault navigation, including global search,
+ * quick links (Today, Agenda, Tags, etc.), group and collection hierarchy,
+ * and bottom fixed actions.
+ *
+ * @returns {JSX.Element} The rendered VaultSidebar component.
+ */
 export default function VaultSidebar() {
   const {
     setCommandPaletteOpen,
@@ -248,6 +257,18 @@ export default function VaultSidebar() {
   );
 }
 
+/**
+ * SidebarLink Component
+ *
+ * Renders a single navigation link in the vault sidebar.
+ *
+ * @param {Object} props - The component props.
+ * @param {React.ReactNode} props.icon - The Lucide icon to display.
+ * @param {string} props.label - The text label for the link.
+ * @param {boolean} [props.isActive] - Whether the link is currently active.
+ * @param {function} props.onClick - The click handler for the link.
+ * @returns {JSX.Element} The rendered SidebarLink component.
+ */
 function SidebarLink({ icon, label, isActive, onClick }) {
   return (
     <div
@@ -281,6 +302,16 @@ function SidebarLink({ icon, label, isActive, onClick }) {
   );
 }
 
+/**
+ * VaultGroupNode Component
+ *
+ * Renders a group node in the vault hierarchy, allowing expansion and
+ * collection creation.
+ *
+ * @param {Object} props - The component props.
+ * @param {Object} props.group - The group data object from the vault hierarchy.
+ * @returns {JSX.Element} The rendered VaultGroupNode component.
+ */
 function VaultGroupNode({ group }) {
   const [expanded, setExpanded] = useState(true);
   const [hovered, setHovered] = useState(false);
@@ -372,6 +403,17 @@ function VaultGroupNode({ group }) {
   );
 }
 
+/**
+ * VaultNode Component
+ *
+ * Recursive component that renders items (collections, modules)
+ * within a group in the sidebar.
+ *
+ * @param {Object} props - The component props.
+ * @param {Object} props.item - The vault item to render.
+ * @param {number} props.level - The nesting level for indentation.
+ * @returns {JSX.Element|null} The rendered VaultNode component or null for notes.
+ */
 function VaultNode({ item, level }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);

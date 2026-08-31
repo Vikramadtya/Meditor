@@ -3,10 +3,16 @@ import React, { useEffect, useState, useRef } from "react";
 import { X } from "lucide-react";
 import ForceGraph2D from "react-force-graph-2d";
 import { useStore } from "../../store/index";
-import { linkService } from "../../services/linkService";
+import { searchService } from "../../application/editor/SearchService.js";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { iconBtnStyle } from "../Settings/SettingsStyles";
 
+/**
+ * Modal component for displaying an interactive 2D node-link graph of notes and their connections.
+ * Visualizes the vault's note relationships using force-directed graph.
+ *
+ * @returns {React.ReactElement|null} The graph modal or null if not open.
+ */
 export default function GraphModal() {
   const { isGraphModalOpen, setGraphModalOpen, theme } = useStore();
   useModalEscape(isGraphModalOpen, () => setGraphModalOpen(false));
@@ -28,7 +34,14 @@ export default function GraphModal() {
     const links = [];
 
     for (const node of nodes) {
-      const backlinks = await linkService.getBacklinksForNote(node.id);
+      const backlinks = await (async () => {
+        const state = useStore.getState();
+        return searchService.getBacklinks(
+          node.id,
+          state.workspaceMode,
+          state.workspaceRoot || state.currentFolder,
+        );
+      })();
       backlinks.forEach((bl) => {
         links.push({ source: bl.name, target: node.id });
       });
@@ -88,7 +101,7 @@ export default function GraphModal() {
               nodeColor={() => nodeColor}
               linkColor={() => linkColor}
               onNodeClick={(node) => {
-                linkService.openNoteByName(node.id);
+                useStore.getState().openNoteByName(node.id);
                 setGraphModalOpen(false);
               }}
               nodeCanvasObject={(node, ctx, globalScale) => {

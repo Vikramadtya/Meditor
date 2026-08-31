@@ -1,5 +1,12 @@
 import { useEffect, useRef } from "react";
 
+/**
+ * Synchronizes scrolling between the CodeMirror editor and the Markdown preview.
+ *
+ * @param {boolean} isSplit - Whether the editor is in split mode (editing and preview).
+ * @param {import("react").RefObject<HTMLElement>} proseRef - Reference to the preview container.
+ * @returns {{ handleProseScroll: (e: Event) => void }} Object containing the scroll handler for the preview.
+ */
 export function useScrollSync(isSplit, proseRef) {
   const syncTimeoutRef = useRef(null);
   const isSyncingLeft = useRef(false);

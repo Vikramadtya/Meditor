@@ -8,10 +8,18 @@ import {
 } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
-import { srsService } from "../../services/srsService";
+import { srsService } from "../../domain/srs";
 import { vaultService } from "../../application/vault/VaultService";
 import "../../styles/FlashcardReview.css";
 
+/**
+ * FlashcardReviewPage Component
+ *
+ * Provides an interface for reviewing flashcards using a spaced repetition system (SRS).
+ * Allows users to rate cards, updates SRS intervals, and displays review session stats.
+ *
+ * @returns {JSX.Element} The rendered FlashcardReviewPage component.
+ */
 export default function FlashcardReviewPage() {
   const { openNoteFromVault } = useStore();
   const [cards, setCards] = useState([]);
@@ -309,6 +317,19 @@ export default function FlashcardReviewPage() {
   );
 }
 
+/**
+ * RateBtn Component
+ *
+ * Renders a rating button for the flashcard review.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} props.label - The text label.
+ * @param {string} props.emoji - Emoji representing the rating.
+ * @param {number} props.quality - Numeric quality score (e.g. 0-5).
+ * @param {function} props.onClick - The click handler, receives quality.
+ * @param {string} props.color - The button color.
+ * @returns {JSX.Element} The rendered RateBtn component.
+ */
 function RateBtn({ label, emoji, quality, onClick, color }) {
   return (
     <button
@@ -339,6 +360,17 @@ function RateBtn({ label, emoji, quality, onClick, color }) {
   );
 }
 
+/**
+ * StatBadge Component
+ *
+ * Renders a badge showing a statistic from the flashcard review session.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} props.label - The label describing the stat.
+ * @param {number} props.value - The numeric value.
+ * @param {string} props.color - The theme color.
+ * @returns {JSX.Element} The rendered StatBadge component.
+ */
 function StatBadge({ label, value, color }) {
   return (
     <div

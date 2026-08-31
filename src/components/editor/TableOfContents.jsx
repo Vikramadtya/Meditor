@@ -1,9 +1,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useStore } from "../../store/index";
 
-import { tagService } from "../../services/tagService";
-import { linkService } from "../../services/linkService";
+import { searchService } from "../../application/editor/SearchService.js";
 
+/**
+ * Renders the table of contents sidebar, providing an outline of the markdown document
+ * or document statistics and backlinks.
+ *
+ * @param {Object} props - The component props.
+ * @param {Array<{id: string, text: string, level: number}>} props.toc - The table of contents data generated from markdown headings.
+ * @returns {React.ReactElement|null} The rendered TableOfContents component, or null if it shouldn't be visible.
+ */
 export default function TableOfContents({ toc }) {
   const {
     isTocOpen,
@@ -21,7 +28,14 @@ export default function TableOfContents({ toc }) {
   useEffect(() => {
     if (isTocOpen && activeTab === "stats" && fileName) {
       // The filename might have .md, getBacklinksForNote handles it or we pass it
-      linkService.getBacklinksForNote(fileName).then((links) => {
+      (async () => {
+        const state = useStore.getState();
+        return searchService.getBacklinks(
+          fileName,
+          state.workspaceMode,
+          state.workspaceRoot || state.currentFolder,
+        );
+      })().then((links) => {
         setBacklinks(links);
       });
     }
@@ -313,7 +327,9 @@ export default function TableOfContents({ toc }) {
                       background: "var(--bg-secondary)",
                       borderRadius: "6px",
                     }}
-                    onClick={() => linkService.openNoteByName(link.name)}
+                    onClick={() =>
+                      useStore.getState().openNoteByName(link.name)
+                    }
                   >
                     <div
                       style={{ fontWeight: 600, color: "var(--text-primary)" }}

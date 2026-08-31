@@ -10,9 +10,10 @@ const WELCOME_CONTENT =
 /**
  * Syncs root editor state (markdown, fileName, etc.) from the active tab.
  * This enables backward-compatible access to `state.markdown` etc.
- * @param {Array} tabs
- * @param {string} activeTabId
- * @returns {Object}
+ *
+ * @param {Array<Object>} tabs - The list of open tabs.
+ * @param {string} activeTabId - The ID of the currently active tab.
+ * @returns {Object} The synced editor state properties.
  */
 const syncFromActiveTab = (tabs, activeTabId) => {
   if (!tabs?.length) {
@@ -47,6 +48,13 @@ const initialTab = {
 
 export const WELCOME_MD = WELCOME_CONTENT;
 
+/**
+ * Creates the editor state slice.
+ *
+ * @param {Function} set - Zustand set function.
+ * @param {Function} get - Zustand get function.
+ * @returns {Object} The editor state slice.
+ */
 export const createEditorSlice = (set, get) => ({
   tabs: [initialTab],
   activeTabId: "Untitled.md",

@@ -4,6 +4,12 @@ import { selectStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
 import { useStore } from "../../store/index";
 
+/**
+ * Settings tab for configuring the Markdown engine.
+ * Allows users to toggle features like HTML rendering, auto-linking, smart typography, and vim keybindings.
+ *
+ * @returns {React.ReactElement} The markdown settings tab component.
+ */
 export default function MarkdownTab() {
   const { mdConfig, setMdConfig } = useSettingsStore();
   const { workspaceMode } = useStore();

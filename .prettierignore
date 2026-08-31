@@ -1,0 +1,7 @@
+node_modules/
+dist/
+build/
+public/
+*.log
+*.wasm
+.DS_Store

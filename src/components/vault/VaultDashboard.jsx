@@ -14,6 +14,15 @@ import { startOfDay } from "date-fns";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { vaultService } from "../../application/vault/VaultService";
 
+/**
+ * VaultDashboard Component
+ *
+ * Renders the dashboard view for the vault, showing 'Today' (recently edited notes)
+ * or 'Agenda' (notes due for review) when no specific vault item is active.
+ * When a vault item (group, collection) is active, it renders its children as cards.
+ *
+ * @returns {JSX.Element} The rendered VaultDashboard component.
+ */
 export default function VaultDashboard() {
   const { activeVaultItem, openCreateVaultItemModal } = useStore();
   const [todayNotes, setTodayNotes] = React.useState([]);
@@ -36,7 +45,7 @@ export default function VaultDashboard() {
       const note = agendaNotes.find((n) => n.id === noteId);
       if (!note) return;
 
-      const { srsService } = await import("../../services/srsService");
+      const { srsService } = await import("../../domain/srs");
       const { ease, interval, nextReview } = srsService.calculateNextReview(
         quality,
         note.srs_ease || 2.5,
@@ -543,6 +552,20 @@ export default function VaultDashboard() {
   );
 }
 
+/**
+ * VaultCard Component
+ *
+ * Renders an individual card for a vault item (collection, module, or note)
+ * within the dashboard view.
+ *
+ * @param {Object} props - Component props.
+ * @param {Object} props.child - The vault item to display.
+ * @param {function} props.countNotes - Function to calculate total notes inside the item.
+ * @param {string} props.themeColor - Hex color for the theme.
+ * @param {string} props.themeGradient - CSS gradient string for the card banner.
+ * @param {React.ElementType} props.CardBannerIcon - Icon component to display in the banner.
+ * @returns {JSX.Element} The rendered VaultCard component.
+ */
 function VaultCard({
   child,
   countNotes,

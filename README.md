@@ -644,3 +644,75 @@ _Built on the shoulders of giants:_
 [Neutralino.js](https://neutralino.js.org) · [React](https://react.dev) · [CodeMirror 6](https://codemirror.net) · [markdown-it](https://markdown-it.github.io) · [Mermaid](https://mermaid.js.org) · [Zustand](https://zustand-demo.pmnd.rs) · [Vite](https://vite.dev)
 
 </div>
+
+---
+
+## 13. Troubleshooting & Debugging
+
+If Meditor behaves unexpectedly, crashes, or fails to render, use the following resources to debug.
+
+### How to Find the Logs
+
+Meditor uses a structured logging system (`Logger.forContext()`) that writes to two places:
+
+1. **Browser Console:**
+   Right-click anywhere in the Meditor window and select **Inspect Element** (or press \`Cmd + Option + I\`). Open the **Console** tab to view real-time frontend logs, React errors, and warnings.
+
+2. **Disk Log File:**
+   Meditor persists all application logs (`INFO`, `WARN`, `ERROR`) to a persistent log file on your system.
+   - **macOS:** `~/Library/Application Support/meditor/meditor.log` (or within the folder returned by your OS for Application Data).
+   - **Windows:** `%APPDATA%\\meditor\\meditor.log`
+   - **Linux:** `~/.config/meditor/meditor.log`
+
+   _Note: If the application cannot write to the OS Data directory, it may fail silently. Check the Developer Console first._
+
+### How to Debug Issues (Detailed Guide)
+
+When investigating a bug, follow this workflow:
+
+1. **Check the React Console:**
+   - Open Developer Tools (`Cmd + Option + I`).
+   - Check the **Console** for uncaught JavaScript exceptions (e.g., `TypeError: null is not an object`).
+   - Look for Meditor-specific context logs (e.g., `[ERROR] [VaultService] Failed to load SQLite database`).
+
+2. **Inspect the UI State (Zustand):**
+   - Meditor's state is centrally managed via Zustand. You can inspect the current global state by typing `useStore.getState()` in the Console.
+   - Verify `currentFolder`, `workspaceMode`, and `activeVaultItem` are set to what you expect.
+
+3. **Check the SQLite Vault Database:**
+   - If running in Vault Mode, check if the `vault.db` file in the root of your workspace is corrupted.
+   - You can open the `vault.db` file using any SQLite browser (like DB Browser for SQLite) to verify that the `groups`, `collections`, `modules`, and `notes` tables exist and contain correct references.
+
+4. **Verify File Permissions:**
+   - Meditor requires read/write access to your workspace folder. If saving fails, ensure the directory permissions allow writing.
+
+5. **Hot-Reloading in Dev Mode:**
+   - If you are developing and hit a bug, run the app in Vite dev mode (`npm run dev`) and Neutralino dev mode (`npx @neutralinojs/neu run`).
+   - The Vite dev server will print build and syntax errors directly to Terminal 1.
+   - Neutralino backend logs (C++ server errors) will be printed to Terminal 2.
+
+### macOS App Deployment
+
+Meditor provides a fully automated build script for macOS that compiles the React app, bundles it with Neutralino, assigns the App Icon, sets up the `Info.plist`, and wraps everything into a distributable Disk Image (`.dmg`).
+
+To build and package for macOS:
+
+```bash
+# Make sure the script is executable
+chmod +x build-mac.sh
+
+# Run the build script
+./build-mac.sh
+```
+
+**What this script does:**
+
+1. Runs `npm run build` to compile the Vite + React frontend into `/dist`.
+2. Runs `npx @neutralinojs/neu build` to package the frontend and the Neutralino binaries.
+3. Creates a `.app` bundle structure in `/build/Meditor.app`.
+4. Copies the Universal macOS binary (`meditor-mac_universal`) and the resource bundle (`resources.neu`) into the `.app`.
+5. Uses `sips` and `iconutil` to generate the `.icns` file from `public/app-icon.png`.
+6. Generates a standard Apple `Info.plist`.
+7. Packages the `.app` into a `.dmg` file in the `/build/` directory using `hdiutil`.
+
+You can now share the generated `build/Meditor-[version].dmg` file with others!

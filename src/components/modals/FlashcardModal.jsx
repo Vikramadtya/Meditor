@@ -5,6 +5,12 @@ import { useStore } from "../../store/index";
 import { noteService } from "../../application/vault/NoteService";
 import toast from "react-hot-toast";
 
+/**
+ * Modal component for creating and editing active recall flashcards associated with a note.
+ * Allows users to set a question and answer for spaced repetition.
+ *
+ * @returns {React.ReactElement|null} The flashcard modal or null if not open.
+ */
 export default function FlashcardModal() {
   const {
     isFlashcardModalOpen,

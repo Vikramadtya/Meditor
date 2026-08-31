@@ -2,6 +2,17 @@ import React from "react";
 import { Bold, Italic, Strikethrough, Code, Link } from "lucide-react";
 import { createPortal } from "react-dom";
 
+/**
+ * A floating bubble menu for text formatting that appears over text selection in the editor.
+ * Uses React Portals to render at the document root level.
+ *
+ * @param {Object} props - The component props.
+ * @param {boolean} props.show - Whether to show the menu.
+ * @param {number} props.top - The top position in pixels.
+ * @param {number} props.left - The left position in pixels.
+ * @param {function} props.onFormat - Callback when a format button is clicked, passing prefix and suffix.
+ * @returns {React.ReactPortal|null} The rendered BubbleMenu portal, or null if it shouldn't show.
+ */
 export default function BubbleMenu({ show, top, left, onFormat }) {
   if (!show) return null;
 

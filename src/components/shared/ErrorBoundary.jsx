@@ -3,6 +3,10 @@ import { Logger } from "../../infrastructure/Logger";
 const logger = Logger.forContext("App");
 import { AlertOctagon, RefreshCw } from "lucide-react";
 
+/**
+ * A React Error Boundary component to catch and display unhandled rendering errors.
+ * Prevents the entire application from crashing and provides a fallback UI.
+ */
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);

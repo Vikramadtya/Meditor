@@ -10,6 +10,9 @@ export const PROSE_FONTS = [
   { label: "System Default", value: "system-ui, sans-serif" },
 ];
 
+/**
+ * Zustand store for persisting application settings.
+ */
 export const useSettingsStore = create(
   persist(
     (set) => ({

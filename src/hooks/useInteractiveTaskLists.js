@@ -1,6 +1,12 @@
 import { useEffect } from "react";
 import { useStore as useDocumentStore } from "../store/index";
 
+/**
+ * Hook to enable interactive task lists in rendered markdown.
+ * Allows users to click on checkboxes in the preview to toggle their state in the markdown source.
+ *
+ * @param {import("react").RefObject<HTMLElement>} ref - Reference to the container element holding the rendered markdown.
+ */
 export function useInteractiveTaskLists(ref) {
   useEffect(() => {
     const container = ref.current;

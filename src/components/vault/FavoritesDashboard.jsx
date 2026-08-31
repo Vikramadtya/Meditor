@@ -3,6 +3,13 @@ import { useStore } from "../../store/index";
 import { Star, FileText } from "lucide-react";
 import { noteService } from "../../application/vault/NoteService";
 
+/**
+ * FavoritesDashboard Component
+ *
+ * Displays a dashboard of all notes marked as favorites, allowing quick access.
+ *
+ * @returns {JSX.Element} The rendered FavoritesDashboard component.
+ */
 export default function FavoritesDashboard() {
   const { openNoteFromVault } = useStore();
   const [favorites, setFavorites] = useState([]);

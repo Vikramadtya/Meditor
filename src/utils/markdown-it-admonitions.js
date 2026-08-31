@@ -162,6 +162,13 @@ function admonition(state, startLine, endLine, silent) {
   return true;
 }
 
+/**
+ * Markdown-It plugin for admonitions (callouts).
+ * Supports standard syntax as well as MkDocs collapsible syntax (???, ???+).
+ *
+ * @param {import("markdown-it")} md - The Markdown-It instance.
+ * @param {Object} [options={}] - Plugin options.
+ */
 export default function admonitionPlugin(md, options = {}) {
   const render = options.render || renderDefault;
 

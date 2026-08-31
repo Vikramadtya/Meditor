@@ -3,6 +3,12 @@ import { Plus, Trash2, Edit2, Save } from "lucide-react";
 import { chipStyle, inputStyle, iconBtnStyle } from "./SettingsStyles";
 import { useSettingsStore } from "../../store/settingsStore";
 
+/**
+ * Settings tab for managing custom markdown rendering rules using Regular Expressions.
+ * Allows users to add, edit, and delete custom text replacements with HTML/CSS.
+ *
+ * @returns {React.ReactElement} The custom rules settings tab component.
+ */
 export default function CustomRulesTab() {
   const { customRules, setCustomRules } = useSettingsStore();
   const [editingId, setEditingId] = useState(null);

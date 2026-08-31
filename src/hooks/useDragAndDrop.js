@@ -29,7 +29,10 @@ const sanitize = (s) => s.replace(/[/\\:*?"<>|]/g, "_");
 
 /**
  * Resolves vault-relative asset path for a note.
- * Returns { destFolder, markdownPath } or null if the note can't be located.
+ *
+ * @param {string} noteId - The ID of the note.
+ * @param {string} currentFolder - The current folder path.
+ * @returns {{destFolder: string, markdownPath: string}|null} The destination folder and markdown path, or null if note can't be located.
  */
 function resolveVaultImagePaths(noteId, currentFolder) {
   const lp = vaultRepository.getLogicalPath(noteId);
@@ -48,6 +51,10 @@ function resolveVaultImagePaths(noteId, currentFolder) {
 /**
  * Ensures all directories in a path exist (best-effort).
  * Only creates directories inside the currentFolder boundary.
+ *
+ * @param {string} dirPath - The directory path to ensure exists.
+ * @param {string} currentFolder - The boundary folder to restrict creation within.
+ * @returns {Promise<void>}
  */
 async function ensureDir(dirPath, currentFolder) {
   const parts = dirPath.split("/");
@@ -65,6 +72,12 @@ async function ensureDir(dirPath, currentFolder) {
 
 /**
  * Saves an image ArrayBuffer to disk and records it in the vault DB.
+ *
+ * @param {ArrayBuffer} arrayBuffer - The image data.
+ * @param {string} destPath - The destination path to write the image.
+ * @param {string|null} noteId - The associated note ID.
+ * @param {string} fileName - The filename of the image.
+ * @returns {Promise<void>}
  */
 async function persistImage(arrayBuffer, destPath, noteId, fileName) {
   await fileService.writeBinaryFile(destPath, arrayBuffer);
@@ -81,6 +94,9 @@ async function persistImage(arrayBuffer, destPath, noteId, fileName) {
 
 /**
  * Reads a File object as an ArrayBuffer via FileReader.
+ *
+ * @param {File} file - The file to read.
+ * @returns {Promise<ArrayBuffer>} The read array buffer.
  */
 function readAsArrayBuffer(file) {
   return new Promise((resolve, reject) => {
@@ -94,6 +110,13 @@ function readAsArrayBuffer(file) {
 /**
  * Prompts for a filename, processes the image, and inserts the markdown.
  * Shared by both drop and paste handlers.
+ *
+ * @param {File} file - The image file to process.
+ * @param {number} insertPos - The position in the editor to insert the markdown text.
+ * @param {import("@codemirror/view").EditorView} view - The CodeMirror editor view.
+ * @param {string} currentFolder - The current folder path.
+ * @param {string} imageSavePath - The relative path to save the image to in folder mode.
+ * @returns {Promise<void>}
  */
 async function handleImageFile(
   file,
@@ -187,6 +210,14 @@ async function handleImageFile(
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
+/**
+ * Hook to set up drag-and-drop and paste event handlers for CodeMirror.
+ *
+ * @param {string} currentFolder - The current workspace folder.
+ * @param {string} imageSavePath - The configured folder to save images in.
+ * @param {Function} setMarkdown - Function to update the markdown state.
+ * @returns {import("@codemirror/view").Extension} CodeMirror DOM event handlers extension.
+ */
 export function useDragAndDrop(currentFolder, imageSavePath, setMarkdown) {
   return useMemo(
     () =>

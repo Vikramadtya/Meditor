@@ -3,6 +3,13 @@ import { Tag, FileText, Hash } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
+/**
+ * TagsPage Component
+ *
+ * Displays all tags used in the vault and the notes associated with each tag.
+ *
+ * @returns {JSX.Element} The rendered TagsPage component.
+ */
 export default function TagsPage() {
   const { openNoteFromVault } = useStore();
   const [tagsMap, setTagsMap] = useState(new Map());

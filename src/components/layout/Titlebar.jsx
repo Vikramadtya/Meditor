@@ -3,6 +3,12 @@ import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useStore } from "../../store/index";
 import { selectShowDashboard } from "../../store/selectors/index";
 
+/**
+ * Custom window titlebar for the application.
+ * Shows the sidebar toggle button, current file name, dirty state indicator, and file statistics.
+ *
+ * @returns {React.ReactElement} The rendered Titlebar component.
+ */
 export default function Titlebar() {
   const { fileName, markdown, isDirty, isSidebarOpen, toggleSidebar } =
     useStore();

@@ -3,7 +3,7 @@ import ForceGraph2D from "react-force-graph-2d";
 import { Network, Search, X } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
-import { linkService } from "../../services/linkService";
+import { searchService } from "../../application/editor/SearchService.js";
 
 // Generate a stable color per group name
 const GROUP_COLORS = [
@@ -16,9 +16,24 @@ const GROUP_COLORS = [
   "#84cc16",
   "#f59e0b",
 ];
+/**
+ * Generates a stable color for a given group name.
+ *
+ * @param {string} name - The group name.
+ * @param {Array<string>} allGroups - All possible group names.
+ * @returns {string} The HEX color string.
+ */
 const groupColor = (name, allGroups) =>
   GROUP_COLORS[allGroups.indexOf(name) % GROUP_COLORS.length] ?? "#6366f1";
 
+/**
+ * KnowledgeGraphPage Component
+ *
+ * Renders an interactive 2D force-directed graph of notes and their connections
+ * based on backlinks, with filtering capabilities by tags, groups, and search query.
+ *
+ * @returns {JSX.Element} The rendered KnowledgeGraphPage component.
+ */
 export default function KnowledgeGraphPage() {
   const { theme, vaultHierarchy } = useStore();
   const graphRef = useRef();
@@ -113,7 +128,14 @@ export default function KnowledgeGraphPage() {
     const links = [];
     for (const node of nodes) {
       try {
-        const bls = await linkService.getBacklinksForNote(node.id);
+        const bls = await (async () => {
+          const state = useStore.getState();
+          return searchService.getBacklinks(
+            node.id,
+            state.workspaceMode,
+            state.workspaceRoot || state.currentFolder,
+          );
+        })();
         bls.forEach((bl) => {
           if (nodeSet.has(bl.name))
             links.push({ source: bl.name, target: node.id });
@@ -300,7 +322,7 @@ export default function KnowledgeGraphPage() {
             nodeColor={nodeColorFn}
             linkColor={() => linkColor}
             nodeRelSize={5}
-            onNodeClick={(node) => linkService.openNoteByName(node.id)}
+            onNodeClick={(node) => useStore.getState().openNoteByName(node.id)}
             nodeCanvasObject={
               showLabels
                 ? (node, ctx, scale) => {
@@ -351,6 +373,19 @@ const labelStyle = {
   marginBottom: "8px",
 };
 
+/**
+ * FilterSection Component
+ *
+ * Renders a set of filter pills for tags or groups.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} props.title - The title of the filter section.
+ * @param {Array<string>} props.items - Array of filter item strings.
+ * @param {Array<string>} props.selected - Array of currently selected items.
+ * @param {function} props.onToggle - Callback when an item is toggled.
+ * @param {function} [props.getColor] - Function to get the color for a filter item.
+ * @returns {JSX.Element|null} The rendered FilterSection component.
+ */
 function FilterSection({ title, items, selected, onToggle, getColor }) {
   if (items.length === 0) return null;
   return (

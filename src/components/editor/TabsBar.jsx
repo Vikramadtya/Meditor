@@ -4,6 +4,12 @@ import { useStore } from "../../store/index";
 
 import "../../styles/TabsBar.css";
 
+/**
+ * Renders the tabs bar displaying open files in the editor.
+ * Allows users to switch between files or close them.
+ *
+ * @returns {React.ReactElement|null} The rendered TabsBar component, or null if no tabs are open.
+ */
 export default function TabsBar() {
   const { tabs, activeTabId, setActiveTab, closeTab } = useStore();
 

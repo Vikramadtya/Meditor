@@ -12,6 +12,12 @@ import GitHistoryModal from "./GitHistoryModal";
 import TagModal from "./TagModal";
 import FlashcardModal from "./FlashcardModal";
 
+/**
+ * Manager component that renders all global modals in the application.
+ * Controls the visibility of modals based on global store state.
+ *
+ * @returns {React.ReactElement} A fragment containing all modal components.
+ */
 export default function ModalManager() {
   const { isHistoryModalOpen, setHistoryModalOpen } = useStore();
 

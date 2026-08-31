@@ -5,6 +5,14 @@ import { subYears, eachDayOfInterval, format } from "date-fns";
 import { useStore } from "../../store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
+/**
+ * AnalyticsPage Component
+ *
+ * Renders an analytics dashboard for the vault, displaying overall stats,
+ * writing activity heatmap, notes by group, top tags, and SRS maturity.
+ *
+ * @returns {JSX.Element} The rendered AnalyticsPage component.
+ */
 export default function AnalyticsPage() {
   const { theme } = useStore();
   const [analytics, setAnalytics] = useState(null);
@@ -318,6 +326,18 @@ export default function AnalyticsPage() {
   );
 }
 
+/**
+ * HeroCard Component
+ *
+ * Renders a high-level summary metric with an icon.
+ *
+ * @param {Object} props - Component props.
+ * @param {React.ReactNode} props.icon - The lucide-react icon component.
+ * @param {string} props.label - Metric label.
+ * @param {number|string} props.value - Metric value.
+ * @param {string} props.color - Hex color string.
+ * @returns {JSX.Element} The rendered HeroCard.
+ */
 function HeroCard({ icon, label, value, color }) {
   return (
     <div
@@ -362,6 +382,16 @@ function HeroCard({ icon, label, value, color }) {
   );
 }
 
+/**
+ * Section Component
+ *
+ * Container component for a logical section of the analytics page.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} props.title - Section title.
+ * @param {React.ReactNode} props.children - Section content.
+ * @returns {JSX.Element} The rendered Section.
+ */
 function Section({ title, children }) {
   return (
     <div

@@ -1,3 +1,8 @@
+/**
+ * Markdown-It plugin to parse wikilinks (`[[Link]]`).
+ *
+ * @param {import("markdown-it")} md - The Markdown-It instance.
+ */
 export default function wikilinksPlugin(md) {
   const wikilinkRegex = /\[\[(.*?)\]\]/;
 

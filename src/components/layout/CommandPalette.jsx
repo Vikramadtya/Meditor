@@ -13,9 +13,15 @@ import {
   FileText,
 } from "lucide-react";
 import { useStore } from "../../store/index";
-import { exportService } from "../../services/exportService";
+import { exportService } from "../../application/editor/ExportService";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
+/**
+ * Global command palette accessible via keyboard shortcut (Cmd+K).
+ * Allows searching vault notes and executing application commands.
+ *
+ * @returns {React.ReactElement} The rendered CommandPalette modal component.
+ */
 export default function CommandPalette() {
   const {
     isCmdPaletteOpen,

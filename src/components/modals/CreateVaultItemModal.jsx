@@ -5,6 +5,12 @@ import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
+/**
+ * Modal component for creating or editing vault items (groups, collections, modules, notes).
+ * Handles user input for item details such as name, order index, and metadata.
+ *
+ * @returns {React.ReactElement|null} The create/edit vault item modal or null if not open.
+ */
 export default function CreateVaultItemModal() {
   const { createVaultItemModal, closeCreateVaultItemModal } = useStore();
   const { reloadVaultHierarchy } = useStore();

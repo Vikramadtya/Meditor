@@ -3,6 +3,12 @@
  * Pure state: no async operations or service calls here.
  */
 
+/**
+ * Creates the UI state slice.
+ *
+ * @param {Function} set - Zustand set function.
+ * @returns {Object} The UI state slice.
+ */
 export const createUISlice = (set) => ({
   // ── Editor UI ───────────────────────────────────────────────────────────
   isEditMode: false,

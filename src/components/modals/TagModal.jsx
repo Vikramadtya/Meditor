@@ -5,6 +5,12 @@ import { useStore } from "../../store/index";
 import { noteService } from "../../application/vault/NoteService";
 import toast from "react-hot-toast";
 
+/**
+ * Modal component for managing tags and scheduling agenda dates for a specific note.
+ * Allows adding, removing tags and setting an optional agenda date.
+ *
+ * @returns {React.ReactElement|null} The tag management modal or null if not open.
+ */
 export default function TagModal() {
   const {
     isTagModalOpen,

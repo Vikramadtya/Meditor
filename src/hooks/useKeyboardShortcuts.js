@@ -1,42 +1,52 @@
 import { useEffect } from "react";
-import { useStore as useUIStore } from "../store/index";
-import { useStore as useDocumentStore } from "../store/index";
+import { useStore } from "../store/index";
 
 /**
  * Global keyboard shortcut handler.
+ * Split into editor shortcuts and vault shortcuts.
  *
  * IMPORTANT: We use { capture: true } so the listener fires on the capture
  * phase — before CodeMirror or any other focused element can consume the event.
- * Without this, Cmd+S / Cmd+K never fire while the editor is focused.
  *
- * Shortcuts:
- * - Cmd+S  : Save the active file
- * - Cmd+K  : Open the Command Palette
- * - Cmd+E  : Toggle Edit / View mode
+ * @returns {void}
  */
 export function useKeyboardShortcuts() {
-  const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen } = useUIStore();
-  const { saveActiveFile } = useDocumentStore();
+  const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen, saveActiveFile } =
+    useStore();
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!(e.metaKey || e.ctrlKey)) return;
 
       switch (e.key.toLowerCase()) {
+        // --- Editor Shortcuts ---
         case "s":
           e.preventDefault();
           e.stopPropagation();
           saveActiveFile();
           break;
-        case "k":
-          e.preventDefault();
-          e.stopPropagation();
-          setCmdPaletteOpen(true);
-          break;
         case "e":
           e.preventDefault();
           e.stopPropagation();
           toggleMode();
+          break;
+        case "enter":
+          if (e.metaKey || e.ctrlKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveActiveFile();
+            const { isEditMode } = useStore.getState();
+            if (isEditMode) {
+              toggleMode();
+            }
+          }
+          break;
+
+        // --- Vault & Global Shortcuts ---
+        case "k":
+          e.preventDefault();
+          e.stopPropagation();
+          setCmdPaletteOpen(true);
           break;
         case "f":
           if (e.shiftKey) {
@@ -68,23 +78,11 @@ export function useKeyboardShortcuts() {
             document.execCommand("undo");
           }
           break;
-        case "enter":
-          if (e.metaKey || e.ctrlKey) {
-            e.preventDefault();
-            e.stopPropagation();
-            saveActiveFile();
-            const { isEditMode } = useUIStore.getState();
-            if (isEditMode) {
-              toggleMode();
-            }
-          }
-          break;
         default:
           break;
       }
     };
 
-    // capture: true = intercept before CodeMirror or any child element
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     return () =>
       window.removeEventListener("keydown", handleKeyDown, { capture: true });

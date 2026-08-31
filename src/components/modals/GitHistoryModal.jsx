@@ -8,6 +8,14 @@ import { gitService } from "../../application/git/GitService";
 import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
 import toast from "react-hot-toast";
 
+/**
+ * Modal component for viewing and restoring file history from Git commits.
+ *
+ * @param {Object} props - The component props.
+ * @param {boolean} props.isOpen - Whether the modal is visible.
+ * @param {Function} props.onClose - Callback function to close the modal.
+ * @returns {React.ReactElement|null} The Git history modal or null if not open.
+ */
 export default function GitHistoryModal({ isOpen, onClose }) {
   const {
     currentFilePath,

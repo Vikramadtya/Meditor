@@ -31,11 +31,23 @@ const MIME_MAP = {
   bmp: "image/bmp",
 };
 
+/**
+ * Determines the MIME type based on the file extension.
+ *
+ * @param {string} path - The file path.
+ * @returns {string} The computed MIME type.
+ */
 function getMimeType(path) {
   const ext = path.split(".").pop().toLowerCase();
   return MIME_MAP[ext] ?? "application/octet-stream";
 }
 
+/**
+ * Converts an ArrayBuffer to a base64 encoded string.
+ *
+ * @param {ArrayBuffer} buffer - The array buffer to convert.
+ * @returns {string} The base64 string.
+ */
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = "";
@@ -44,6 +56,13 @@ function arrayBufferToBase64(buffer) {
   return window.btoa(binary);
 }
 
+/**
+ * Resolves a relative path against a base path.
+ *
+ * @param {string} basePath - The base absolute path.
+ * @param {string} relativePath - The relative path to resolve.
+ * @returns {string} The resolved absolute path.
+ */
 function resolvePath(basePath, relativePath) {
   try {
     relativePath = decodeURIComponent(relativePath);
@@ -61,6 +80,11 @@ function resolvePath(basePath, relativePath) {
 /**
  * Patches images in FOLDER mode only.
  * Vault mode images are handled upstream inside useMarkdown.
+ *
+ * @param {import("react").RefObject<HTMLElement>} proseRef - Reference to the element containing rendered markdown.
+ * @param {string} currentFilePath - The path of the current file.
+ * @param {string} currentFolder - The current workspace folder path.
+ * @param {string} htmlContent - The rendered HTML content.
  */
 export function useImageInterceptor(
   proseRef,

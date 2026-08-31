@@ -1,9 +1,19 @@
 import React, { useState } from "react";
+import LinearNotesView from "./LinearNotesView";
 
 import { useStore } from "../../store/index";
 import { BookOpen, CircleDashed, FileText, Maximize, Plus } from "lucide-react";
 import MarkdownPreview from "../editor/MarkdownPreview";
 
+/**
+ * CollectionDashboard Component
+ *
+ * Displays the dashboard for a specific collection within the vault.
+ * Supports viewing contents as a Table of Contents (modules and notes)
+ * or a linear notes view.
+ *
+ * @returns {JSX.Element|null} The collection dashboard view, or null if no active collection.
+ */
 export default function CollectionDashboard() {
   const { activeVaultItem, openNoteFromVault } = useStore();
   const { openCreateVaultItemModal } = useStore();
@@ -336,40 +346,7 @@ export default function CollectionDashboard() {
             )}
           </div>
         ) : (
-          <div
-            style={{
-              width: "100%",
-              maxWidth: "900px",
-              backgroundColor: "var(--bg-primary)",
-              border: "1px solid var(--glass-border)",
-              borderRadius: "16px",
-              padding: "40px",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.02)",
-            }}
-          >
-            <h2
-              style={{
-                margin: "0 0 32px 0",
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                borderBottom: "1px solid var(--glass-border)",
-                paddingBottom: "16px",
-              }}
-            >
-              Linear Notes View
-            </h2>
-            <div style={{ color: "var(--text-secondary)" }}>
-              {/* We will implement reading all notes linearly later, for now just a placeholder */}
-              <p>
-                Linear notes view will compile and render all markdown notes in
-                this collection sequentially.
-              </p>
-              <p>
-                This allows you to read an entire book or course as a single
-                continuous document.
-              </p>
-            </div>
-          </div>
+          <LinearNotesView collection={activeVaultItem} />
         )}
       </div>
     </div>

@@ -19,6 +19,12 @@ import {
 } from "../Settings/SettingsStyles";
 import toast from "react-hot-toast";
 
+/**
+ * Modal component for managing Git operations within the vault.
+ * Provides UI for initializing a repository, committing changes, and syncing with a remote.
+ *
+ * @returns {React.ReactElement|null} The Git management modal or null if not open.
+ */
 export default function GitModal() {
   const { isGitModalOpen, setGitModalOpen, workspaceRoot, currentFolder } =
     useStore();

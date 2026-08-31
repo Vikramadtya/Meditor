@@ -10,6 +10,12 @@ import CustomRulesTab from "./CustomRulesTab";
 import EditorTab from "./EditorTab";
 import SystemTab from "./SystemTab";
 
+/**
+ * Main modal component for application settings.
+ * Renders a sidebar navigation and manages the currently active settings tab.
+ *
+ * @returns {React.ReactElement|null} The settings modal or null if not open.
+ */
 export default function SettingsModal() {
   const { isSettingsOpen, setSettingsOpen } = useStore();
   const [activeTab, setActiveTab] = useState("general");

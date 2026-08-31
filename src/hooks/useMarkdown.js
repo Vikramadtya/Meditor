@@ -12,6 +12,18 @@ import { useStore } from "../store/index";
 let mdInstance = null;
 let currentConfigStr = "";
 
+/**
+ * Creates and returns a MarkdownIt instance based on the provided configuration.
+ * Caches the instance and returns it if the configuration hasn't changed.
+ *
+ * @param {Object} mdConfig - Markdown configuration object.
+ * @param {string} mdConfig.dialect - The dialect to use (e.g. "commonmark").
+ * @param {boolean} mdConfig.allowHtml - Whether to allow HTML tags in markdown.
+ * @param {boolean} mdConfig.linkify - Whether to auto-convert URL-like text to links.
+ * @param {boolean} mdConfig.typographer - Whether to enable typographic replacements.
+ * @param {Array} mdConfig.customRules - Custom parsing rules.
+ * @returns {MarkdownIt} The configured MarkdownIt instance.
+ */
 function getMarkdownInstance(mdConfig) {
   const configStr = JSON.stringify(mdConfig);
   if (mdInstance && currentConfigStr === configStr) {
@@ -54,11 +66,27 @@ const MIME_MAP = {
   bmp: "image/bmp",
 };
 
+/**
+ * Determines the MIME type based on the file extension.
+ *
+ * @param {string} path - The file path or name.
+ * @returns {string} The MIME type.
+ */
 function getMimeType(path) {
   const ext = path.split(".").pop().toLowerCase();
   return MIME_MAP[ext] ?? "application/octet-stream";
 }
 
+/**
+ * Resolves an absolute path for an image source based on current context.
+ *
+ * @param {string} src - The source URL or path from the markdown.
+ * @param {string} currentFilePath - The path of the current markdown file.
+ * @param {string} currentFolder - The current workspace folder path.
+ * @param {string} workspaceMode - The mode of the workspace ("vault" or "folder").
+ * @param {string} vaultPath - The root path of the vault.
+ * @returns {string|null} The resolved absolute path, or null if resolution fails.
+ */
 function resolveAbsolutePath(
   src,
   currentFilePath,
@@ -102,6 +130,12 @@ function resolveAbsolutePath(
   return parts.join("/");
 }
 
+/**
+ * Converts an ArrayBuffer to a base64 encoded string.
+ *
+ * @param {ArrayBuffer} buffer - The array buffer to convert.
+ * @returns {string} The base64 string.
+ */
 function arrayBufferToBase64(buffer) {
   const bytes = new Uint8Array(buffer);
   let binary = "";
@@ -114,6 +148,11 @@ function arrayBufferToBase64(buffer) {
  * Given raw HTML that may contain `<img src="local/path">` tags,
  * reads every local image from disk and replaces the src with a base64
  * data URI. Returns the HTML with all images inlined.
+ *
+ * @param {string} rawHtml - The raw HTML string from Markdown parsing.
+ * @param {string} currentFilePath - The path of the current markdown file.
+ * @param {string} currentFolder - The current workspace folder path.
+ * @returns {Promise<string>} The HTML string with local images inlined as base64.
  */
 async function inlineLocalImages(rawHtml, currentFilePath, currentFolder) {
   const { workspaceMode, currentFolder: vaultPath } = useStore.getState();
@@ -195,6 +234,15 @@ async function inlineLocalImages(rawHtml, currentFilePath, currentFolder) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * Hook to parse and render Markdown content.
+ * Handles frontmatter, table of contents generation, and local image inlining.
+ *
+ * @param {string} markdown - The markdown content to parse.
+ * @param {Object} mdConfig - Configuration for the markdown parser.
+ * @param {number} [debounceMs=100] - Debounce time for rendering.
+ * @returns {{ htmlContent: string, toc: Array<{level: number, text: string}>, frontmatter: Object|null }} The rendered HTML, table of contents, and parsed frontmatter.
+ */
 export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
   const [htmlContent, setHtmlContent] = useState("");
   const [toc, setToc] = useState([]);
@@ -226,10 +274,29 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
           content = markdown.slice(fmMatch[0].length);
           const yamlString = fmMatch[1];
           parsedFm = {};
-          yamlString.split("\n").forEach((line) => {
-            const idx = line.indexOf(":");
-            if (idx > 0) {
-              parsedFm[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
+          const lines = yamlString.split("\n");
+          let currentKey = null;
+          lines.forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed) return;
+            if (trimmed.startsWith("- ") && currentKey) {
+              if (!Array.isArray(parsedFm[currentKey])) {
+                parsedFm[currentKey] = parsedFm[currentKey]
+                  ? [parsedFm[currentKey]]
+                  : [];
+              }
+              parsedFm[currentKey].push(trimmed.slice(2).trim());
+            } else {
+              const idx = line.indexOf(":");
+              if (idx > 0) {
+                currentKey = line.slice(0, idx).trim();
+                const val = line.slice(idx + 1).trim();
+                if (val) {
+                  parsedFm[currentKey] = val;
+                } else {
+                  parsedFm[currentKey] = [];
+                }
+              }
             }
           });
         }

@@ -3,6 +3,12 @@ import { Folder, FolderOpen } from "lucide-react";
 
 import { useStore } from "../../store/index";
 
+/**
+ * A welcome screen shown to the user when no workspace or vault is currently open.
+ * Prompts the user to create a vault or open a regular folder.
+ *
+ * @returns {React.ReactElement} The rendered WelcomeScreen component.
+ */
 export default function WelcomeScreen() {
   const { createVaultDialog, openWorkspaceDialog } = useStore();
   const { theme } = useStore();

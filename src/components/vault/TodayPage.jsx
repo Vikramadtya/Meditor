@@ -4,6 +4,14 @@ import { format, startOfDay } from "date-fns";
 import { useStore } from "../../store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
+/**
+ * TodayPage Component
+ *
+ * Displays the notes created or edited today.
+ * Shows an empty state if no activity has occurred today.
+ *
+ * @returns {JSX.Element} The rendered TodayPage component.
+ */
 export default function TodayPage() {
   const { openNoteFromVault, openCreateVaultItemModal } = useStore();
   const [created, setCreated] = useState([]);
@@ -103,6 +111,18 @@ export default function TodayPage() {
   );
 }
 
+/**
+ * NoteSection Component
+ *
+ * Renders a list of notes with a given title.
+ *
+ * @param {Object} props - Component props.
+ * @param {string} props.title - The section title.
+ * @param {Array<Object>} props.notes - The array of note objects.
+ * @param {function} props.onOpen - Callback when a note is clicked.
+ * @param {string} props.timeKey - The key to extract timestamp ('created_at' or 'updated_at').
+ * @returns {JSX.Element} The rendered NoteSection.
+ */
 function NoteSection({ title, notes, onOpen, timeKey }) {
   return (
     <div style={{ marginBottom: "40px" }}>
