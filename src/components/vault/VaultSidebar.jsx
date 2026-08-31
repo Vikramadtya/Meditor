@@ -411,7 +411,7 @@ function VaultGroupNode({ group }) {
                 `Are you sure you want to delete the group "${group.name}" and all its contents?`,
               )
             ) {
-              await vaultService.deleteItem("group", group.id);
+              await vaultService.deleteItem("group", group.id, true);
               if (activeVaultItem?.id === group.id) setActiveVaultItem(null);
               reloadVaultHierarchy();
             }
@@ -571,7 +571,7 @@ function VaultNode({ item, level }) {
                   `Are you sure you want to delete the collection "${item.name}" and all its contents?`,
                 )
               ) {
-                await vaultService.deleteItem("collection", item.id);
+                await vaultService.deleteItem("collection", item.id, true);
                 if (activeVaultItem?.id === item.id) setActiveVaultItem(null);
                 reloadVaultHierarchy();
               }

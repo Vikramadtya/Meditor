@@ -208,6 +208,27 @@ export class VaultService {
     return `${this.vaultPath}/${relPath}`.replace(/\/{2,}/g, "/");
   }
 
+  getModulePath(moduleId) {
+    const rel = vaultRepository.getModuleFsPath(moduleId);
+    return rel && this.vaultPath
+      ? `${this.vaultPath}/${rel}`.replace(/\/{2,}/g, "/")
+      : null;
+  }
+
+  getCollectionPath(collectionId) {
+    const rel = vaultRepository.getCollectionFsPath(collectionId);
+    return rel && this.vaultPath
+      ? `${this.vaultPath}/${rel}`.replace(/\/{2,}/g, "/")
+      : null;
+  }
+
+  getGroupPath(groupId) {
+    const rel = vaultRepository.getGroupFsPath(groupId);
+    return rel && this.vaultPath
+      ? `${this.vaultPath}/${rel}`.replace(/\/{2,}/g, "/")
+      : null;
+  }
+
   // ─── Delete operations ───────────────────────────────────────────────────
 
   async deleteItem(type, id, hard = false) {
@@ -221,11 +242,14 @@ export class VaultService {
         } catch (_) {}
       }
     } else if (type === "module") {
+      const modulePath = this.getModulePath(id);
       const noteIds = vaultRepository
         ._queryAll("SELECT id FROM notes WHERE module_id=?", [id])
         .map((r) => r.id);
       vaultRepository.deleteModule(id, noteIds);
+      if (hard && modulePath) await fileSystem.removeDirectory(modulePath);
     } else if (type === "collection") {
+      const collectionPath = this.getCollectionPath(id);
       const moduleRows = vaultRepository._queryAll(
         "SELECT id FROM modules WHERE collection_id=?",
         [id],
@@ -241,7 +265,10 @@ export class VaultService {
         moduleRows.map((r) => r.id),
         notesByModule,
       );
+      if (hard && collectionPath)
+        await fileSystem.removeDirectory(collectionPath);
     } else if (type === "group") {
+      const groupPath = this.getGroupPath(id);
       const colRows = vaultRepository._queryAll(
         "SELECT id FROM collections WHERE group_id=?",
         [id],
@@ -266,6 +293,7 @@ export class VaultService {
         modulesByCol,
         notesByModule,
       );
+      if (hard && groupPath) await fileSystem.removeDirectory(groupPath);
     }
     await this.save();
   }

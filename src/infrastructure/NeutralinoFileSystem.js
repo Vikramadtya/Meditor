@@ -242,7 +242,52 @@ export class NeutralinoFileSystem {
     return path || null;
   }
 
+  /**
+   * Removes a file.
+   * @param {string} filePath
+   */
+  async removeFile(filePath) {
+    try {
+      await window.Neutralino.filesystem.removeFile(filePath);
+      const dir = filePath.substring(0, filePath.lastIndexOf("/"));
+      this.clearDirectoryCache(dir);
+    } catch (err) {
+      this._log.warn("Failed to remove file: " + filePath, err);
+    }
+  }
+
+  /**
+   * Removes a directory.
+   * @param {string} dirPath
+   */
+  async removeDirectory(dirPath) {
+    try {
+      // Recursively delete contents first
+      try {
+        const entries =
+          await window.Neutralino.filesystem.readDirectory(dirPath);
+        for (const e of entries) {
+          if (e.entry === "." || e.entry === "..") continue;
+          const fullPath = `${dirPath}/${e.entry}`;
+          if (e.type === "DIRECTORY") {
+            await this.removeDirectory(fullPath);
+          } else {
+            await this.removeFile(fullPath);
+          }
+        }
+      } catch (err) {
+        // Might not exist
+      }
+      await window.Neutralino.filesystem.removeDirectory(dirPath);
+      const parentDir = dirPath.substring(0, dirPath.lastIndexOf("/"));
+      this.clearDirectoryCache(parentDir);
+    } catch (err) {
+      this._log.warn("Failed to remove directory: " + dirPath, err);
+    }
+  }
+
   /** @param {string} dirPath */
+
   clearDirectoryCache(dirPath) {
     this._directoryCache.delete(dirPath);
   }

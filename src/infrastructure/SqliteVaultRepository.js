@@ -716,6 +716,46 @@ export class SqliteVaultRepository {
    * @param {string} noteId
    * @returns {string|null}  relative path from vault root (no leading slash)
    */
+  getGroupFsPath(groupId) {
+    try {
+      const res = this.db.exec("SELECT name FROM groups WHERE id=?", [groupId]);
+      if (!res[0]?.values[0]) return null;
+      return `notes/${res[0].values[0][0].replace(/[/\\:*?"<>|]/g, "_")}`;
+    } catch {
+      return null;
+    }
+  }
+
+  getCollectionFsPath(collectionId) {
+    try {
+      const res = this.db.exec(
+        "SELECT g.name, c.name FROM collections c JOIN groups g ON c.group_id = g.id WHERE c.id = ?",
+        [collectionId],
+      );
+      if (!res[0]?.values[0]) return null;
+      const [g, c] = res[0].values[0];
+      const sanitize = (s) => s.replace(/[/\\:*?"<>|]/g, "_");
+      return `notes/${sanitize(g)}/${sanitize(c)}`;
+    } catch {
+      return null;
+    }
+  }
+
+  getModuleFsPath(moduleId) {
+    try {
+      const res = this.db.exec(
+        "SELECT g.name, c.name, m.name FROM modules m JOIN collections c ON m.collection_id = c.id JOIN groups g ON c.group_id = g.id WHERE m.id = ?",
+        [moduleId],
+      );
+      if (!res[0]?.values[0]) return null;
+      const [g, c, m] = res[0].values[0];
+      const sanitize = (s) => s.replace(/[/\\:*?"<>|]/g, "_");
+      return `notes/${sanitize(g)}/${sanitize(c)}/${sanitize(m)}`;
+    } catch {
+      return null;
+    }
+  }
+
   getNoteFsPath(noteId) {
     const lp = this.getLogicalPath(noteId);
     if (!lp) return null;

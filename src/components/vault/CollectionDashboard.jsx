@@ -303,6 +303,7 @@ export default function CollectionDashboard() {
                               await vaultService.deleteItem(
                                 "module",
                                 module.id,
+                                true,
                               );
                               reloadVaultHierarchy();
                             }
@@ -418,12 +419,13 @@ export default function CollectionDashboard() {
                                 e.stopPropagation();
                                 if (
                                   window.confirm(
-                                    `Move "${note.name}" to trash?`,
+                                    `Permanently delete "${note.name}"?`,
                                   )
                                 ) {
                                   await vaultService.deleteItem(
                                     "note",
                                     note.id,
+                                    true,
                                   );
                                   reloadVaultHierarchy();
                                 }
