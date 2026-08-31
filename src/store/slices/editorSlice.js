@@ -34,6 +34,7 @@ const syncFromActiveTab = (tabs, activeTabId) => {
     fileName: active.fileName,
     currentFilePath: active.currentFilePath,
     activeTabId: active.id,
+    activeVaultItem: active.vaultItem ?? null,
   };
 };
 

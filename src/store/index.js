@@ -196,7 +196,7 @@ export const useStore = create(
           return;
         }
         // Open the file first so content is ready, THEN switch the view
-        await get().openFile(fullPath, note.name);
+        await get().openFile(fullPath, note.name, note);
         set((s) => {
           s.activeVaultItem = note;
         });
@@ -230,13 +230,16 @@ export const useStore = create(
 
       // ── Editor file operations ──────────────────────────────────────────
 
-      openFile: async (fullPath, logicalName = null) => {
+      openFile: async (fullPath, logicalName = null, vaultItem = null) => {
         try {
           const { tabs } = get();
           const existing = tabs.find(
             (t) => t.id === fullPath || t.currentFilePath === fullPath,
           );
           if (existing) {
+            if (vaultItem) {
+              existing.vaultItem = vaultItem; // Update in case it changed
+            }
             get().setActiveTab(existing.id);
             set((s) => {
               s.isEditMode = false;
@@ -254,6 +257,7 @@ export const useStore = create(
             markdown: content,
             savedMarkdown: content,
             isDirty: false,
+            vaultItem,
           });
 
           // Default to view mode when opening a note
