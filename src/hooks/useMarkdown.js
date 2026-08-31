@@ -8,6 +8,8 @@ import customRulesPlugin from "../utils/markdown-it-custom-rules";
 import markdownItMkDocsTabs from "../utils/markdown-it-mkdocs-tabs";
 import wikilinksPlugin from "../utils/markdown-it-wikilinks";
 import { useStore } from "../store/index";
+import { Logger } from "../infrastructure/Logger";
+const log = Logger.forContext("useMarkdown");
 
 let mdInstance = null;
 let currentConfigStr = "";
@@ -199,7 +201,7 @@ async function inlineLocalImages(rawHtml, currentFilePath, currentFolder) {
         imageBase64Cache.set(absolutePath, `data:${mimeType};base64,${b64}`);
       } catch (err) {
         imageBase64Cache.set(absolutePath, null); // mark as failed so we don't retry
-        logger.warn(`[useMarkdown] Could not load image: ${absolutePath}`, err);
+        log.warn(`[useMarkdown] Could not load image: ${absolutePath}`, err);
       }
     }),
   );
@@ -359,7 +361,7 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
         setToc(parsedToc);
         setFrontmatter(parsedFm);
       } catch (err) {
-        logger.error("Markdown Parse Error:", err);
+        log.error("Markdown Parse Error:", err);
       }
     }, debounceMs);
 
