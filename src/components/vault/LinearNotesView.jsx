@@ -30,14 +30,7 @@ export default function LinearNotesView({ collection }) {
         const modules = collection.children || [];
 
         for (const module of modules) {
-          const isTransparent =
-            module.name === "General" ||
-            module.name === "Untitled" ||
-            module.name === "Root" ||
-            module.name === "Imported Attachments";
-          if (!isTransparent) {
-            compiledMarkdown += `## ${module.name}\n\n`;
-          }
+          compiledMarkdown += `## ${module.name}\n\n`;
           for (const note of module.children || []) {
             compiledMarkdown += `### ${note.name}\n\n`;
             try {
