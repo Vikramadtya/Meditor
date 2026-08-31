@@ -716,3 +716,14 @@ chmod +x build-mac.sh
 7. Packages the `.app` into a `.dmg` file in the `/build/` directory using `hdiutil`.
 
 You can now share the generated `build/Meditor-[version].dmg` file with others!
+
+### Code Quality & Vendor Files
+
+Meditor uses `oxlint`, `prettier`, and `husky` to maintain a strict code quality standard.
+
+> **Important:** Certain files in the repository are generated and minified by external frameworks (Vendor Files). They are intentionally excluded from linting and formatting via `.oxlintignore` and `.prettierignore`. Do **not** attempt to format or add JSDocs to these files, as it will break framework updates or runtime behavior:
+>
+> - `public/neutralino.js` (Neutralino client framework API)
+> - `public/neutralino.d.ts` (Neutralino type definitions)
+> - `public/sql-wasm.wasm` (Compiled WebAssembly binary for SQLite)
+> - `dist/*` and `build/*` (Compiled output directories)
