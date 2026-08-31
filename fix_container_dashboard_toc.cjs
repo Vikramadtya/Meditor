@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+const fs = require('fs');
+const code = `import React, { useState, useEffect } from "react";
 import { Folder, FileText, Book, LayoutGrid, List } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
@@ -16,54 +17,40 @@ function TocNode({ item, level = 0 }) {
 
   return (
     <div style={{ marginTop: level === 0 ? "16px" : "8px" }}>
-      <div
-        onClick={() =>
-          isNote ? openNoteFromVault(item) : setActiveVaultItem(item)
-        }
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          cursor: "pointer",
-          padding: "8px 12px",
+      <div 
+        onClick={() => isNote ? openNoteFromVault(item) : setActiveVaultItem(item)}
+        style={{ 
+          display: "flex", alignItems: "center", gap: "10px", 
+          cursor: "pointer", 
+          padding: "8px 12px", 
           borderRadius: "8px",
-          transition: "background 0.2s",
+          transition: "background 0.2s"
         }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "transparent")
-        }
+        onMouseEnter={e => e.currentTarget.style.backgroundColor = "var(--bg-secondary)"}
+        onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}
       >
         {isNote ? (
           <FileText size={18} style={{ color: "var(--text-secondary)" }} />
         ) : (
           <Folder size={18} style={{ color: "var(--accent)" }} />
         )}
-        <span
-          style={{
-            fontWeight: isNote ? 500 : 600,
-            fontSize: isNote ? "14px" : "15px",
-            color: isNote ? "var(--text-secondary)" : "var(--text-primary)",
-          }}
-        >
+        <span style={{ 
+          fontWeight: isNote ? 500 : 600, 
+          fontSize: isNote ? "14px" : "15px",
+          color: isNote ? "var(--text-secondary)" : "var(--text-primary)"
+        }}>
           {item.name}
         </span>
       </div>
-
+      
       {!isNote && children && children.length > 0 && (
-        <div
-          style={{
-            paddingLeft: "24px",
-            marginLeft: "21px",
-            borderLeft: "1px dashed var(--glass-border)",
-            marginTop: "4px",
-          }}
-        >
-          {children.map((child) => (
-            <TocNode key={child.id} item={child} level={level + 1} />
-          ))}
+        <div style={{ 
+          paddingLeft: "24px", 
+          marginLeft: "21px", 
+          borderLeft: "1px dashed var(--glass-border)", 
+          marginTop: "4px" 
+        }}>
+          {children.map(child => <TocNode key={child.id} item={child} level={level + 1} />)}
         </div>
       )}
     </div>
@@ -147,14 +134,9 @@ export default function ContainerDashboard() {
               gap: "6px",
               fontSize: "13px",
               fontWeight: 600,
-              backgroundColor:
-                viewMode === "grid" ? "var(--bg-primary)" : "transparent",
-              color:
-                viewMode === "grid"
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-              boxShadow:
-                viewMode === "grid" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+              backgroundColor: viewMode === "grid" ? "var(--bg-primary)" : "transparent",
+              color: viewMode === "grid" ? "var(--text-primary)" : "var(--text-secondary)",
+              boxShadow: viewMode === "grid" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
             }}
           >
             <LayoutGrid size={16} /> Grid
@@ -170,14 +152,9 @@ export default function ContainerDashboard() {
               gap: "6px",
               fontSize: "13px",
               fontWeight: 600,
-              backgroundColor:
-                viewMode === "toc" ? "var(--bg-primary)" : "transparent",
-              color:
-                viewMode === "toc"
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-              boxShadow:
-                viewMode === "toc" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+              backgroundColor: viewMode === "toc" ? "var(--bg-primary)" : "transparent",
+              color: viewMode === "toc" ? "var(--text-primary)" : "var(--text-secondary)",
+              boxShadow: viewMode === "toc" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
             }}
           >
             <List size={16} /> TOC
@@ -200,7 +177,9 @@ export default function ContainerDashboard() {
               <div
                 key={child.id}
                 onClick={() =>
-                  isNote ? openNoteFromVault(child) : setActiveVaultItem(child)
+                  isNote
+                    ? openNoteFromVault(child)
+                    : setActiveVaultItem(child)
                 }
                 style={{
                   backgroundColor: "var(--bg-secondary)",
@@ -279,7 +258,7 @@ export default function ContainerDashboard() {
                         color: "var(--text-secondary)",
                       }}
                     >
-                      {isNote ? "1 note" : `${childCount} items`}
+                      {isNote ? "1 note" : \`\${childCount} items\`}
                     </span>
                   </div>
                 </div>
@@ -289,19 +268,10 @@ export default function ContainerDashboard() {
         </div>
       ) : (
         <div style={{ maxWidth: "800px", padding: "16px 0" }}>
-          <h2
-            style={{
-              fontSize: "20px",
-              borderBottom: "1px solid var(--glass-border)",
-              paddingBottom: "16px",
-              marginBottom: "8px",
-            }}
-          >
+          <h2 style={{ fontSize: "20px", borderBottom: "1px solid var(--glass-border)", paddingBottom: "16px", marginBottom: "8px" }}>
             Table of Contents
           </h2>
-          {children.map((child) => (
-            <TocNode key={child.id} item={child} level={0} />
-          ))}
+          {children.map(child => <TocNode key={child.id} item={child} level={0} />)}
         </div>
       )}
 
@@ -313,7 +283,10 @@ export default function ContainerDashboard() {
             marginTop: "100px",
           }}
         >
-          <Folder size={48} style={{ opacity: 0.2, margin: "0 auto 16px" }} />
+          <Folder
+            size={48}
+            style={{ opacity: 0.2, margin: "0 auto 16px" }}
+          />
           <h3>This folder is empty</h3>
           <p>Create a note or subfolder from the sidebar to get started.</p>
         </div>
@@ -321,3 +294,5 @@ export default function ContainerDashboard() {
     </div>
   );
 }
+`;
+fs.writeFileSync('src/components/vault/ContainerDashboard.jsx', code);
