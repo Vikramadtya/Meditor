@@ -230,118 +230,138 @@ export default function CollectionDashboard() {
                   gap: "24px",
                 }}
               >
-                {modules.map((module) => (
-                  <div key={module.id} style={{ position: "relative" }}>
-                    {/* Module Header */}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "12px",
-                        marginBottom: "16px",
-                      }}
-                    >
-                      <CircleDashed
-                        size={20}
-                        color="#3b82f6"
-                        style={{ flexShrink: 0 }}
-                      />
-                      <h3
-                        style={{
-                          margin: 0,
-                          fontSize: "1.1rem",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {module.name}
-                      </h3>
-                      <button
-                        onClick={() =>
-                          openCreateVaultItemModal("note", module.id)
-                        }
-                        style={{
-                          marginLeft: "auto",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          padding: "4px 8px",
-                          borderRadius: "6px",
-                          border: "none",
-                          backgroundColor: "var(--bg-secondary)",
-                          color: "var(--text-secondary)",
-                          cursor: "pointer",
-                          fontSize: "11px",
-                          fontWeight: 600,
-                        }}
-                        title="Add Note to this Module"
-                      >
-                        <Plus size={12} />
-                      </button>
-                    </div>
+                {modules.map((module) => {
+                  const isTransparent =
+                    module.name === "General" ||
+                    module.name === "Untitled" ||
+                    module.name === "Root" ||
+                    module.name === "Imported Attachments";
 
-                    {/* Notes List */}
+                  return (
                     <div
+                      key={module.id}
                       style={{
-                        paddingLeft: "10px",
-                        marginLeft: "9px",
-                        borderLeft: "2px solid var(--glass-border)",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "12px",
+                        position: "relative",
+                        marginBottom: isTransparent ? "8px" : "0",
                       }}
                     >
-                      {(module.children || []).length === 0 ? (
+                      {/* Module Header */}
+                      {!isTransparent && (
                         <div
                           style={{
-                            paddingLeft: "16px",
-                            color: "var(--text-secondary)",
-                            fontSize: "13px",
-                            fontStyle: "italic",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "12px",
+                            marginBottom: "16px",
                           }}
                         >
-                          No notes in this module.
-                        </div>
-                      ) : (
-                        (module.children || []).map((note, index) => (
-                          <div
-                            key={note.id}
-                            onClick={() => openNoteFromVault(note)}
+                          <CircleDashed
+                            size={20}
+                            color="#3b82f6"
+                            style={{ flexShrink: 0 }}
+                          />
+                          <h3
                             style={{
+                              margin: 0,
+                              fontSize: "1.1rem",
+                              fontWeight: 700,
+                            }}
+                          >
+                            {module.name}
+                          </h3>
+                          <button
+                            onClick={() =>
+                              openCreateVaultItemModal("note", module.id)
+                            }
+                            style={{
+                              marginLeft: "auto",
                               display: "flex",
                               alignItems: "center",
-                              gap: "12px",
-                              paddingLeft: "16px",
-                              cursor: "pointer",
+                              gap: "6px",
+                              padding: "4px 8px",
+                              borderRadius: "6px",
+                              border: "none",
+                              backgroundColor: "var(--bg-secondary)",
                               color: "var(--text-secondary)",
-                              fontSize: "14px",
-                              transition: "color 0.2s",
+                              cursor: "pointer",
+                              fontSize: "11px",
+                              fontWeight: 600,
                             }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.color =
-                                "var(--text-primary)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.color =
-                                "var(--text-secondary)")
-                            }
+                            title="Add Note to this Module"
                           >
-                            <span
-                              style={{
-                                fontSize: "12px",
-                                opacity: 0.6,
-                                width: "16px",
-                                textAlign: "right",
-                              }}
-                            >
-                              {index + 1}.
-                            </span>
-                            <span style={{ fontWeight: 500 }}>{note.name}</span>
-                          </div>
-                        ))
+                            <Plus size={12} />
+                          </button>
+                        </div>
                       )}
+
+                      {/* Notes List */}
+                      <div
+                        style={{
+                          paddingLeft: isTransparent ? "0px" : "10px",
+                          marginLeft: isTransparent ? "0px" : "9px",
+                          borderLeft: isTransparent
+                            ? "none"
+                            : "2px solid var(--glass-border)",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "12px",
+                        }}
+                      >
+                        {(module.children || []).length === 0 ? (
+                          <div
+                            style={{
+                              paddingLeft: "16px",
+                              color: "var(--text-secondary)",
+                              fontSize: "13px",
+                              fontStyle: "italic",
+                            }}
+                          >
+                            No notes in this module.
+                          </div>
+                        ) : (
+                          (module.children || []).map((note, index) => (
+                            <div
+                              key={note.id}
+                              onClick={() => openNoteFromVault(note)}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                paddingLeft: "16px",
+                                cursor: "pointer",
+                                color: "var(--text-secondary)",
+                                fontSize: "14px",
+                                transition: "color 0.2s",
+                              }}
+                              onMouseEnter={(e) =>
+                                (e.currentTarget.style.color =
+                                  "var(--text-primary)")
+                              }
+                              onMouseLeave={(e) =>
+                                (e.currentTarget.style.color =
+                                  "var(--text-secondary)")
+                              }
+                            >
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  opacity: 0.6,
+                                  width: "16px",
+                                  textAlign: "right",
+                                }}
+                              >
+                                {index + 1}.
+                              </span>
+                              <span style={{ fontWeight: 500 }}>
+                                {note.name}
+                              </span>
+                            </div>
+                          ))
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
