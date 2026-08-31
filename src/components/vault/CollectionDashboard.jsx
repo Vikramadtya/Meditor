@@ -3,7 +3,14 @@ import LinearNotesView from "./LinearNotesView";
 
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
-import { BookOpen, CircleDashed, FileText, Maximize, Plus } from "lucide-react";
+import {
+  BookOpen,
+  CircleDashed,
+  FileText,
+  Maximize,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import MarkdownPreview from "../editor/MarkdownPreview";
 
 /**
