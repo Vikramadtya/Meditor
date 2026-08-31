@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useStore } from "../../store/index";
 import { noteService } from "../../application/vault/NoteService";
+import { vaultService } from "../../application/vault/VaultService";
 
 /**
  * VaultSidebar Component
@@ -325,8 +326,12 @@ function SidebarLink({ icon, label, isActive, onClick }) {
 function VaultGroupNode({ group }) {
   const [expanded, setExpanded] = useState(true);
   const [hovered, setHovered] = useState(false);
-  const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal } =
-    useStore();
+  const {
+    setActiveVaultItem,
+    activeVaultItem,
+    openCreateVaultItemModal,
+    reloadVaultHierarchy,
+  } = useStore();
   const isActive =
     activeVaultItem &&
     activeVaultItem.id === group.id &&
@@ -398,6 +403,31 @@ function VaultGroupNode({ group }) {
         >
           <Plus size={14} />
         </div>
+        <div
+          onClick={async (e) => {
+            e.stopPropagation();
+            if (
+              window.confirm(
+                `Are you sure you want to delete the group "${group.name}" and all its contents?`,
+              )
+            ) {
+              await vaultService.deleteItem("group", group.id);
+              if (activeVaultItem?.id === group.id) setActiveVaultItem(null);
+              reloadVaultHierarchy();
+            }
+          }}
+          style={{
+            opacity: hovered ? 1 : 0,
+            transition: "opacity 0.1s",
+            display: "flex",
+            alignItems: "center",
+            marginLeft: "4px",
+            color: "var(--error, #ff5252)",
+          }}
+          title="Delete Group"
+        >
+          <Trash2 size={13} />
+        </div>
       </div>
 
       {expanded && group.children && (
@@ -433,8 +463,12 @@ function VaultGroupNode({ group }) {
 function VaultNode({ item, level }) {
   const [expanded, setExpanded] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal } =
-    useStore();
+  const {
+    setActiveVaultItem,
+    activeVaultItem,
+    openCreateVaultItemModal,
+    reloadVaultHierarchy,
+  } = useStore();
   const isActive =
     (activeVaultItem &&
       activeVaultItem.id === item.id &&
@@ -528,6 +562,34 @@ function VaultNode({ item, level }) {
         >
           {item.name}
         </span>
+        {item.type === "collection" && (
+          <div
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (
+                window.confirm(
+                  `Are you sure you want to delete the collection "${item.name}" and all its contents?`,
+                )
+              ) {
+                await vaultService.deleteItem("collection", item.id);
+                if (activeVaultItem?.id === item.id) setActiveVaultItem(null);
+                reloadVaultHierarchy();
+              }
+            }}
+            style={{
+              opacity: hovered ? 1 : 0,
+              transition: "opacity 0.1s",
+              display: "flex",
+              alignItems: "center",
+              padding: "2px",
+              marginLeft: "4px",
+              color: "var(--error, #ff5252)",
+            }}
+            title="Delete Collection"
+          >
+            <Trash2 size={12} />
+          </div>
+        )}
 
         {nextType && (
           <div

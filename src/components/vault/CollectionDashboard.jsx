@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import LinearNotesView from "./LinearNotesView";
 
 import { useStore } from "../../store/index";
+import { vaultService } from "../../application/vault/VaultService";
 import { BookOpen, CircleDashed, FileText, Maximize, Plus } from "lucide-react";
 import MarkdownPreview from "../editor/MarkdownPreview";
 
@@ -316,26 +317,75 @@ export default function CollectionDashboard() {
                               fontSize: "14px",
                               transition: "color 0.2s",
                             }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.color =
-                                "var(--text-primary)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.color =
-                                "var(--text-secondary)")
-                            }
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.color =
+                                "var(--text-primary)";
+                              const delBtn =
+                                e.currentTarget.querySelector(
+                                  ".delete-note-btn",
+                                );
+                              if (delBtn) delBtn.style.opacity = 1;
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color =
+                                "var(--text-secondary)";
+                              const delBtn =
+                                e.currentTarget.querySelector(
+                                  ".delete-note-btn",
+                                );
+                              if (delBtn) delBtn.style.opacity = 0;
+                            }}
                           >
-                            <span
+                            <div
                               style={{
-                                fontSize: "12px",
-                                opacity: 0.6,
-                                width: "16px",
-                                textAlign: "right",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "12px",
+                                flex: 1,
                               }}
                             >
-                              {index + 1}.
-                            </span>
-                            <span style={{ fontWeight: 500 }}>{note.name}</span>
+                              <span
+                                style={{
+                                  fontSize: "12px",
+                                  opacity: 0.6,
+                                  width: "16px",
+                                  textAlign: "right",
+                                }}
+                              >
+                                {index + 1}.
+                              </span>
+                              <span style={{ fontWeight: 500 }}>
+                                {note.name}
+                              </span>
+                            </div>
+                            <div
+                              className="delete-note-btn"
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (
+                                  window.confirm(
+                                    `Move "${note.name}" to trash?`,
+                                  )
+                                ) {
+                                  await vaultService.deleteItem(
+                                    "note",
+                                    note.id,
+                                  );
+                                  reloadVaultHierarchy();
+                                }
+                              }}
+                              style={{
+                                color: "var(--error, #ff5252)",
+                                padding: "4px",
+                                opacity: 0,
+                                transition: "opacity 0.2s",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                              title="Move to Trash"
+                            >
+                              <Trash2 size={14} />
+                            </div>
                           </div>
                         ))
                       )}
