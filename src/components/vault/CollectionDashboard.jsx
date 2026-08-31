@@ -23,7 +23,8 @@ import MarkdownPreview from "../editor/MarkdownPreview";
  * @returns {JSX.Element|null} The collection dashboard view, or null if no active collection.
  */
 export default function CollectionDashboard() {
-  const { activeVaultItem, openNoteFromVault } = useStore();
+  const { activeVaultItem, openNoteFromVault, reloadVaultHierarchy } =
+    useStore();
   const { openCreateVaultItemModal } = useStore();
   const [viewMode, setViewMode] = useState("toc"); // 'toc' or 'linear'
 
@@ -263,28 +264,74 @@ export default function CollectionDashboard() {
                       >
                         {module.name}
                       </h3>
-                      <button
-                        onClick={() =>
-                          openCreateVaultItemModal("note", module.id)
-                        }
+                      <div
                         style={{
                           marginLeft: "auto",
                           display: "flex",
-                          alignItems: "center",
                           gap: "6px",
-                          padding: "4px 8px",
-                          borderRadius: "6px",
-                          border: "none",
-                          backgroundColor: "var(--bg-secondary)",
-                          color: "var(--text-secondary)",
-                          cursor: "pointer",
-                          fontSize: "11px",
-                          fontWeight: 600,
                         }}
-                        title="Add Note to this Module"
                       >
-                        <Plus size={12} />
-                      </button>
+                        <button
+                          onClick={() =>
+                            openCreateVaultItemModal("note", module.id)
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            border: "none",
+                            backgroundColor: "var(--bg-secondary)",
+                            color: "var(--text-secondary)",
+                            cursor: "pointer",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                          }}
+                          title="Add Note to this Module"
+                        >
+                          <Plus size={12} />
+                        </button>
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (
+                              window.confirm(
+                                `Are you sure you want to delete the module "${module.name}" and all its notes?`,
+                              )
+                            ) {
+                              await vaultService.deleteItem(
+                                "module",
+                                module.id,
+                              );
+                              reloadVaultHierarchy();
+                            }
+                          }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                            padding: "4px 8px",
+                            borderRadius: "6px",
+                            border: "none",
+                            backgroundColor: "var(--bg-secondary)",
+                            color: "var(--error, #ff5252)",
+                            cursor: "pointer",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            opacity: 0.5,
+                          }}
+                          onMouseEnter={(e) =>
+                            (e.currentTarget.style.opacity = 1)
+                          }
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.opacity = 0.5)
+                          }
+                          title="Delete Module"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Notes List */}
