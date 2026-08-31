@@ -26,7 +26,6 @@ export default function ModalManager() {
       <GlobalSearchModal />
       <CreateVaultItemModal />
       <TrashModal />
-      <GraphModal />
       <StatsModal />
       <GitModal />
       <GitHistoryModal
@@ -34,7 +33,6 @@ export default function ModalManager() {
         onClose={() => setHistoryModalOpen(false)}
       />
       <TagModal />
-      <FlashcardModal />
     </>
   );
 }
