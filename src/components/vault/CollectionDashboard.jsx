@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import LinearNotesView from "./LinearNotesView";
 
 import { useStore } from "../../store/index";
+import { vaultService } from "../../application/vault/VaultService";
 import { BookOpen, CircleDashed, FileText, Maximize, Plus } from "lucide-react";
 import MarkdownPreview from "../editor/MarkdownPreview";
 
@@ -190,11 +191,43 @@ export default function CollectionDashboard() {
               </h2>
 
               <button
+                onClick={async () => {
+                  let genMod = modules.find((m) => m.name === "General");
+                  if (!genMod) {
+                    const id = await vaultService.createModule(
+                      activeVaultItem.id,
+                      "General",
+                    );
+                    // Wait for state to sync if needed, or just use the ID directly
+                    openCreateVaultItemModal("note", id);
+                  } else {
+                    openCreateVaultItemModal("note", genMod.id);
+                  }
+                }}
+                style={{
+                  marginLeft: "auto",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  padding: "6px 12px",
+                  borderRadius: "8px",
+                  border: "none",
+                  backgroundColor: "var(--accent)",
+                  color: "#fff",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                }}
+              >
+                <Plus size={14} /> Add Note
+              </button>
+
+              <button
                 onClick={() =>
                   openCreateVaultItemModal("module", activeVaultItem.id)
                 }
                 style={{
-                  marginLeft: "auto",
+                  marginLeft: "8px",
                   display: "flex",
                   alignItems: "center",
                   gap: "6px",
@@ -327,38 +360,93 @@ export default function CollectionDashboard() {
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "12px",
-                                paddingLeft: "16px",
+                                paddingLeft: isTransparent ? "8px" : "16px",
+                                paddingTop: isTransparent ? "8px" : "0",
+                                paddingBottom: isTransparent ? "8px" : "0",
                                 cursor: "pointer",
-                                color: "var(--text-secondary)",
+                                color: isTransparent
+                                  ? "var(--text-primary)"
+                                  : "var(--text-secondary)",
+                                fontWeight: isTransparent ? 600 : 500,
                                 fontSize: "14px",
-                                transition: "color 0.2s",
+                                transition: "all 0.2s",
+                                backgroundColor: "transparent",
+                                borderRadius: "8px",
                               }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.color =
-                                  "var(--text-primary)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.color =
-                                  "var(--text-secondary)")
-                              }
+                              onMouseEnter={(e) => {
+                                if (isTransparent)
+                                  e.currentTarget.style.backgroundColor =
+                                    "var(--bg-secondary)";
+                                e.currentTarget.style.color =
+                                  "var(--text-primary)";
+                              }}
+                              onMouseLeave={(e) => {
+                                if (isTransparent)
+                                  e.currentTarget.style.backgroundColor =
+                                    "transparent";
+                                if (!isTransparent)
+                                  e.currentTarget.style.color =
+                                    "var(--text-secondary)";
+                              }}
                             >
-                              <span
-                                style={{
-                                  fontSize: "12px",
-                                  opacity: 0.6,
-                                  width: "16px",
-                                  textAlign: "right",
-                                }}
-                              >
-                                {index + 1}.
-                              </span>
-                              <span style={{ fontWeight: 500 }}>
-                                {note.name}
-                              </span>
+                              {isTransparent ? (
+                                <FileText
+                                  size={16}
+                                  color="var(--accent)"
+                                  style={{ flexShrink: 0 }}
+                                />
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: "12px",
+                                    opacity: 0.6,
+                                    width: "16px",
+                                    textAlign: "right",
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {index + 1}.
+                                </span>
+                              )}
+                              <span>{note.name}</span>
                             </div>
                           ))
                         )}
                       </div>
+
+                      {isTransparent && (
+                        <div
+                          onClick={() =>
+                            openCreateVaultItemModal("note", module.id)
+                          }
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            marginTop: "8px",
+                            padding: "6px 12px",
+                            color: "var(--text-secondary)",
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            cursor: "pointer",
+                            borderRadius: "6px",
+                            transition: "background 0.2s",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              "var(--bg-secondary)";
+                            e.currentTarget.style.color = "var(--text-primary)";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor =
+                              "transparent";
+                            e.currentTarget.style.color =
+                              "var(--text-secondary)";
+                          }}
+                        >
+                          <Plus size={14} /> Add another note
+                        </div>
+                      )}
                     </div>
                   );
                 })}
