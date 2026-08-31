@@ -217,7 +217,7 @@ export class VaultService {
       vaultRepository.deleteNote(id, !hard);
       if (hard && filePath) {
         try {
-          await window.Neutralino.filesystem.removeFile(filePath);
+          await fileSystem.removeFile(filePath);
         } catch (_) {}
       }
     } else if (type === "module") {
