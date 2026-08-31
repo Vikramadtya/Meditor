@@ -15,6 +15,26 @@ class VaultService {
     this._log.info("Initialized with SQL instance");
   }
 
+  async initVault(folderPath) {
+    try {
+      const SQL = await this._sqlPromise;
+      const db = new SQL.Database();
+      const exported = db.export();
+      await fileSystem.writeBinaryFile(`${folderPath}/vault.db`, exported);
+      try {
+        await window.Neutralino.filesystem.createDirectory(
+          `${folderPath}/notes`,
+        );
+      } catch (e) {
+        // directory might already exist
+      }
+      return true;
+    } catch (e) {
+      this._log.error("Failed to init vault", e);
+      return false;
+    }
+  }
+
   async loadVault(folderPath) {
     try {
       const SQL = await this._sqlPromise;
