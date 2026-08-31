@@ -16,6 +16,14 @@ export const PROSE_FONTS = [
 export const useSettingsStore = create(
   persist(
     (set) => ({
+      uiConfig: {
+        sidebarWidth: 250,
+      },
+      setUiConfig: (newConfig) =>
+        set((state) => ({
+          uiConfig: { ...state.uiConfig, ...newConfig },
+        })),
+
       editorConfig: {
         autoSaveMode: "delay", // 'manual', 'delay', 'blur'
         autoFormatOnSave: false, // Prettier formatting

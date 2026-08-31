@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useStore } from "../../store/index";
+import { useSettingsStore } from "../../store/settingsStore";
 import "../../styles/Sidebar.css";
 
 /**
@@ -12,7 +13,11 @@ import "../../styles/Sidebar.css";
  */
 export default function SidebarContainer({ children }) {
   const { isSidebarOpen } = useStore();
-  const [sidebarWidth, setSidebarWidth] = useState(250);
+  const { uiConfig, setUiConfig } = useSettingsStore();
+  const sidebarWidth = uiConfig?.sidebarWidth ?? 250;
+
+  const setSidebarWidth = (width) => setUiConfig({ sidebarWidth: width });
+
   const isDragging = useRef(false);
 
   const handleMouseDown = () => {
