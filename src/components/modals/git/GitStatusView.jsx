@@ -1,7 +1,6 @@
 import React from "react";
 import { FolderGit2, History, Cloud, Save, RefreshCw } from "lucide-react";
 import { chipStyle } from "../../Settings/SettingsStyles";
-
 export function GitStatusView({
   loading,
   isRepo,
@@ -22,10 +21,14 @@ export function GitStatusView({
       </div>
     );
   }
-
   if (!isRepo) {
     return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
+      <div
+        style={{
+          textAlign: "center",
+          padding: "20px",
+        }}
+      >
         <div
           style={{
             width: "80px",
@@ -42,7 +45,11 @@ export function GitStatusView({
           <FolderGit2 size={36} color="var(--text-secondary)" />
         </div>
         <h3
-          style={{ margin: "0 0 12px 0", fontSize: "1.1rem", fontWeight: 600 }}
+          style={{
+            margin: "0 0 12px 0",
+            fontSize: "1.1rem",
+            fontWeight: 600,
+          }}
         >
           Not Tracked
         </h3>
@@ -75,9 +82,14 @@ export function GitStatusView({
       </div>
     );
   }
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "24px",
+      }}
+    >
       <div
         style={{
           background: "var(--bg-secondary)",
@@ -95,7 +107,13 @@ export function GitStatusView({
           }}
         >
           <History size={18} color="var(--accent)" />
-          <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: "15px",
+              fontWeight: 600,
+            }}
+          >
             Local Snapshot
           </h3>
         </div>
@@ -142,7 +160,13 @@ export function GitStatusView({
           }}
         >
           <Cloud size={18} color="#8b5cf6" />
-          <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: "15px",
+              fontWeight: 600,
+            }}
+          >
             Remote Sync
           </h3>
         </div>

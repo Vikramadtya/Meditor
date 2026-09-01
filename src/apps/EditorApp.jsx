@@ -1,5 +1,4 @@
 import React from "react";
-
 import EditorPane from "../components/editor/EditorPane";
 import FloatingActionBar from "../components/layout/FloatingActionBar";
 

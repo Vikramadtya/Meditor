@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import { useModalEscape } from "../../hooks/useModalEscape";
 import React, { useState, useEffect } from "react";
 import {
@@ -31,14 +32,18 @@ import { GitCommitForm } from "./git/GitCommitForm";
  */
 export default function GitModal() {
   const repoPath = useStore(selectRepoPath);
-  const { isGitModalOpen, setGitModalOpen } = useStore();
+  const { isGitModalOpen, setGitModalOpen } = useStore(
+    useShallow((s) => ({
+      isGitModalOpen: s.isGitModalOpen,
+      setGitModalOpen: s.setGitModalOpen,
+    })),
+  );
   useModalEscape(isGitModalOpen, () => setGitModalOpen(false));
   const [isRepo, setIsRepo] = useState(false);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState("main");
   const [uncommittedChanges, setUncommittedChanges] = useState([]);
   const [commitMessage, setCommitMessage] = useState("Auto sync commit");
-
   useEffect(() => {
     if (isGitModalOpen) {
       setView("main");
@@ -46,10 +51,8 @@ export default function GitModal() {
       checkRepo();
     }
   }, [isGitModalOpen]);
-
   const checkRepo = async () => {
     setLoading(true);
-
     if (!repoPath) {
       setIsRepo(false);
       setLoading(false);
@@ -59,7 +62,6 @@ export default function GitModal() {
     setIsRepo(repoExists);
     setLoading(false);
   };
-
   const handleInit = async () => {
     try {
       await gitService.initRepo(repoPath);
@@ -69,7 +71,6 @@ export default function GitModal() {
       toast.error("Failed to initialize git");
     }
   };
-
   const handleCommitAll = async () => {
     try {
       await gitService.commitAll(repoPath, "Manual commit from Meditor");
@@ -78,36 +79,42 @@ export default function GitModal() {
       toast.error("Nothing to commit, or error occurred");
     }
   };
-
   const handleReviewSync = async () => {
-    toast.loading("Gathering changes...", { id: "sync-prep" });
+    toast.loading("Gathering changes...", {
+      id: "sync-prep",
+    });
     try {
       const changes = await gitService.getStatus(repoPath);
       setUncommittedChanges(changes);
       setView("review");
       toast.dismiss("sync-prep");
     } catch (e) {
-      toast.error("Failed to gather status", { id: "sync-prep" });
+      toast.error("Failed to gather status", {
+        id: "sync-prep",
+      });
     }
   };
-
   const handleConfirmSync = async () => {
     try {
-      toast.loading("Committing & Syncing...", { id: "sync" });
+      toast.loading("Committing & Syncing...", {
+        id: "sync",
+      });
       if (uncommittedChanges.length > 0) {
         await gitService.commitAll(repoPath, commitMessage);
       }
       await gitService.sync(repoPath);
-      toast.success("Synced successfully!", { id: "sync" });
+      toast.success("Synced successfully!", {
+        id: "sync",
+      });
       setView("main");
       setGitModalOpen(false);
     } catch (e) {
-      toast.error("Sync failed. Check remote configuration.", { id: "sync" });
+      toast.error("Sync failed. Check remote configuration.", {
+        id: "sync",
+      });
     }
   };
-
   if (!isGitModalOpen) return null;
-
   return (
     <div className="modal-overlay open" onClick={() => setGitModalOpen(false)}>
       <div
@@ -175,7 +182,11 @@ export default function GitModal() {
         </div>
 
         {view === "review" ? (
-          <div style={{ padding: "24px 32px" }}>
+          <div
+            style={{
+              padding: "24px 32px",
+            }}
+          >
             <h3
               style={{
                 margin: "0 0 8px 0",
@@ -262,7 +273,11 @@ export default function GitModal() {
             </div>
           </div>
         ) : (
-          <div style={{ padding: "32px" }}>
+          <div
+            style={{
+              padding: "32px",
+            }}
+          >
             <GitStatusView
               loading={loading}
               isRepo={isRepo}

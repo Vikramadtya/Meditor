@@ -1,20 +1,15 @@
 import React from "react";
 import { Toaster } from "react-hot-toast";
-
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useSystemEffects } from "./hooks/useSystemEffects";
-
 import Titlebar from "./components/layout/Titlebar";
 import ModalManager from "./components/modals/ModalManager";
 import RootRouter from "./routers/RootRouter";
-
 import "./styles/Modals.css";
-
 function App() {
   // Bind global side effects
   useKeyboardShortcuts();
   useSystemEffects();
-
   return (
     <>
       <Toaster
@@ -42,5 +37,4 @@ function App() {
     </>
   );
 }
-
 export default App;

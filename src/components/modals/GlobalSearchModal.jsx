@@ -1,8 +1,9 @@
+import { useShallow } from "zustand/react/shallow";
+import { openFile } from "../../store/actions/index.js";
 import { Logger } from "../../infrastructure/Logger";
 import React, { useState, useEffect } from "react";
 import { Search, FileText } from "lucide-react";
 import { useStore } from "../../store/index";
-
 import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
 
 /**
@@ -12,14 +13,20 @@ import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSy
  * @returns {React.ReactElement} The global search modal component.
  */
 export default function GlobalSearchModal() {
-  const { isGlobalSearchOpen, setGlobalSearchOpen } = useStore();
-  const { openFile } = useStore();
-  const { currentFolder } = useStore();
-
+  const { isGlobalSearchOpen, setGlobalSearchOpen } = useStore(
+    useShallow((s) => ({
+      isGlobalSearchOpen: s.isGlobalSearchOpen,
+      setGlobalSearchOpen: s.setGlobalSearchOpen,
+    })),
+  );
+  const { currentFolder } = useStore(
+    useShallow((s) => ({
+      currentFolder: s.currentFolder,
+    })),
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
-
   useEffect(() => {
     if (!isGlobalSearchOpen) {
       setSearchQuery("");
@@ -27,13 +34,11 @@ export default function GlobalSearchModal() {
       return;
     }
   }, [isGlobalSearchOpen]);
-
   useEffect(() => {
     if (!searchQuery.trim() || !currentFolder) {
       setResults([]);
       return;
     }
-
     setIsSearching(true);
 
     // Debounce search
@@ -50,15 +55,12 @@ export default function GlobalSearchModal() {
         setIsSearching(false);
       }
     }, 300);
-
     return () => clearTimeout(timer);
   }, [searchQuery, currentFolder]);
-
   const handleResultClick = (filePath) => {
     openFile(filePath);
     setGlobalSearchOpen(false);
   };
-
   return (
     <div
       className={`modal-overlay cmd-palette ${isGlobalSearchOpen ? "open" : ""}`}
@@ -83,7 +85,13 @@ export default function GlobalSearchModal() {
           />
         </div>
 
-        <div style={{ maxHeight: "400px", overflowY: "auto", padding: "8px" }}>
+        <div
+          style={{
+            maxHeight: "400px",
+            overflowY: "auto",
+            padding: "8px",
+          }}
+        >
           {isSearching && (
             <div
               style={{

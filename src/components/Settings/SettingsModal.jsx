@@ -1,8 +1,8 @@
+import { useShallow } from "zustand/react/shallow";
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import { useStore } from "../../store/index";
 import { iconBtnStyle } from "./SettingsStyles";
-
 import AppearanceTab from "./AppearanceTab";
 import TypographyTab from "./TypographyTab";
 import MarkdownTab from "./MarkdownTab";
@@ -17,11 +17,14 @@ import SystemTab from "./SystemTab";
  * @returns {React.ReactElement|null} The settings modal or null if not open.
  */
 export default function SettingsModal() {
-  const { isSettingsOpen, setSettingsOpen } = useStore();
+  const { isSettingsOpen, setSettingsOpen } = useStore(
+    useShallow((s) => ({
+      isSettingsOpen: s.isSettingsOpen,
+      setSettingsOpen: s.setSettingsOpen,
+    })),
+  );
   const [activeTab, setActiveTab] = useState("general");
-
   if (!isSettingsOpen) return null;
-
   return (
     <div className="modal-overlay open" onClick={() => setSettingsOpen(false)}>
       <div

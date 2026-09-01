@@ -1,10 +1,7 @@
 import React from "react";
-
 export function TopTagsChart({ topTags }) {
   if (!topTags || topTags.length === 0) return null;
-
   const maxCount = topTags[0][1];
-
   return (
     <div
       style={{
@@ -15,7 +12,13 @@ export function TopTagsChart({ topTags }) {
         padding: "28px",
       }}
     >
-      <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700 }}>
+      <h3
+        style={{
+          margin: "0 0 20px",
+          fontSize: "16px",
+          fontWeight: 700,
+        }}
+      >
         Top Tags
       </h3>
       <div

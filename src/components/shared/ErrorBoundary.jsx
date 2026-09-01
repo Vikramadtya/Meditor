@@ -10,23 +10,28 @@ import { AlertOctagon, RefreshCw } from "lucide-react";
 export class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+    };
   }
-
   static getDerivedStateFromError(error) {
-    return { hasError: true, error };
+    return {
+      hasError: true,
+      error,
+    };
   }
-
   componentDidCatch(error, errorInfo) {
-    this.setState({ errorInfo });
+    this.setState({
+      errorInfo,
+    });
     logger.error("React Rendering Crash:", error);
     logger.error("Component Stack:", errorInfo.componentStack);
   }
-
   handleReload = () => {
     window.location.reload();
   };
-
   render() {
     if (this.state.hasError) {
       return (
@@ -69,10 +74,21 @@ export class ErrorBoundary extends React.Component {
               }}
             >
               <AlertOctagon size={32} />
-              <h2 style={{ margin: 0 }}>Application Crash</h2>
+              <h2
+                style={{
+                  margin: 0,
+                }}
+              >
+                Application Crash
+              </h2>
             </div>
 
-            <p style={{ margin: 0, color: "var(--text-secondary)" }}>
+            <p
+              style={{
+                margin: 0,
+                color: "var(--text-secondary)",
+              }}
+            >
               An unexpected error occurred while rendering the UI. A log has
               been written to your active workspace (if one is open).
             </p>
@@ -118,7 +134,6 @@ export class ErrorBoundary extends React.Component {
         </div>
       );
     }
-
     return this.props.children;
   }
 }

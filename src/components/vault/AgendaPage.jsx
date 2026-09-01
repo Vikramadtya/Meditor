@@ -1,3 +1,4 @@
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect, useCallback } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -17,34 +18,28 @@ import toast from "react-hot-toast";
  * @returns {JSX.Element} The rendered AgendaPage component.
  */
 export default function AgendaPage() {
-  const { openNoteFromVault } = useStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [notesForDay, setNotesForDay] = useState([]);
   const [agendaDays, setAgendaDays] = useState(new Set());
-
   const loadAgendaDays = useCallback(() => {
     const days = vaultRepository.getAgendaDays();
     setAgendaDays(
       new Set(days.map((ts) => startOfDay(new Date(ts)).getTime())),
     );
   }, []);
-
   const loadNotesForDate = useCallback((date) => {
     const dayStart = startOfDay(date).getTime();
     const dayEnd = endOfDay(date).getTime();
     setNotesForDay(vaultRepository.getNotesForDate(dayStart, dayEnd));
   }, []);
-
   useEffect(() => {
     loadAgendaDays();
     loadNotesForDate(selectedDate);
   }, [loadAgendaDays, loadNotesForDate, selectedDate]);
-
   const handleDateChange = (date) => {
     setSelectedDate(date);
     loadNotesForDate(date);
   };
-
   const handleRemoveDate = async (note) => {
     vaultRepository.setNoteAgendaDate(note.id, 0);
     // Save via direct db call then re-fetch
@@ -72,10 +67,13 @@ export default function AgendaPage() {
       />
     ) : null;
   };
-
   return (
     <div
-      style={{ display: "flex", height: "100%", overflow: "hidden" }}
+      style={{
+        display: "flex",
+        height: "100%",
+        overflow: "hidden",
+      }}
       className="page-container"
     >
       {/* Left: Calendar Panel */}
@@ -97,7 +95,13 @@ export default function AgendaPage() {
           }}
         >
           <CalendarDays size={22} color="var(--accent)" />
-          <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "20px",
+              fontWeight: 800,
+            }}
+          >
             Agenda
           </h1>
         </div>
@@ -111,11 +115,28 @@ export default function AgendaPage() {
       </div>
 
       {/* Right: Notes for Selected Day */}
-      <div style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
-        <h2 style={{ margin: "0 0 8px 0", fontSize: "22px", fontWeight: 800 }}>
+      <div
+        style={{
+          flex: 1,
+          padding: "32px 40px",
+          overflowY: "auto",
+        }}
+      >
+        <h2
+          style={{
+            margin: "0 0 8px 0",
+            fontSize: "22px",
+            fontWeight: 800,
+          }}
+        >
           {format(selectedDate, "EEEE, MMMM d")}
         </h2>
-        <p style={{ margin: "0 0 28px", color: "var(--text-secondary)" }}>
+        <p
+          style={{
+            margin: "0 0 28px",
+            color: "var(--text-secondary)",
+          }}
+        >
           {notesForDay.length > 0
             ? `${notesForDay.length} note${notesForDay.length !== 1 ? "s" : ""} scheduled`
             : "No notes scheduled"}
@@ -131,13 +152,20 @@ export default function AgendaPage() {
           >
             <CalendarDays
               size={48}
-              style={{ opacity: 0.15, marginBottom: "16px" }}
+              style={{
+                opacity: 0.15,
+                marginBottom: "16px",
+              }}
             />
             <p>Add a date to notes from the Tags panel to see them here.</p>
           </div>
         ) : (
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+            }}
           >
             {notesForDay.map((note) => (
               <div
@@ -163,7 +191,13 @@ export default function AgendaPage() {
                 >
                   <FileText size={16} color="var(--accent)" />
                   <div>
-                    <div style={{ fontWeight: 600 }}>{note.name}</div>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                      }}
+                    >
+                      {note.name}
+                    </div>
                     {note.tags && (
                       <div
                         style={{

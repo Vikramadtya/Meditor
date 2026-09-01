@@ -1,12 +1,18 @@
+import { useShallow } from "zustand/react/shallow";
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { Folder, Book, LayoutGrid, List } from "lucide-react";
 import { GridCard } from "./dashboard/GridCard";
 import { TocView } from "./dashboard/TocView";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
-
 export default function ContainerDashboard() {
-  const { activeVaultItem, setActiveVaultItem, openNoteFromVault } = useStore();
+  const { activeVaultItem, setActiveVaultItem } = useStore(
+    useShallow((s) => ({
+      activeVaultItem: s.activeVaultItem,
+      setActiveVaultItem: s.setActiveVaultItem,
+    })),
+  );
   const [children, setChildren] = useState([]);
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'toc'
 
@@ -15,9 +21,7 @@ export default function ContainerDashboard() {
       vaultService.getFolderContents(activeVaultItem.path).then(setChildren);
     }
   }, [activeVaultItem]);
-
   if (!activeVaultItem) return null;
-
   return (
     <div
       style={{
@@ -36,8 +40,19 @@ export default function ContainerDashboard() {
           marginBottom: "32px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <Book size={32} style={{ color: "var(--accent)" }} />
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <Book
+            size={32}
+            style={{
+              color: "var(--accent)",
+            }}
+          />
           <div>
             <h1
               style={{
@@ -144,7 +159,13 @@ export default function ContainerDashboard() {
             marginTop: "100px",
           }}
         >
-          <Folder size={48} style={{ opacity: 0.2, margin: "0 auto 16px" }} />
+          <Folder
+            size={48}
+            style={{
+              opacity: 0.2,
+              margin: "0 auto 16px",
+            }}
+          />
           <h3>This folder is empty</h3>
           <p>Create a note or subfolder from the sidebar to get started.</p>
         </div>

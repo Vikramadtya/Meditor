@@ -11,16 +11,19 @@ import { Tag } from "lucide-react";
  */
 export default function FrontmatterBlock({ data }) {
   if (!data || Object.keys(data).length === 0) return null;
-
   const { tags, ...rest } = data;
   const tagList = Array.isArray(tags)
     ? tags
     : typeof tags === "string"
       ? tags.split(",").map((t) => t.trim())
       : [];
-
   return (
-    <div className="frontmatter-container" style={{ marginBottom: "2rem" }}>
+    <div
+      className="frontmatter-container"
+      style={{
+        marginBottom: "2rem",
+      }}
+    >
       {tagList.length > 0 && (
         <div
           style={{
@@ -34,7 +37,9 @@ export default function FrontmatterBlock({ data }) {
           <Tag
             size={16}
             color="var(--text-secondary)"
-            style={{ marginRight: "4px" }}
+            style={{
+              marginRight: "4px",
+            }}
           />
           {tagList.map((tag, i) => (
             <span
@@ -69,7 +74,11 @@ export default function FrontmatterBlock({ data }) {
           {Object.entries(rest).map(([key, value]) => (
             <div
               key={key}
-              style={{ display: "flex", marginBottom: "8px", fontSize: "14px" }}
+              style={{
+                display: "flex",
+                marginBottom: "8px",
+                fontSize: "14px",
+              }}
             >
               <div
                 style={{
@@ -83,7 +92,12 @@ export default function FrontmatterBlock({ data }) {
               >
                 {key}
               </div>
-              <div style={{ flex: 1, color: "var(--text-primary)" }}>
+              <div
+                style={{
+                  flex: 1,
+                  color: "var(--text-primary)",
+                }}
+              >
                 {Array.isArray(value)
                   ? value.join(", ")
                   : typeof value === "object"

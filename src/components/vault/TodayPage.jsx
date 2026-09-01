@@ -1,3 +1,5 @@
+import { useShallow } from "zustand/react/shallow";
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { Sun, FileText, Clock, Plus } from "lucide-react";
 import { format, startOfDay } from "date-fns";
@@ -13,10 +15,13 @@ import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
  * @returns {JSX.Element} The rendered TodayPage component.
  */
 export default function TodayPage() {
-  const { openNoteFromVault, openCreateVaultItemModal } = useStore();
+  const { openCreateVaultItemModal } = useStore(
+    useShallow((s) => ({
+      openCreateVaultItemModal: s.openCreateVaultItemModal,
+    })),
+  );
   const [created, setCreated] = useState([]);
   const [edited, setEdited] = useState([]);
-
   useEffect(() => {
     const todayStart = startOfDay(new Date()).getTime();
     // Created today
@@ -32,15 +37,22 @@ export default function TodayPage() {
     setCreated(createdNotes);
     setEdited(editedNotes);
   }, []);
-
   const isEmpty = created.length === 0 && edited.length === 0;
-
   return (
     <div
-      style={{ padding: "40px 60px", height: "100%", overflowY: "auto" }}
+      style={{
+        padding: "40px 60px",
+        height: "100%",
+        overflowY: "auto",
+      }}
       className="page-container"
     >
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: "900px",
+          margin: "0 auto",
+        }}
+      >
         {/* Header */}
         <div
           style={{
@@ -50,10 +62,22 @@ export default function TodayPage() {
             marginBottom: "32px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+            }}
+          >
             <Sun size={36} color="#f59e0b" fill="#fde68a" />
             <div>
-              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800 }}>
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: "28px",
+                  fontWeight: 800,
+                }}
+              >
                 Today
               </h1>
               <p
@@ -69,8 +93,7 @@ export default function TodayPage() {
           </div>
         </div>
 
-        {isEmpty ? (
-          /* Empty state */
+        {isEmpty /* Empty state */ ? (
           <div
             style={{
               textAlign: "center",
@@ -78,8 +101,19 @@ export default function TodayPage() {
               color: "var(--text-secondary)",
             }}
           >
-            <Sun size={64} style={{ opacity: 0.15, marginBottom: "24px" }} />
-            <h2 style={{ fontWeight: 700, fontSize: "20px" }}>
+            <Sun
+              size={64}
+              style={{
+                opacity: 0.15,
+                marginBottom: "24px",
+              }}
+            />
+            <h2
+              style={{
+                fontWeight: 700,
+                fontSize: "20px",
+              }}
+            >
               Nothing yet today
             </h2>
             <p>Notes you create or edit today will appear here.</p>
@@ -125,7 +159,11 @@ export default function TodayPage() {
  */
 function NoteSection({ title, notes, onOpen, timeKey }) {
   return (
-    <div style={{ marginBottom: "40px" }}>
+    <div
+      style={{
+        marginBottom: "40px",
+      }}
+    >
       <h2
         style={{
           fontSize: "14px",
@@ -138,7 +176,13 @@ function NoteSection({ title, notes, onOpen, timeKey }) {
       >
         {title} — {notes.length}
       </h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+        }}
+      >
         {notes.map((note) => (
           <div
             key={note.id}
@@ -155,12 +199,27 @@ function NoteSection({ title, notes, onOpen, timeKey }) {
               transition: "background 0.15s ease",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+              }}
+            >
               <FileText size={16} color="var(--accent)" />
-              <span style={{ fontWeight: 600 }}>{note.name}</span>
+              <span
+                style={{
+                  fontWeight: 600,
+                }}
+              >
+                {note.name}
+              </span>
               {note.tags && (
                 <span
-                  style={{ fontSize: "11px", color: "var(--text-secondary)" }}
+                  style={{
+                    fontSize: "11px",
+                    color: "var(--text-secondary)",
+                  }}
                 >
                   {note.tags
                     .split(",")

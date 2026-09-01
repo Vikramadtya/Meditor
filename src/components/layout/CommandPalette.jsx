@@ -1,3 +1,12 @@
+import { useShallow } from "zustand/react/shallow";
+import {
+  openNoteFromVault,
+  saveActiveFile,
+  openWorkspaceDialog,
+  createVaultDialog,
+  createNewFile,
+  createNewFolder,
+} from "../../store/actions/index.js";
 import React, { useState } from "react";
 import {
   Eye,
@@ -33,17 +42,21 @@ export default function CommandPalette() {
     toggleToc,
     setSettingsOpen,
     workspaceMode,
-    openNoteFromVault,
-    saveActiveFile,
-    openWorkspaceDialog,
-    createVaultDialog,
-    createNewFile,
-    createNewFolder,
-  } = useStore();
-
+  } = useStore(
+    useShallow((s) => ({
+      isCmdPaletteOpen: s.isCmdPaletteOpen,
+      setCmdPaletteOpen: s.setCmdPaletteOpen,
+      isEditMode: s.isEditMode,
+      toggleMode: s.toggleMode,
+      theme: s.theme,
+      setTheme: s.setTheme,
+      toggleToc: s.toggleToc,
+      setSettingsOpen: s.setSettingsOpen,
+      workspaceMode: s.workspaceMode,
+    })),
+  );
   const [cmdSearch, setCmdSearch] = useState("");
   const [noteResults, setNoteResults] = useState([]);
-
   React.useEffect(() => {
     if (
       isCmdPaletteOpen &&
@@ -55,7 +68,6 @@ export default function CommandPalette() {
       setNoteResults([]);
     }
   }, [cmdSearch, isCmdPaletteOpen, workspaceMode]);
-
   const cmdActions = [
     {
       name: "Toggle Edit/View Mode",
@@ -173,13 +185,11 @@ export default function CommandPalette() {
       },
     },
   ];
-
   const filteredCmdActions = cmdActions.filter((a) => {
     if (a.hideInVault && useStore.getState().workspaceMode === "vault")
       return false;
     return a.name.toLowerCase().includes(cmdSearch.toLowerCase());
   });
-
   return (
     <div
       className={`modal-overlay cmd-palette ${isCmdPaletteOpen ? "open" : ""}`}
@@ -203,7 +213,12 @@ export default function CommandPalette() {
             className="cmd-palette-input"
           />
         </div>
-        <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+        <div
+          style={{
+            maxHeight: "300px",
+            overflowY: "auto",
+          }}
+        >
           {noteResults.map((note, i) => (
             <div
               key={`note-${i}`}

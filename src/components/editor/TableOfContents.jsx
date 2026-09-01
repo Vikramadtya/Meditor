@@ -1,7 +1,7 @@
+import { openNoteByName } from "../../store/actions/index.js";
 import React, { useState, useEffect, useMemo } from "react";
 import { useStore } from "../../store/index";
 import { useTableOfContents } from "../../hooks/useTableOfContents";
-
 import { searchService } from "../../application/editor/SearchService.js";
 
 /**
@@ -23,13 +23,17 @@ export default function TableOfContents({ toc }) {
     setTagModalOpen,
     workspaceMode,
   } = useTableOfContents();
-
   if (!isTocOpen) return null;
-
   return (
     <div className="toc-sidebar">
       {/* Tab Header */}
-      <div style={{ display: "flex", padding: "16px", gap: "8px" }}>
+      <div
+        style={{
+          display: "flex",
+          padding: "16px",
+          gap: "8px",
+        }}
+      >
         <button
           onClick={() => setActiveTab("stats")}
           style={{
@@ -76,7 +80,12 @@ export default function TableOfContents({ toc }) {
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto" }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+        }}
+      >
         {activeTab === "outline" ? (
           <>
             <div className="toc-header">TABLE OF CONTENTS</div>
@@ -105,10 +114,17 @@ export default function TableOfContents({ toc }) {
             )}
           </>
         ) : (
-          <div style={{ padding: "0 16px" }}>
+          <div
+            style={{
+              padding: "0 16px",
+            }}
+          >
             <div
               className="toc-header"
-              style={{ paddingLeft: 0, paddingRight: 0 }}
+              style={{
+                paddingLeft: 0,
+                paddingRight: 0,
+              }}
             >
               DOCUMENT STATS
             </div>
@@ -259,13 +275,20 @@ export default function TableOfContents({ toc }) {
 
             <div
               className="toc-header"
-              style={{ paddingLeft: 0, paddingRight: 0 }}
+              style={{
+                paddingLeft: 0,
+                paddingRight: 0,
+              }}
             >
               BACKLINKS ({backlinks.length})
             </div>
             {backlinks.length > 0 ? (
               <div
-                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}
               >
                 {backlinks.map((link, i) => (
                   <div
@@ -276,12 +299,13 @@ export default function TableOfContents({ toc }) {
                       background: "var(--bg-secondary)",
                       borderRadius: "6px",
                     }}
-                    onClick={() =>
-                      useStore.getState().openNoteByName(link.name)
-                    }
+                    onClick={() => openNoteByName(link.name)}
                   >
                     <div
-                      style={{ fontWeight: 600, color: "var(--text-primary)" }}
+                      style={{
+                        fontWeight: 600,
+                        color: "var(--text-primary)",
+                      }}
                     >
                       {link.name}
                     </div>

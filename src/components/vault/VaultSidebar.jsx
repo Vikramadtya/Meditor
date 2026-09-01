@@ -1,3 +1,5 @@
+import { useShallow } from "zustand/react/shallow";
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import {
   Search,
@@ -44,7 +46,6 @@ function containsItem(node, targetItem) {
       containsItem(child, targetItem),
   );
 }
-
 export default function VaultSidebar() {
   const {
     setCommandPaletteOpen,
@@ -52,14 +53,22 @@ export default function VaultSidebar() {
     setSettingsOpen,
     setGitModalOpen,
     openCreateVaultItemModal,
-  } = useStore();
-  const {
-    vaultHierarchy,
-    setActiveVaultItem,
-    activeVaultItem,
-    openNoteFromVault,
-  } = useStore();
-
+  } = useStore(
+    useShallow((s) => ({
+      setCommandPaletteOpen: s.setCommandPaletteOpen,
+      setGraphModalOpen: s.setGraphModalOpen,
+      setSettingsOpen: s.setSettingsOpen,
+      setGitModalOpen: s.setGitModalOpen,
+      openCreateVaultItemModal: s.openCreateVaultItemModal,
+    })),
+  );
+  const { vaultHierarchy, setActiveVaultItem, activeVaultItem } = useStore(
+    useShallow((s) => ({
+      vaultHierarchy: s.vaultHierarchy,
+      setActiveVaultItem: s.setActiveVaultItem,
+      activeVaultItem: s.activeVaultItem,
+    })),
+  );
   const handleExport = async () => {
     try {
       if (window.Neutralino) {
@@ -70,7 +79,6 @@ export default function VaultSidebar() {
       }
     } catch (e) {}
   };
-
   return (
     <div
       style={{
@@ -82,7 +90,13 @@ export default function VaultSidebar() {
       }}
     >
       {/* Scrollable Top Section */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px 12px" }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "16px 12px",
+        }}
+      >
         {/* Search */}
         <div
           onClick={() => setCommandPaletteOpen(true)}
@@ -118,7 +132,11 @@ export default function VaultSidebar() {
             label="Today"
             isActive={!activeVaultItem}
             onClick={() =>
-              setActiveVaultItem({ type: "today", id: "today", name: "Today" })
+              setActiveVaultItem({
+                type: "today",
+                id: "today",
+                name: "Today",
+              })
             }
           />
           <SidebarLink
@@ -138,7 +156,11 @@ export default function VaultSidebar() {
             label="Tags"
             isActive={activeVaultItem?.type === "tags"}
             onClick={() =>
-              setActiveVaultItem({ type: "tags", id: "tags", name: "Tags" })
+              setActiveVaultItem({
+                type: "tags",
+                id: "tags",
+                name: "Tags",
+              })
             }
           />
 
@@ -169,7 +191,13 @@ export default function VaultSidebar() {
         </div>
 
         {/* Groups */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+          }}
+        >
           <div
             style={{
               display: "flex",

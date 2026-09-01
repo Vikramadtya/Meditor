@@ -12,7 +12,6 @@ import { useSettingsStore } from "../../store/settingsStore";
  */
 export default function SystemTab() {
   const { cacheLocation, setCacheLocation } = useSettingsStore();
-
   return (
     <Section label="Storage & Caching">
       <Row label="Cache Directory">
@@ -28,7 +27,10 @@ export default function SystemTab() {
             type="text"
             value={cacheLocation}
             onChange={(e) => setCacheLocation(e.target.value)}
-            style={{ ...inputStyle, flex: 1 }}
+            style={{
+              ...inputStyle,
+              flex: 1,
+            }}
             placeholder="/tmp/meditor_cache"
           />
           <button

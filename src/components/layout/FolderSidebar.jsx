@@ -1,7 +1,8 @@
+import { useShallow } from "zustand/react/shallow";
+import { createNewFile, createNewFolder } from "../../store/actions/index.js";
 import React, { useState, useRef, useEffect } from "react";
 import { Folder, FileText, FilePlus, FolderPlus } from "lucide-react";
 import { useStore } from "../../store/index";
-
 import { FileTree } from "./FileTree";
 
 /**
@@ -11,23 +12,22 @@ import { FileTree } from "./FileTree";
  * @returns {React.ReactElement|null} The rendered FolderSidebar component, or null if no folder is active.
  */
 export default function FolderSidebar() {
-  const {
-    theme,
-    currentFolder,
-    files,
-    createNewFile,
-    createNewFolder,
-    workspaceMode,
-    workspaceRoot,
-  } = useStore();
-
+  const { theme, currentFolder, files, workspaceMode, workspaceRoot } =
+    useStore(
+      useShallow((s) => ({
+        theme: s.theme,
+        currentFolder: s.currentFolder,
+        files: s.files,
+        workspaceMode: s.workspaceMode,
+        workspaceRoot: s.workspaceRoot,
+      })),
+    );
   const [creatingType, setCreatingType] = useState(null);
   const [newName, setNewName] = useState("");
   const inputRef = useRef(null);
   useEffect(() => {
     if (creatingType && inputRef.current) inputRef.current.focus();
   }, [creatingType]);
-
   const handleCreate = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
@@ -39,16 +39,19 @@ export default function FolderSidebar() {
     if (type === "file") await createNewFile(trimmed);
     else if (type === "folder") await createNewFolder(trimmed);
   };
-
   const handleInputKeyDown = (e) => {
     if (e.key === "Enter") handleCreate();
     if (e.key === "Escape") setCreatingType(null);
   };
-
   if (!currentFolder) return null;
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+      }}
+    >
       <div
         className="sidebar-header"
         style={{
@@ -70,7 +73,10 @@ export default function FolderSidebar() {
           </span>
           <div
             className="sidebar-actions"
-            style={{ display: "flex", gap: "4px" }}
+            style={{
+              display: "flex",
+              gap: "4px",
+            }}
           >
             <button
               className="sidebar-new-file-btn"
@@ -99,16 +105,28 @@ export default function FolderSidebar() {
       {creatingType && (
         <div
           className="new-file-input-row"
-          style={{ marginTop: "10px", padding: "0 10px" }}
+          style={{
+            marginTop: "10px",
+            padding: "0 10px",
+          }}
         >
           {creatingType === "folder" ? (
             <Folder
               size={13}
-              style={{ flexShrink: 0, opacity: 0.5 }}
+              style={{
+                flexShrink: 0,
+                opacity: 0.5,
+              }}
               color={theme === "light" ? "#ca8a04" : "#facc15"}
             />
           ) : (
-            <FileText size={13} style={{ flexShrink: 0, opacity: 0.5 }} />
+            <FileText
+              size={13}
+              style={{
+                flexShrink: 0,
+                opacity: 0.5,
+              }}
+            />
           )}
           <input
             ref={inputRef}
@@ -127,13 +145,20 @@ export default function FolderSidebar() {
 
       <div
         className="file-list"
-        style={{ paddingTop: "10px", flex: 1, overflowY: "auto" }}
+        style={{
+          paddingTop: "10px",
+          flex: 1,
+          overflowY: "auto",
+        }}
       >
         <FileTree
           files={
             currentFolder !== workspaceRoot
               ? [
-                  { entry: "..", type: "DIRECTORY" },
+                  {
+                    entry: "..",
+                    type: "DIRECTORY",
+                  },
                   ...files.filter((f) => f.entry !== ".."),
                 ]
               : files

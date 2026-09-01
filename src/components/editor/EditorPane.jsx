@@ -1,9 +1,9 @@
+import { useShallow } from "zustand/react/shallow";
 import React, { useEffect, useRef } from "react";
 import { useStore } from "../../store/index";
 import { useSettingsStore } from "../../store/settingsStore";
 import { useMarkdown } from "../../hooks/useMarkdown";
 import { useScrollSync } from "../../hooks/useScrollSync";
-
 import CodeEditor from "./CodeEditor";
 import MarkdownPreview from "./MarkdownPreview";
 import TableOfContents from "./TableOfContents";
@@ -18,25 +18,30 @@ import "../../styles/Editor.css";
  * @returns {React.ReactElement} The rendered EditorPane component.
  */
 export default function EditorPane() {
-  const { isEditMode, theme, viewLayout } = useStore();
-  const { markdown } = useStore();
+  const { isEditMode, theme, viewLayout } = useStore(
+    useShallow((s) => ({
+      isEditMode: s.isEditMode,
+      theme: s.theme,
+      viewLayout: s.viewLayout,
+    })),
+  );
+  const { markdown } = useStore(
+    useShallow((s) => ({
+      markdown: s.markdown,
+    })),
+  );
   const { mdConfig } = useSettingsStore();
-
   const { toc, htmlContent, frontmatter } = useMarkdown(markdown, mdConfig);
-
   const paneRef = useRef(null);
   const proseRef = useRef(null);
   const scrollRef = useRef(0);
   const isSplit = viewLayout === "split";
-
   const { handleProseScroll } = useScrollSync(isSplit, proseRef);
-
   useEffect(() => {
     if (paneRef.current) {
       paneRef.current.scrollTop = scrollRef.current;
     }
   }, [isEditMode]);
-
   return (
     <div
       style={{
@@ -61,10 +66,17 @@ export default function EditorPane() {
           <div
             className="pane-container split"
             ref={paneRef}
-            style={{ flex: 1 }}
+            style={{
+              flex: 1,
+            }}
           >
             <div className="split-pane">
-              <div className="cm-editor-container" style={{ height: "100%" }}>
+              <div
+                className="cm-editor-container"
+                style={{
+                  height: "100%",
+                }}
+              >
                 <CodeEditor theme={theme} />
               </div>
             </div>
@@ -81,7 +93,9 @@ export default function EditorPane() {
           <div
             className="pane-container fade-pane"
             ref={paneRef}
-            style={{ flex: 1 }}
+            style={{
+              flex: 1,
+            }}
           >
             {isEditMode && (
               <div className="cm-editor-container">

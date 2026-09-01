@@ -1,12 +1,16 @@
+import { useShallow } from "zustand/react/shallow";
+import { openNoteFromVault } from "../../../store/actions/index.js";
 import React from "react";
 import { Folder, FileText, Book } from "lucide-react";
 import { useStore } from "../../../store/index";
-
 export function GridCard({ child }) {
-  const { setActiveVaultItem, openNoteFromVault } = useStore();
+  const { setActiveVaultItem } = useStore(
+    useShallow((s) => ({
+      setActiveVaultItem: s.setActiveVaultItem,
+    })),
+  );
   const isNote = child.type === "note";
   const childCount = child.metadata?.children_order?.length || 0;
-
   return (
     <div
       onClick={() =>
@@ -72,7 +76,11 @@ export function GridCard({ child }) {
         >
           {child.name}
         </div>
-        <div style={{ marginTop: "16px" }}>
+        <div
+          style={{
+            marginTop: "16px",
+          }}
+        >
           <span
             style={{
               backgroundColor: "var(--bg-secondary)",

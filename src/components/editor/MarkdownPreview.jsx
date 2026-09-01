@@ -1,10 +1,10 @@
+import { openNoteByName } from "../../store/actions/index.js";
+import { useShallow } from "zustand/react/shallow";
 import React, { forwardRef, useEffect, useState } from "react";
 import FrontmatterBlock from "./FrontmatterBlock";
 import { useStore } from "../../store/index";
-
 import { searchService } from "../../application/editor/SearchService.js";
 import { Link } from "lucide-react";
-
 import { useImageInterceptor } from "../../hooks/useImageInterceptor";
 import { useMermaidRenderer } from "../../hooks/useMermaidRenderer";
 import { useMkDocsTabs } from "../../hooks/useMkDocsTabs";
@@ -25,9 +25,22 @@ import { useWikilinks } from "../../hooks/useWikilinks";
  */
 const MarkdownPreview = forwardRef(
   ({ onScroll, className, htmlContent, frontmatter }, ref) => {
-    const { theme } = useStore();
-    const { currentFolder } = useStore();
-    const { currentFilePath, fileName } = useStore();
+    const { theme } = useStore(
+      useShallow((s) => ({
+        theme: s.theme,
+      })),
+    );
+    const { currentFolder } = useStore(
+      useShallow((s) => ({
+        currentFolder: s.currentFolder,
+      })),
+    );
+    const { currentFilePath, fileName } = useStore(
+      useShallow((s) => ({
+        currentFilePath: s.currentFilePath,
+        fileName: s.fileName,
+      })),
+    );
     const [backlinks, setBacklinks] = useState([]);
 
     // Fetch backlinks when file changes
@@ -53,9 +66,7 @@ const MarkdownPreview = forwardRef(
           setBacklinks(links);
         }
       };
-
       fetchBacklinks();
-
       return () => {
         isMounted = false;
       };
@@ -67,18 +78,23 @@ const MarkdownPreview = forwardRef(
     useMkDocsTabs(ref, htmlContent);
     useInteractiveTaskLists(ref);
     useWikilinks(ref);
-
     return (
       <div
         ref={ref}
         onScroll={onScroll}
         className={className}
-        style={{ position: "relative" }}
+        style={{
+          position: "relative",
+        }}
       >
         <FrontmatterBlock data={frontmatter} />
         <div
-          dangerouslySetInnerHTML={{ __html: htmlContent }}
-          style={{ paddingBottom: backlinks.length > 0 ? "40px" : "10px" }}
+          dangerouslySetInnerHTML={{
+            __html: htmlContent,
+          }}
+          style={{
+            paddingBottom: backlinks.length > 0 ? "40px" : "10px",
+          }}
         />
 
         {backlinks.length > 0 && (
@@ -103,13 +119,17 @@ const MarkdownPreview = forwardRef(
               <Link size={16} /> Backlinks
             </h3>
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+              }}
             >
               {backlinks.map((bl, i) => (
                 <div
                   key={i}
                   className="wikilink-card"
-                  onClick={() => useStore.getState().openNoteByName(bl.name)}
+                  onClick={() => openNoteByName(bl.name)}
                   style={{
                     padding: "12px",
                     backgroundColor: "var(--bg-secondary)",
@@ -130,6 +150,5 @@ const MarkdownPreview = forwardRef(
     );
   },
 );
-
 MarkdownPreview.displayName = "MarkdownPreview";
 export default MarkdownPreview;

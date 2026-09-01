@@ -1,7 +1,7 @@
+import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { X, FileText } from "lucide-react";
 import { useStore } from "../../store/index";
-
 import "../../styles/TabsBar.css";
 
 /**
@@ -11,10 +11,15 @@ import "../../styles/TabsBar.css";
  * @returns {React.ReactElement|null} The rendered TabsBar component, or null if no tabs are open.
  */
 export default function TabsBar() {
-  const { tabs, activeTabId, setActiveTab, closeTab } = useStore();
-
+  const { tabs, activeTabId, setActiveTab, closeTab } = useStore(
+    useShallow((s) => ({
+      tabs: s.tabs,
+      activeTabId: s.activeTabId,
+      setActiveTab: s.setActiveTab,
+      closeTab: s.closeTab,
+    })),
+  );
   if (!tabs || tabs.length === 0) return null;
-
   return (
     <div className="tabs-bar">
       <div className="tabs-container">

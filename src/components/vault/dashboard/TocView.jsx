@@ -1,21 +1,28 @@
+import { useShallow } from "zustand/react/shallow";
+import { openNoteFromVault } from "../../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { Folder, FileText } from "lucide-react";
 import { useStore } from "../../../store/index";
 import { vaultService } from "../../../application/vault/VaultService";
-
 export function TocNode({ item, level = 0 }) {
-  const { setActiveVaultItem, openNoteFromVault } = useStore();
+  const { setActiveVaultItem } = useStore(
+    useShallow((s) => ({
+      setActiveVaultItem: s.setActiveVaultItem,
+    })),
+  );
   const [children, setChildren] = useState(null);
   const isNote = item.type === "note";
-
   useEffect(() => {
     if (!isNote) {
       vaultService.getFolderContents(item.path).then(setChildren);
     }
   }, [item.path, isNote]);
-
   return (
-    <div style={{ marginTop: level === 0 ? "16px" : "8px" }}>
+    <div
+      style={{
+        marginTop: level === 0 ? "16px" : "8px",
+      }}
+    >
       <div
         onClick={() =>
           isNote ? openNoteFromVault(item) : setActiveVaultItem(item)
@@ -37,9 +44,19 @@ export function TocNode({ item, level = 0 }) {
         }
       >
         {isNote ? (
-          <FileText size={18} style={{ color: "var(--text-secondary)" }} />
+          <FileText
+            size={18}
+            style={{
+              color: "var(--text-secondary)",
+            }}
+          />
         ) : (
-          <Folder size={18} style={{ color: "var(--accent)" }} />
+          <Folder
+            size={18}
+            style={{
+              color: "var(--accent)",
+            }}
+          />
         )}
         <span
           style={{
@@ -69,10 +86,14 @@ export function TocNode({ item, level = 0 }) {
     </div>
   );
 }
-
 export function TocView({ children }) {
   return (
-    <div style={{ maxWidth: "800px", padding: "16px 0" }}>
+    <div
+      style={{
+        maxWidth: "800px",
+        padding: "16px 0",
+      }}
+    >
       <h2
         style={{
           fontSize: "20px",

@@ -1,8 +1,11 @@
 import React from "react";
-
 export function GitCommitForm({ commitMessage, setCommitMessage }) {
   return (
-    <div style={{ marginBottom: "20px" }}>
+    <div
+      style={{
+        marginBottom: "20px",
+      }}
+    >
       <label
         style={{
           display: "block",

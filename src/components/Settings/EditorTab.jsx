@@ -11,7 +11,6 @@ import { useSettingsStore } from "../../store/settingsStore";
  */
 export default function EditorTab() {
   const { editorConfig, setEditorConfig } = useSettingsStore();
-
   return (
     <>
       <Section label="Saving & Formatting">
@@ -20,9 +19,16 @@ export default function EditorTab() {
           description="When should Meditor automatically save your files?"
         >
           <select
-            style={{ ...selectStyle, maxWidth: "200px" }}
+            style={{
+              ...selectStyle,
+              maxWidth: "200px",
+            }}
             value={editorConfig.autoSaveMode}
-            onChange={(e) => setEditorConfig({ autoSaveMode: e.target.value })}
+            onChange={(e) =>
+              setEditorConfig({
+                autoSaveMode: e.target.value,
+              })
+            }
           >
             <option value="delay">On typing delay (2 seconds)</option>
             <option value="blur">On blur (clicking away)</option>
@@ -33,7 +39,11 @@ export default function EditorTab() {
         <ToggleRow
           label="Auto-Format on Save (Prettier)"
           checked={editorConfig.autoFormatOnSave}
-          onChange={(checked) => setEditorConfig({ autoFormatOnSave: checked })}
+          onChange={(checked) =>
+            setEditorConfig({
+              autoFormatOnSave: checked,
+            })
+          }
         />
       </Section>
     </>

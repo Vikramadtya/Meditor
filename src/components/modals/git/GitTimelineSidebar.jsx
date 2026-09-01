@@ -1,6 +1,5 @@
 import React from "react";
 import { Clock } from "lucide-react";
-
 export function GitTimelineSidebar({
   loading,
   history,
@@ -56,7 +55,13 @@ export function GitTimelineSidebar({
           No commits found. Initialize Git and commit your vault first.
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "6px",
+          }}
+        >
           {history.map((commit) => {
             const isSelected = selectedCommit?.hash === commit.hash;
             return (
@@ -99,7 +104,12 @@ export function GitTimelineSidebar({
                   >
                     {commit.hash.substring(0, 7)}
                   </span>
-                  <span style={{ fontSize: "11px", opacity: 0.8 }}>
+                  <span
+                    style={{
+                      fontSize: "11px",
+                      opacity: 0.8,
+                    }}
+                  >
                     {new Date(commit.date).toLocaleDateString(undefined, {
                       month: "short",
                       day: "numeric",

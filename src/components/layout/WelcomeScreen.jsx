@@ -1,6 +1,10 @@
+import { useShallow } from "zustand/react/shallow";
+import {
+  createVaultDialog,
+  openWorkspaceDialog,
+} from "../../store/actions/index.js";
 import React from "react";
 import { Folder, FolderOpen } from "lucide-react";
-
 import { useStore } from "../../store/index";
 
 /**
@@ -10,11 +14,12 @@ import { useStore } from "../../store/index";
  * @returns {React.ReactElement} The rendered WelcomeScreen component.
  */
 export default function WelcomeScreen() {
-  const { createVaultDialog, openWorkspaceDialog } = useStore();
-  const { theme } = useStore();
-
+  const { theme } = useStore(
+    useShallow((s) => ({
+      theme: s.theme,
+    })),
+  );
   const isLight = theme === "light";
-
   return (
     <div
       style={{
@@ -78,7 +83,8 @@ export default function WelcomeScreen() {
             style={{
               width: "100%",
               padding: "12px",
-              backgroundColor: "#E4785C", // Coral color from screenshot
+              backgroundColor: "#E4785C",
+              // Coral color from screenshot
               color: "white",
               border: "none",
               borderRadius: "8px",

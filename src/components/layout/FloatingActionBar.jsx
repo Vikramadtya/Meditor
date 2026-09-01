@@ -1,3 +1,8 @@
+import { useShallow } from "zustand/react/shallow";
+import {
+  saveActiveFile,
+  openWorkspaceDialog,
+} from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import {
   Eye,
@@ -93,11 +98,17 @@ function EditorActions() {
     toggleToc,
     viewLayout,
     toggleLayout,
-    saveActiveFile,
-    openWorkspaceDialog,
     workspaceMode,
-  } = useStore();
-
+  } = useStore(
+    useShallow((s) => ({
+      isEditMode: s.isEditMode,
+      toggleMode: s.toggleMode,
+      toggleToc: s.toggleToc,
+      viewLayout: s.viewLayout,
+      toggleLayout: s.toggleLayout,
+      workspaceMode: s.workspaceMode,
+    })),
+  );
   return (
     <>
       <FabBtn
@@ -143,9 +154,12 @@ function EditorActions() {
  * @returns {React.ReactElement} The rendered fragment of vault note actions.
  */
 function VaultNoteActions() {
-  const { activeVaultItem } = useStore();
+  const { activeVaultItem } = useStore(
+    useShallow((s) => ({
+      activeVaultItem: s.activeVaultItem,
+    })),
+  );
   const [isFavorite, setIsFavorite] = useState(false);
-
   useEffect(() => {
     if (activeVaultItem?.id) {
       try {
@@ -157,13 +171,11 @@ function VaultNoteActions() {
       setIsFavorite(false);
     }
   }, [activeVaultItem?.id]);
-
   const handleToggleFavorite = async () => {
     if (!activeVaultItem?.id) return;
     await noteService.toggleFavorite(activeVaultItem.id);
     setIsFavorite((prev) => !prev);
   };
-
   return (
     <>
       <FabSep />
@@ -186,9 +198,13 @@ function VaultNoteActions() {
  * @returns {React.ReactElement} The rendered FloatingActionBar component.
  */
 export default function FloatingActionBar() {
-  const { setCmdPaletteOpen, setSettingsOpen } = useStore();
+  const { setCmdPaletteOpen, setSettingsOpen } = useStore(
+    useShallow((s) => ({
+      setCmdPaletteOpen: s.setCmdPaletteOpen,
+      setSettingsOpen: s.setSettingsOpen,
+    })),
+  );
   const isVaultNote = useStore(selectIsVaultNote);
-
   return (
     <div className="fab">
       <EditorActions />

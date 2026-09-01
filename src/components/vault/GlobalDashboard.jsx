@@ -1,17 +1,21 @@
+import { useShallow } from "zustand/react/shallow";
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { useStore } from "../../store/index";
 import { Folder, FileText, CalendarDays } from "lucide-react";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
-
 export default function GlobalDashboard() {
-  const { vaultHierarchy, activeVaultItem, openNoteFromVault } = useStore();
+  const { vaultHierarchy, activeVaultItem } = useStore(
+    useShallow((s) => ({
+      vaultHierarchy: s.vaultHierarchy,
+      activeVaultItem: s.activeVaultItem,
+    })),
+  );
   const [agendaNotes, setAgendaNotes] = useState([]);
-
   useEffect(() => {
     setAgendaNotes(vaultRepository.getAgendaNotes());
   }, [vaultHierarchy]);
-
   return (
     <div
       style={{
@@ -21,17 +25,43 @@ export default function GlobalDashboard() {
         backgroundColor: "var(--bg-primary)",
       }}
     >
-      <div style={{ marginBottom: "40px" }}>
-        <h1 style={{ fontSize: "28px", fontWeight: 700, margin: "0 0 8px 0" }}>
+      <div
+        style={{
+          marginBottom: "40px",
+        }}
+      >
+        <h1
+          style={{
+            fontSize: "28px",
+            fontWeight: 700,
+            margin: "0 0 8px 0",
+          }}
+        >
           Welcome back
         </h1>
-        <div style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+        <div
+          style={{
+            color: "var(--text-secondary)",
+            fontSize: "14px",
+          }}
+        >
           {format(new Date(), "EEEE, MMMM do")}
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: "40px", flexWrap: "wrap" }}>
-        <div style={{ flex: 2, minWidth: "300px" }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "40px",
+          flexWrap: "wrap",
+        }}
+      >
+        <div
+          style={{
+            flex: 2,
+            minWidth: "300px",
+          }}
+        >
           <h2
             style={{
               fontSize: "18px",
@@ -103,7 +133,12 @@ export default function GlobalDashboard() {
         </div>
 
         {/* Agenda Column */}
-        <div style={{ flex: 1, minWidth: "300px" }}>
+        <div
+          style={{
+            flex: 1,
+            minWidth: "300px",
+          }}
+        >
           <h2
             style={{
               fontSize: "18px",
@@ -114,7 +149,12 @@ export default function GlobalDashboard() {
               paddingBottom: "12px",
             }}
           >
-            <CalendarDays size={18} style={{ color: "var(--accent)" }} />
+            <CalendarDays
+              size={18}
+              style={{
+                color: "var(--accent)",
+              }}
+            />
             Agenda
           </h2>
           <div
@@ -168,7 +208,10 @@ export default function GlobalDashboard() {
                     {note.name}
                   </div>
                   <div
-                    style={{ fontSize: "12px", color: "var(--text-secondary)" }}
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-secondary)",
+                    }}
                   >
                     Due today
                   </div>

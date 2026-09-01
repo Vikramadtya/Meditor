@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import React, { useMemo } from "react";
 import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useStore } from "../../store/index";
@@ -11,18 +12,27 @@ import { selectShowDashboard } from "../../store/selectors/index";
  * @returns {React.ReactElement} The rendered Titlebar component.
  */
 export default function Titlebar() {
-  const { fileName, markdown, isSidebarOpen, toggleSidebar } = useStore();
+  const { fileName, markdown, isSidebarOpen, toggleSidebar } = useStore(
+    useShallow((s) => ({
+      fileName: s.fileName,
+      markdown: s.markdown,
+      isSidebarOpen: s.isSidebarOpen,
+      toggleSidebar: s.toggleSidebar,
+    })),
+  );
   const isDirty = useStore(selectIsDirty);
   const showDashboard = useStore(selectShowDashboard);
-
   const stats = useMemo(() => {
     const text = markdown.trim();
     const words = text ? text.split(/\s+/).length : 0;
     const chars = text.length;
     const readTime = Math.ceil(words / 200);
-    return { words, chars, readTime };
+    return {
+      words,
+      chars,
+      readTime,
+    };
   }, [markdown]);
-
   return (
     <div className="titlebar">
       <div
@@ -34,7 +44,13 @@ export default function Titlebar() {
           paddingRight: "16px",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
           <button
             onClick={toggleSidebar}
             style={{
@@ -77,7 +93,12 @@ export default function Titlebar() {
               )}
             </>
           )}
-          <span style={{ color: "var(--text-secondary)", opacity: 0.4 }}>
+          <span
+            style={{
+              color: "var(--text-secondary)",
+              opacity: 0.4,
+            }}
+          >
             Meditor
           </span>
         </div>

@@ -1,26 +1,27 @@
+import { useShallow } from "zustand/react/shallow";
+import { reloadVaultHierarchy } from "../../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { ChevronRight, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useStore } from "../../../store/index";
 import { vaultService } from "../../../application/vault/VaultService";
 import VaultNode from "./VaultNode";
-
 export default function VaultGroupNode({ group }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
-  const {
-    setActiveVaultItem,
-    activeVaultItem,
-    openCreateVaultItemModal,
-    reloadVaultHierarchy,
-  } = useStore();
+  const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal } =
+    useStore(
+      useShallow((s) => ({
+        setActiveVaultItem: s.setActiveVaultItem,
+        activeVaultItem: s.activeVaultItem,
+        openCreateVaultItemModal: s.openCreateVaultItemModal,
+      })),
+    );
   const isActive = activeVaultItem && activeVaultItem.id === group.id;
-
   const loadChildren = async () => {
     const res = await vaultService.getFolderContents(group.path);
     setChildren(res);
   };
-
   useEffect(() => {
     if (expanded) loadChildren();
   }, [expanded]);
@@ -31,7 +32,12 @@ export default function VaultGroupNode({ group }) {
   }, [group]); // if group object changes, maybe reload? Actually we need an event, but reloadVaultHierarchy will trigger top-level re-render
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <div
         onClick={() => {
           setActiveVaultItem(group);
@@ -66,7 +72,13 @@ export default function VaultGroupNode({ group }) {
         >
           {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </div>
-        <span style={{ flex: 1 }}>{group.name}</span>
+        <span
+          style={{
+            flex: 1,
+          }}
+        >
+          {group.name}
+        </span>
 
         <div
           onClick={(e) => {

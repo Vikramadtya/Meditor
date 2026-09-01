@@ -57,7 +57,6 @@ export function ToggleRow({ label, checked, onChange }) {
     </Row>
   );
 }
-
 import { chipStyle } from "./SettingsStyles";
 
 /**

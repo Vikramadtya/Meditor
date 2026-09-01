@@ -13,12 +13,17 @@ export default function CustomRulesTab() {
   const { customRules, setCustomRules } = useSettingsStore();
   const [editingId, setEditingId] = useState(null);
   const [draft, setDraft] = useState({});
-
   const handleAdd = () => {
     const newId = "rule_" + Date.now();
     setCustomRules([
       ...customRules,
-      { id: newId, name: "New Rule", regex: "", htmlTemplate: "", css: "" },
+      {
+        id: newId,
+        name: "New Rule",
+        regex: "",
+        htmlTemplate: "",
+        css: "",
+      },
     ]);
     handleEdit({
       id: newId,
@@ -28,24 +33,26 @@ export default function CustomRulesTab() {
       css: "",
     });
   };
-
   const handleEdit = (rule) => {
     setEditingId(rule.id);
     setDraft(rule);
   };
-
   const handleDelete = (id) => {
     setCustomRules(customRules.filter((r) => r.id !== id));
     if (editingId === id) setEditingId(null);
   };
-
   const handleSave = () => {
     setCustomRules(customRules.map((r) => (r.id === draft.id ? draft : r)));
     setEditingId(null);
   };
-
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -53,18 +60,33 @@ export default function CustomRulesTab() {
           alignItems: "center",
         }}
       >
-        <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>
+        <span
+          style={{
+            fontSize: "13px",
+            color: "var(--text-secondary)",
+          }}
+        >
           Define custom Markdown rules using Regex.
         </span>
         <button
           onClick={handleAdd}
-          style={{ ...chipStyle, background: "var(--accent)", color: "#fff" }}
+          style={{
+            ...chipStyle,
+            background: "var(--accent)",
+            color: "#fff",
+          }}
         >
           <Plus size={14} /> Add Rule
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+        }}
+      >
         {customRules.map((rule) => (
           <div
             key={rule.id}
@@ -85,9 +107,17 @@ export default function CustomRulesTab() {
               >
                 <input
                   value={draft.name}
-                  onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+                  onChange={(e) =>
+                    setDraft({
+                      ...draft,
+                      name: e.target.value,
+                    })
+                  }
                   placeholder="Rule Name"
-                  style={{ ...inputStyle, fontWeight: 600 }}
+                  style={{
+                    ...inputStyle,
+                    fontWeight: 600,
+                  }}
                 />
                 <div
                   style={{
@@ -108,7 +138,10 @@ export default function CustomRulesTab() {
                   <input
                     value={draft.regex}
                     onChange={(e) =>
-                      setDraft({ ...draft, regex: e.target.value })
+                      setDraft({
+                        ...draft,
+                        regex: e.target.value,
+                      })
                     }
                     placeholder="\$\$de\$\$(.*?)\$\$de\$\$"
                     style={inputStyle}
@@ -133,7 +166,10 @@ export default function CustomRulesTab() {
                   <input
                     value={draft.htmlTemplate}
                     onChange={(e) =>
-                      setDraft({ ...draft, htmlTemplate: e.target.value })
+                      setDraft({
+                        ...draft,
+                        htmlTemplate: e.target.value,
+                      })
                     }
                     placeholder="<span class='custom'>$1</span>"
                     style={inputStyle}
@@ -158,7 +194,10 @@ export default function CustomRulesTab() {
                   <textarea
                     value={draft.css}
                     onChange={(e) =>
-                      setDraft({ ...draft, css: e.target.value })
+                      setDraft({
+                        ...draft,
+                        css: e.target.value,
+                      })
                     }
                     placeholder=".custom { color: red; }"
                     style={{
@@ -213,7 +252,12 @@ export default function CustomRulesTab() {
                     gap: "2px",
                   }}
                 >
-                  <span style={{ fontWeight: 600, fontSize: "14px" }}>
+                  <span
+                    style={{
+                      fontWeight: 600,
+                      fontSize: "14px",
+                    }}
+                  >
                     {rule.name}
                   </span>
                   <span
@@ -226,7 +270,12 @@ export default function CustomRulesTab() {
                     {rule.regex}
                   </span>
                 </div>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                  }}
+                >
                   <button
                     onClick={() => handleEdit(rule)}
                     style={iconBtnStyle}
@@ -236,7 +285,10 @@ export default function CustomRulesTab() {
                   </button>
                   <button
                     onClick={() => handleDelete(rule.id)}
-                    style={{ ...iconBtnStyle, color: "var(--error, #ff5252)" }}
+                    style={{
+                      ...iconBtnStyle,
+                      color: "var(--error, #ff5252)",
+                    }}
                     title="Delete"
                   >
                     <Trash2 size={16} />

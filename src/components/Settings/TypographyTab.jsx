@@ -11,14 +11,17 @@ import { useSettingsStore, PROSE_FONTS } from "../../store/settingsStore";
  */
 export default function TypographyTab() {
   const { typography, setTypography } = useSettingsStore();
-
   return (
     <>
       <Section label="Typography">
         <Row label="Prose Font">
           <select
             value={typography.proseFont}
-            onChange={(e) => setTypography({ proseFont: e.target.value })}
+            onChange={(e) =>
+              setTypography({
+                proseFont: e.target.value,
+              })
+            }
             style={selectStyle}
           >
             {PROSE_FONTS.map((f) => (
@@ -37,7 +40,9 @@ export default function TypographyTab() {
             step={1}
             value={typography.fontSize}
             onChange={(e) =>
-              setTypography({ fontSize: Number(e.target.value) })
+              setTypography({
+                fontSize: Number(e.target.value),
+              })
             }
             style={rangeStyle}
           />
@@ -51,7 +56,9 @@ export default function TypographyTab() {
             step={0.05}
             value={typography.lineHeight}
             onChange={(e) =>
-              setTypography({ lineHeight: Number(e.target.value) })
+              setTypography({
+                lineHeight: Number(e.target.value),
+              })
             }
             style={rangeStyle}
           />
@@ -67,7 +74,9 @@ export default function TypographyTab() {
             step={40}
             value={typography.proseWidth}
             onChange={(e) =>
-              setTypography({ proseWidth: Number(e.target.value) })
+              setTypography({
+                proseWidth: Number(e.target.value),
+              })
             }
             style={rangeStyle}
           />
@@ -76,10 +85,22 @@ export default function TypographyTab() {
 
       <Section label="Heading Scale">
         {[
-          { key: "h1Scale", label: "H1" },
-          { key: "h2Scale", label: "H2" },
-          { key: "h3Scale", label: "H3" },
-          { key: "h4Scale", label: "H4" },
+          {
+            key: "h1Scale",
+            label: "H1",
+          },
+          {
+            key: "h2Scale",
+            label: "H2",
+          },
+          {
+            key: "h3Scale",
+            label: "H3",
+          },
+          {
+            key: "h4Scale",
+            label: "H4",
+          },
         ].map(({ key, label }) => (
           <Row key={key} label={`${label} (${typography[key]}×)`}>
             <input
@@ -88,7 +109,11 @@ export default function TypographyTab() {
               max={3.0}
               step={0.05}
               value={typography[key]}
-              onChange={(e) => setTypography({ [key]: Number(e.target.value) })}
+              onChange={(e) =>
+                setTypography({
+                  [key]: Number(e.target.value),
+                })
+              }
               style={rangeStyle}
             />
           </Row>
@@ -97,11 +122,20 @@ export default function TypographyTab() {
 
       <Section label="Table Style">
         <Row label="Style">
-          <div style={{ display: "flex", gap: "8px" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+            }}
+          >
             {["minimal", "bordered", "striped"].map((s) => (
               <button
                 key={s}
-                onClick={() => setTypography({ tableStyle: s })}
+                onClick={() =>
+                  setTypography({
+                    tableStyle: s,
+                  })
+                }
                 style={{
                   ...chipStyle,
                   background:

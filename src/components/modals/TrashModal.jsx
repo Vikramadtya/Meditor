@@ -1,8 +1,9 @@
+import { useShallow } from "zustand/react/shallow";
+import { reloadVaultHierarchy } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { X, Trash2, RefreshCw } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
-
 import { iconBtnStyle } from "../Settings/SettingsStyles";
 
 /**
@@ -12,25 +13,24 @@ import { iconBtnStyle } from "../Settings/SettingsStyles";
  * @returns {React.ReactElement|null} The trash modal or null if not open.
  */
 export default function TrashModal() {
-  const { isTrashModalOpen, setTrashModalOpen, reloadVaultHierarchy } =
-    useStore();
-
+  const { isTrashModalOpen, setTrashModalOpen } = useStore(
+    useShallow((s) => ({
+      isTrashModalOpen: s.isTrashModalOpen,
+      setTrashModalOpen: s.setTrashModalOpen,
+    })),
+  );
   const [deletedNotes, setDeletedNotes] = useState([]);
-
   useEffect(() => {
     if (isTrashModalOpen) {
       setDeletedNotes(vaultService.getDeletedNotes());
     }
   }, [isTrashModalOpen]);
-
   if (!isTrashModalOpen) return null;
-
   const handleRestore = async (id) => {
     await vaultService.restoreNote(id);
     setDeletedNotes(vaultService.getDeletedNotes());
     reloadVaultHierarchy();
   };
-
   const handleHardDelete = async (id) => {
     if (
       confirm(
@@ -41,7 +41,6 @@ export default function TrashModal() {
       setDeletedNotes(vaultService.getDeletedNotes());
     }
   };
-
   return (
     <div
       className="modal-overlay open"
@@ -50,7 +49,10 @@ export default function TrashModal() {
       <div
         className="modal-content"
         onClick={(e) => e.stopPropagation()}
-        style={{ width: "600px", maxWidth: "90%" }}
+        style={{
+          width: "600px",
+          maxWidth: "90%",
+        }}
       >
         <div
           style={{
@@ -78,7 +80,11 @@ export default function TrashModal() {
           </div>
         ) : (
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "10px",
+            }}
           >
             {deletedNotes.map((n) => (
               <div
@@ -94,24 +100,44 @@ export default function TrashModal() {
                 }}
               >
                 <div>
-                  <div style={{ fontWeight: 500 }}>{n.name}</div>
                   <div
-                    style={{ fontSize: "12px", color: "var(--text-secondary)" }}
+                    style={{
+                      fontWeight: 500,
+                    }}
+                  >
+                    {n.name}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "var(--text-secondary)",
+                    }}
                   >
                     Deleted {new Date(n.updated_at).toLocaleString()}
                   </div>
                 </div>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "8px",
+                  }}
+                >
                   <button
                     onClick={() => handleRestore(n.id)}
-                    style={{ ...iconBtnStyle, color: "var(--accent)" }}
+                    style={{
+                      ...iconBtnStyle,
+                      color: "var(--accent)",
+                    }}
                     title="Restore"
                   >
                     <RefreshCw size={16} />
                   </button>
                   <button
                     onClick={() => handleHardDelete(n.id)}
-                    style={{ ...iconBtnStyle, color: "var(--error, #ff5252)" }}
+                    style={{
+                      ...iconBtnStyle,
+                      color: "var(--error, #ff5252)",
+                    }}
                     title="Permanently Delete"
                   >
                     <Trash2 size={16} />

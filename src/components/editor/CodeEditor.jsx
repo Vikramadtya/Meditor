@@ -1,3 +1,5 @@
+import { autoSaveFile } from "../../store/actions/index.js";
+import { useShallow } from "zustand/react/shallow";
 import React, {
   useMemo,
   useCallback,
@@ -19,14 +21,11 @@ import { lintGutter } from "@codemirror/lint";
 import prettier from "prettier/standalone";
 import prettierMarkdown from "prettier/plugins/markdown";
 import toast from "react-hot-toast";
-
 import { useStore } from "../../store/index";
-
 import { useSettingsStore } from "../../store/settingsStore";
 import { useDragAndDrop } from "../../hooks/useDragAndDrop";
 import { Logger } from "../../infrastructure/Logger";
 const logger = Logger.forContext("App");
-
 import BubbleMenu from "./BubbleMenu";
 import { slashCommands } from "../../utils/editor/slashCommands";
 
@@ -41,10 +40,18 @@ import { slashCommands } from "../../utils/editor/slashCommands";
  * @returns {React.ReactElement} The rendered CodeEditor component.
  */
 export default function CodeEditor({ theme, height, minHeight }) {
-  const { markdown, setMarkdown } = useStore();
-  const { currentFolder } = useStore();
+  const { markdown, setMarkdown } = useStore(
+    useShallow((s) => ({
+      markdown: s.markdown,
+      setMarkdown: s.setMarkdown,
+    })),
+  );
+  const { currentFolder } = useStore(
+    useShallow((s) => ({
+      currentFolder: s.currentFolder,
+    })),
+  );
   const { mdConfig } = useSettingsStore();
-
   const editorViewRef = useRef(null);
 
   // Bubble Menu State
@@ -55,7 +62,6 @@ export default function CodeEditor({ theme, height, minHeight }) {
     from: 0,
     to: 0,
   });
-
   const dndExtension = useDragAndDrop(
     currentFolder,
     mdConfig.imageSavePath,
@@ -77,13 +83,11 @@ export default function CodeEditor({ theme, height, minHeight }) {
       logger.error("Prettier error", e);
     }
   }, [markdown, setMarkdown]);
-
   const handleFormat = useCallback((prefix, suffix) => {
     if (!editorViewRef.current) return;
     const view = editorViewRef.current;
     const selection = view.state.selection.main;
     const text = view.state.sliceDoc(selection.from, selection.to);
-
     view.dispatch({
       changes: {
         from: selection.from,
@@ -101,11 +105,19 @@ export default function CodeEditor({ theme, height, minHeight }) {
   // Setup CodeMirror extensions
   const extensions = useMemo(() => {
     const exts = [
-      EditorView.lineWrapping, // ← fills the full column width
-      cmMarkdown({ base: markdownLanguage, codeLanguages: languages }),
+      EditorView.lineWrapping,
+      // ← fills the full column width
+      cmMarkdown({
+        base: markdownLanguage,
+        codeLanguages: languages,
+      }),
       dndExtension,
-      search({ top: true }),
-      autocompletion({ override: [slashCommands] }),
+      search({
+        top: true,
+      }),
+      autocompletion({
+        override: [slashCommands],
+      }),
       lintGutter(),
     ];
     if (mdConfig.vimMode) {
@@ -141,7 +153,12 @@ export default function CodeEditor({ theme, height, minHeight }) {
             }, 0);
           } else {
             setBubbleMenu((prev) =>
-              prev.show ? { ...prev, show: false } : prev,
+              prev.show
+                ? {
+                    ...prev,
+                    show: false,
+                  }
+                : prev,
             );
           }
         }
@@ -160,15 +177,13 @@ export default function CodeEditor({ theme, height, minHeight }) {
       blur: (e) => {
         const { editorConfig } = useSettingsStore.getState();
         if (editorConfig.autoSaveMode === "blur") {
-          useStore.getState().autoSaveFile();
+          autoSaveFile();
         }
       },
     });
     exts.push(keymapExt);
-
     return exts;
   }, [dndExtension, mdConfig.vimMode, formatDocument]);
-
   return (
     <>
       <CodeMirror
@@ -180,7 +195,8 @@ export default function CodeEditor({ theme, height, minHeight }) {
         onChange={(val) => setMarkdown(val)}
         theme={theme}
         basicSetup={{
-          lineNumbers: true, // Line Numbers feature request
+          lineNumbers: true,
+          // Line Numbers feature request
           foldGutter: false,
           highlightActiveLine: false,
         }}

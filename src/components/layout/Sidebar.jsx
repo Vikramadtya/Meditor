@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { useStore } from "../../store/index";
 import SidebarContainer from "../shared/SidebarContainer";
@@ -11,8 +12,11 @@ import FolderSidebar from "./FolderSidebar";
  * @returns {React.ReactElement} The rendered Sidebar component.
  */
 export default function Sidebar() {
-  const { workspaceMode } = useStore();
-
+  const { workspaceMode } = useStore(
+    useShallow((s) => ({
+      workspaceMode: s.workspaceMode,
+    })),
+  );
   return (
     <SidebarContainer>
       {workspaceMode === "vault" ? <VaultSidebar /> : <FolderSidebar />}

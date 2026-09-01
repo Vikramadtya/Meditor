@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import React, { useState, useRef, useEffect } from "react";
 import { useStore } from "../../store/index";
 import { useSettingsStore } from "../../store/settingsStore";
@@ -12,19 +13,22 @@ import "../../styles/Sidebar.css";
  * @returns {React.ReactElement} The sidebar container.
  */
 export default function SidebarContainer({ children }) {
-  const { isSidebarOpen } = useStore();
+  const { isSidebarOpen } = useStore(
+    useShallow((s) => ({
+      isSidebarOpen: s.isSidebarOpen,
+    })),
+  );
   const { uiConfig, setUiConfig } = useSettingsStore();
   const sidebarWidth = uiConfig?.sidebarWidth ?? 250;
-
-  const setSidebarWidth = (width) => setUiConfig({ sidebarWidth: width });
-
+  const setSidebarWidth = (width) =>
+    setUiConfig({
+      sidebarWidth: width,
+    });
   const isDragging = useRef(false);
-
   const handleMouseDown = () => {
     isDragging.current = true;
     document.body.style.cursor = "col-resize";
   };
-
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (!isDragging.current) return;
@@ -41,11 +45,9 @@ export default function SidebarContainer({ children }) {
       document.removeEventListener("mouseup", handleMouseUp);
     };
   }, []);
-
   if (!isSidebarOpen) {
     return <div className="sidebar closed">{children}</div>;
   }
-
   return (
     <div
       className="sidebar"

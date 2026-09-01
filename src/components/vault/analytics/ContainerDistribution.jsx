@@ -1,10 +1,7 @@
 import React from "react";
-
 export function ContainerDistribution({ notesByGroup }) {
   if (!notesByGroup || notesByGroup.length === 0) return null;
-
   const maxGroupCount = Math.max(...notesByGroup.map((g) => g.count), 1);
-
   return (
     <div
       style={{
@@ -15,14 +12,30 @@ export function ContainerDistribution({ notesByGroup }) {
         padding: "28px",
       }}
     >
-      <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700 }}>
+      <h3
+        style={{
+          margin: "0 0 20px",
+          fontSize: "16px",
+          fontWeight: 700,
+        }}
+      >
         Notes by Group
       </h3>
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+        }}
+      >
         {notesByGroup.slice(0, 10).map((g) => (
           <div
             key={g.name}
-            style={{ display: "flex", alignItems: "center", gap: "12px" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+            }}
           >
             <span
               style={{

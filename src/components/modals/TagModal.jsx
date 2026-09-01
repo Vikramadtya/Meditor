@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import { useModalEscape } from "../../hooks/useModalEscape";
 import React, { useState, useEffect, useRef } from "react";
 import { X, Tag, Save } from "lucide-react";
@@ -19,16 +20,20 @@ export default function TagModal() {
     setTagModalOpen,
     activeVaultItem,
     setActiveVaultItem,
-  } = useStore();
+  } = useStore(
+    useShallow((s) => ({
+      isTagModalOpen: s.isTagModalOpen,
+      setTagModalOpen: s.setTagModalOpen,
+      activeVaultItem: s.activeVaultItem,
+      setActiveVaultItem: s.setActiveVaultItem,
+    })),
+  );
   useModalEscape(isTagModalOpen, () => setTagModalOpen(false));
-
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [agendaDate, setAgendaDate] = useState("");
   const tagInputRef = useRef(null);
-
   const noteId = activeVaultItem?.type === "note" ? activeVaultItem.id : null;
-
   useEffect(() => {
     if (isTagModalOpen && noteId) {
       const meta = noteService.getMeta(noteId);
@@ -41,7 +46,6 @@ export default function TagModal() {
       }
     }
   }, [isTagModalOpen, noteId]);
-
   const handleTagKeyDown = (e) => {
     if ((e.key === "Enter" || e.key === ",") && tagInput.trim()) {
       e.preventDefault();
@@ -53,9 +57,7 @@ export default function TagModal() {
       setTags((prev) => prev.slice(0, -1));
     }
   };
-
   const removeTag = (tag) => setTags((prev) => prev.filter((t) => t !== tag));
-
   const handleDone = async () => {
     if (!noteId) return;
     const existing = noteService.getMeta(noteId);
@@ -68,15 +70,15 @@ export default function TagModal() {
 
     // Update activeVaultItem in store so right sidebar updates instantly
     if (activeVaultItem) {
-      setActiveVaultItem({ ...activeVaultItem, tags: tags.join(",") });
+      setActiveVaultItem({
+        ...activeVaultItem,
+        tags: tags.join(","),
+      });
     }
-
     toast.success("Saved!");
     setTagModalOpen(false);
   };
-
   if (!isTagModalOpen) return null;
-
   return (
     <div className="modal-overlay open" onClick={() => setTagModalOpen(false)}>
       <div
@@ -125,7 +127,11 @@ export default function TagModal() {
           </button>
         </div>
 
-        <div style={{ padding: "24px" }}>
+        <div
+          style={{
+            padding: "24px",
+          }}
+        >
           <TagChipInput
             tags={tags}
             tagInput={tagInput}

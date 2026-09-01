@@ -1,29 +1,30 @@
+import { useShallow } from "zustand/react/shallow";
+import { reloadVaultHierarchy } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { FolderPlus, FileText, X } from "lucide-react";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
-
 export default function CreateVaultItemModal() {
   const {
     createVaultItemModal,
     closeCreateVaultItemModal,
-    reloadVaultHierarchy,
     setActiveVaultItem,
-  } = useStore();
+  } = useStore(
+    useShallow((s) => ({
+      createVaultItemModal: s.createVaultItemModal,
+      closeCreateVaultItemModal: s.closeCreateVaultItemModal,
+      setActiveVaultItem: s.setActiveVaultItem,
+    })),
+  );
   const [name, setName] = useState("");
-
   const { isOpen, type, parentId } = createVaultItemModal;
-
   useEffect(() => {
     if (isOpen) setName("");
   }, [isOpen]);
-
   if (!isOpen) return null;
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
-
     try {
       if (type === "note") {
         const n = await vaultService.createNote(parentId, name.trim());
@@ -39,7 +40,6 @@ export default function CreateVaultItemModal() {
       alert("Failed to create item.");
     }
   };
-
   return (
     <div
       style={{
@@ -94,14 +94,21 @@ export default function CreateVaultItemModal() {
           </h2>
           <div
             onClick={closeCreateVaultItemModal}
-            style={{ cursor: "pointer", color: "var(--text-secondary)" }}
+            style={{
+              cursor: "pointer",
+              color: "var(--text-secondary)",
+            }}
           >
             <X size={18} />
           </div>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: "20px" }}>
+          <div
+            style={{
+              marginBottom: "20px",
+            }}
+          >
             <label
               style={{
                 display: "block",
@@ -136,7 +143,11 @@ export default function CreateVaultItemModal() {
           </div>
 
           <div
-            style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: "12px",
+            }}
           >
             <button
               type="button"

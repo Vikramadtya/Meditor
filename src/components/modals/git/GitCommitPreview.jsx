@@ -1,7 +1,6 @@
 import React from "react";
 import { Columns, Eye, RotateCcw } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
-
 export function GitCommitPreview({
   selectedCommit,
   viewMode,
@@ -23,15 +22,24 @@ export function GitCommitPreview({
           color: "var(--text-secondary)",
         }}
       >
-        <Clock size={48} style={{ opacity: 0.2, marginBottom: "16px" }} />
+        <Clock
+          size={48}
+          style={{
+            opacity: 0.2,
+            marginBottom: "16px",
+          }}
+        />
         <h3>Select a revision</h3>
-        <p style={{ fontSize: "14px" }}>
+        <p
+          style={{
+            fontSize: "14px",
+          }}
+        >
           Click on a commit in the timeline to view its contents.
         </p>
       </div>
     );
   }
-
   return (
     <div
       style={{
@@ -60,12 +68,23 @@ export function GitCommitPreview({
           }}
         >
           Viewing Revision{" "}
-          <span style={{ fontFamily: "monospace", color: "#8b5cf6" }}>
+          <span
+            style={{
+              fontFamily: "monospace",
+              color: "#8b5cf6",
+            }}
+          >
             {selectedCommit.hash?.slice(0, 7)}
           </span>
         </span>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -146,7 +165,13 @@ export function GitCommitPreview({
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "0" }}>
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          padding: "0",
+        }}
+      >
         {viewMode === "preview" ? (
           <div
             style={{

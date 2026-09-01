@@ -1,6 +1,5 @@
 import React from "react";
 import { FileText } from "lucide-react";
-
 export function GitDiffViewer({ uncommittedChanges }) {
   return (
     <div
@@ -38,9 +37,20 @@ export function GitDiffViewer({ uncommittedChanges }) {
                   : "none",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
               <FileText size={16} color="var(--text-secondary)" />
-              <span style={{ fontSize: "13px", fontWeight: 500 }}>
+              <span
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 500,
+                }}
+              >
                 {change.file}
               </span>
             </div>

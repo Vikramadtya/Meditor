@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { useStore } from "../../store/index";
 import CommandPalette from "../layout/CommandPalette";
@@ -16,8 +17,12 @@ import TagModal from "./TagModal";
  * @returns {React.ReactElement} A fragment containing all modal components.
  */
 export default function ModalManager() {
-  const { isHistoryModalOpen, setHistoryModalOpen } = useStore();
-
+  const { isHistoryModalOpen, setHistoryModalOpen } = useStore(
+    useShallow((s) => ({
+      isHistoryModalOpen: s.isHistoryModalOpen,
+      setHistoryModalOpen: s.setHistoryModalOpen,
+    })),
+  );
   return (
     <>
       <CommandPalette />

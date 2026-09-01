@@ -15,12 +15,12 @@ import { createPortal } from "react-dom";
  */
 export default function BubbleMenu({ show, top, left, onFormat }) {
   if (!show) return null;
-
   return createPortal(
     <div
       style={{
         position: "fixed",
-        top: `${top - 45}px`, // Float above the selection
+        top: `${top - 45}px`,
+        // Float above the selection
         left: `${left}px`,
         transform: "translateX(-50%)",
         background: "var(--bg-glass)",
@@ -101,7 +101,6 @@ export default function BubbleMenu({ show, top, left, onFormat }) {
     document.body,
   );
 }
-
 const btnStyle = {
   background: "transparent",
   border: "none",

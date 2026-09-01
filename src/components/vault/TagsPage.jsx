@@ -1,3 +1,4 @@
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect, useCallback } from "react";
 import { Tag, FileText, Hash } from "lucide-react";
 import { useStore } from "../../store/index";
@@ -11,16 +12,13 @@ import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
  * @returns {JSX.Element} The rendered TagsPage component.
  */
 export default function TagsPage() {
-  const { openNoteFromVault } = useStore();
   const [tagsMap, setTagsMap] = useState(new Map());
   const [selectedTag, setSelectedTag] = useState(null);
-
   const loadTags = useCallback(() => {
     // Fetch all notes to build the tags map
     const notes = vaultRepository._queryAll(
       "SELECT id, name, tags FROM notes WHERE is_deleted=0 AND tags != ''",
     );
-
     const tMap = new Map();
     notes.forEach((note) => {
       if (note.tags) {
@@ -34,7 +32,6 @@ export default function TagsPage() {
         });
       }
     });
-
     setTagsMap(tMap);
 
     // Select the first tag if none selected
@@ -43,17 +40,18 @@ export default function TagsPage() {
       setSelectedTag(firstTag);
     }
   }, [selectedTag]);
-
   useEffect(() => {
     loadTags();
   }, [loadTags]);
-
   const sortedTags = Array.from(tagsMap.keys()).sort();
   const notesForSelected = selectedTag ? tagsMap.get(selectedTag) || [] : [];
-
   return (
     <div
-      style={{ display: "flex", height: "100%", overflow: "hidden" }}
+      style={{
+        display: "flex",
+        height: "100%",
+        overflow: "hidden",
+      }}
       className="page-container"
     >
       {/* Left: Tags List Panel */}
@@ -75,15 +73,34 @@ export default function TagsPage() {
           }}
         >
           <Tag size={22} color="var(--accent)" />
-          <h1 style={{ margin: 0, fontSize: "20px", fontWeight: 800 }}>Tags</h1>
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "20px",
+              fontWeight: 800,
+            }}
+          >
+            Tags
+          </h1>
         </div>
 
         {sortedTags.length === 0 ? (
-          <div style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
+          <div
+            style={{
+              color: "var(--text-secondary)",
+              fontSize: "14px",
+            }}
+          >
             No tags found in vault.
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+            }}
+          >
             {sortedTags.map((tag) => (
               <button
                 key={tag}
@@ -104,7 +121,11 @@ export default function TagsPage() {
                 }}
               >
                 <div
-                  style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
                 >
                   <Hash size={14} opacity={selectedTag === tag ? 1 : 0.5} />
                   {tag}
@@ -131,7 +152,13 @@ export default function TagsPage() {
       </div>
 
       {/* Right: Notes for Selected Tag */}
-      <div style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
+      <div
+        style={{
+          flex: 1,
+          padding: "32px 40px",
+          overflowY: "auto",
+        }}
+      >
         {selectedTag ? (
           <>
             <h2
@@ -147,13 +174,22 @@ export default function TagsPage() {
               <Hash size={28} color="var(--accent)" />
               {selectedTag}
             </h2>
-            <p style={{ margin: "0 0 28px", color: "var(--text-secondary)" }}>
+            <p
+              style={{
+                margin: "0 0 28px",
+                color: "var(--text-secondary)",
+              }}
+            >
               {notesForSelected.length} note
               {notesForSelected.length !== 1 ? "s" : ""} tagged
             </p>
 
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "10px",
+              }}
             >
               {notesForSelected.map((note) => (
                 <div
@@ -178,7 +214,13 @@ export default function TagsPage() {
                     }}
                   >
                     <FileText size={16} color="var(--accent)" />
-                    <div style={{ fontWeight: 600 }}>{note.name}</div>
+                    <div
+                      style={{
+                        fontWeight: 600,
+                      }}
+                    >
+                      {note.name}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -195,7 +237,13 @@ export default function TagsPage() {
               color: "var(--text-secondary)",
             }}
           >
-            <Tag size={64} style={{ opacity: 0.15, marginBottom: "24px" }} />
+            <Tag
+              size={64}
+              style={{
+                opacity: 0.15,
+                marginBottom: "24px",
+              }}
+            />
             <p>Select a tag to view its notes</p>
           </div>
         )}

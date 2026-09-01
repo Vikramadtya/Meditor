@@ -1,10 +1,10 @@
+import { useShallow } from "zustand/react/shallow";
 import { useModalEscape } from "../../hooks/useModalEscape";
 import React, { useState, useEffect } from "react";
 import { X, Clock, RotateCcw, Columns, Eye } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useStore } from "../../store/index";
 import { selectRepoPath } from "../../store/selectors/vault.selectors";
-
 import { gitService } from "../../application/git/GitService";
 import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
 import toast from "react-hot-toast";
@@ -20,22 +20,26 @@ import { GitCommitPreview } from "./git/GitCommitPreview";
  * @returns {React.ReactElement|null} The Git history modal or null if not open.
  */
 export default function GitHistoryModal({ isOpen, onClose }) {
-  const { currentFilePath, fileName, markdown, setMarkdown } = useStore();
+  const { currentFilePath, fileName, markdown, setMarkdown } = useStore(
+    useShallow((s) => ({
+      currentFilePath: s.currentFilePath,
+      fileName: s.fileName,
+      markdown: s.markdown,
+      setMarkdown: s.setMarkdown,
+    })),
+  );
   const [viewMode, setViewMode] = useState("diff"); // "diff" or "preview"
 
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedCommit, setSelectedCommit] = useState(null);
   const [previewContent, setPreviewContent] = useState("");
-
   const repoPath = useStore(selectRepoPath);
-
   useEffect(() => {
     if (isOpen && currentFilePath && repoPath) {
       loadHistory();
     }
   }, [isOpen, currentFilePath]);
-
   const loadHistory = async () => {
     setLoading(true);
     try {
@@ -49,7 +53,6 @@ export default function GitHistoryModal({ isOpen, onClose }) {
     }
     setLoading(false);
   };
-
   const handleSelectCommit = async (commit) => {
     setSelectedCommit(commit);
     try {
@@ -64,7 +67,6 @@ export default function GitHistoryModal({ isOpen, onClose }) {
       setPreviewContent("Failed to load content for this revision.");
     }
   };
-
   const handleRestore = async () => {
     if (confirm("Overwrite your current file with this historical version?")) {
       await fileService.writeFile(currentFilePath, previewContent);
@@ -73,9 +75,7 @@ export default function GitHistoryModal({ isOpen, onClose }) {
       onClose();
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <div className="modal-overlay open" onClick={onClose}>
       <div
@@ -140,7 +140,13 @@ export default function GitHistoryModal({ isOpen, onClose }) {
           </button>
         </div>
 
-        <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <div
+          style={{
+            display: "flex",
+            flex: 1,
+            overflow: "hidden",
+          }}
+        >
           {/* Left: Commit list */}
           <GitTimelineSidebar
             loading={loading}

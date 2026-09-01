@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import React, { useState, useEffect } from "react";
 import { ActivityCalendar } from "react-activity-calendar";
 import { BarChart2, Brain, FileText, Tag, Star, Zap } from "lucide-react";
@@ -17,14 +18,16 @@ import { TopTagsChart } from "./analytics/TopTagsChart";
  * @returns {JSX.Element} The rendered AnalyticsPage component.
  */
 export default function AnalyticsPage() {
-  const { theme } = useStore();
+  const { theme } = useStore(
+    useShallow((s) => ({
+      theme: s.theme,
+    })),
+  );
   const [analytics, setAnalytics] = useState(null);
   const [heatmapData, setHeatmapData] = useState([]);
-
   useEffect(() => {
     const data = vaultRepository.getAnalytics();
     setAnalytics(data);
-
     if (data?.editCounts) {
       const days = eachDayOfInterval({
         start: subYears(new Date(), 1),
@@ -34,12 +37,15 @@ export default function AnalyticsPage() {
         days.map((d) => {
           const key = format(d, "yyyy-MM-dd");
           const count = data.editCounts[key] ?? 0;
-          return { date: key, count, level: Math.min(count, 4) };
+          return {
+            date: key,
+            count,
+            level: Math.min(count, 4),
+          };
         }),
       );
     }
   }, []);
-
   if (!analytics)
     return (
       <div
@@ -53,22 +59,28 @@ export default function AnalyticsPage() {
         Loading...
       </div>
     );
-
   const topTags = Object.entries(analytics.tagCounts ?? {})
     .sort(([, a], [, b]) => b - a)
     .slice(0, 20);
-
   const maxGroupCount = Math.max(
     ...(analytics.notesByGroup?.map((g) => g.count) ?? [1]),
     1,
   );
-
   return (
     <div
-      style={{ padding: "40px 60px", height: "100%", overflowY: "auto" }}
+      style={{
+        padding: "40px 60px",
+        height: "100%",
+        overflowY: "auto",
+      }}
       className="page-container"
     >
-      <div style={{ maxWidth: "1000px", margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: "1000px",
+          margin: "0 auto",
+        }}
+      >
         {/* Header */}
         <div
           style={{
@@ -80,10 +92,21 @@ export default function AnalyticsPage() {
         >
           <BarChart2 size={36} color="var(--accent)" />
           <div>
-            <h1 style={{ margin: 0, fontSize: "28px", fontWeight: 800 }}>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: "28px",
+                fontWeight: 800,
+              }}
+            >
               Analytics
             </h1>
-            <p style={{ margin: 0, color: "var(--text-secondary)" }}>
+            <p
+              style={{
+                margin: 0,
+                color: "var(--text-secondary)",
+              }}
+            >
               Your knowledge base at a glance
             </p>
           </div>
@@ -203,7 +226,13 @@ function Section({ title, children }) {
         padding: "28px",
       }}
     >
-      <h3 style={{ margin: "0 0 20px", fontSize: "16px", fontWeight: 700 }}>
+      <h3
+        style={{
+          margin: "0 0 20px",
+          fontSize: "16px",
+          fontWeight: 700,
+        }}
+      >
         {title}
       </h3>
       {children}

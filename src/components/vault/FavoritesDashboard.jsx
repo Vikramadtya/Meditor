@@ -1,3 +1,4 @@
+import { openNoteFromVault } from "../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import { useStore } from "../../store/index";
 import { Star, FileText } from "lucide-react";
@@ -11,13 +12,10 @@ import { noteService } from "../../application/vault/NoteService";
  * @returns {JSX.Element} The rendered FavoritesDashboard component.
  */
 export default function FavoritesDashboard() {
-  const { openNoteFromVault } = useStore();
   const [favorites, setFavorites] = useState([]);
-
   useEffect(() => {
     setFavorites(noteService.getFavoriteNotes());
   }, []);
-
   return (
     <div
       style={{
@@ -27,7 +25,12 @@ export default function FavoritesDashboard() {
         boxSizing: "border-box",
       }}
     >
-      <div style={{ maxWidth: "800px", margin: "0 auto" }}>
+      <div
+        style={{
+          maxWidth: "800px",
+          margin: "0 auto",
+        }}
+      >
         <header
           style={{
             marginBottom: "32px",
@@ -57,9 +60,20 @@ export default function FavoritesDashboard() {
               color: "var(--text-secondary)",
             }}
           >
-            <Star size={48} style={{ opacity: 0.2, marginBottom: "16px" }} />
+            <Star
+              size={48}
+              style={{
+                opacity: 0.2,
+                marginBottom: "16px",
+              }}
+            />
             <p>No favorites yet.</p>
-            <p style={{ fontSize: "13px", opacity: 0.7 }}>
+            <p
+              style={{
+                fontSize: "13px",
+                opacity: 0.7,
+              }}
+            >
               Star notes to see them here.
             </p>
           </div>

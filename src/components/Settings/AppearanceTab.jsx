@@ -1,3 +1,4 @@
+import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { Moon, Sun } from "lucide-react";
 import { Section, Row, ThemeBtn } from "./SettingsUI";
@@ -10,12 +11,21 @@ import { useStore } from "../../store/index";
  * @returns {React.ReactElement} The appearance settings tab component.
  */
 export default function AppearanceTab() {
-  const { theme, setTheme } = useStore();
-
+  const { theme, setTheme } = useStore(
+    useShallow((s) => ({
+      theme: s.theme,
+      setTheme: s.setTheme,
+    })),
+  );
   return (
     <Section label="Appearance">
       <Row label="Theme">
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+          }}
+        >
           <ThemeBtn
             active={theme === "dark"}
             onClick={() => setTheme("dark")}

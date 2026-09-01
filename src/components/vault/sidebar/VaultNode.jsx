@@ -1,3 +1,8 @@
+import { useShallow } from "zustand/react/shallow";
+import {
+  openNoteFromVault,
+  reloadVaultHierarchy,
+} from "../../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
 import {
   Circle,
@@ -10,39 +15,39 @@ import {
 } from "lucide-react";
 import { useStore } from "../../../store/index";
 import { vaultService } from "../../../application/vault/VaultService";
-
 export default function VaultNode({ item, level }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
-
-  const {
-    activeVaultItem,
-    setActiveVaultItem,
-    openCreateVaultItemModal,
-    openNoteFromVault,
-    reloadVaultHierarchy,
-  } = useStore();
+  const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal } =
+    useStore(
+      useShallow((s) => ({
+        activeVaultItem: s.activeVaultItem,
+        setActiveVaultItem: s.setActiveVaultItem,
+        openCreateVaultItemModal: s.openCreateVaultItemModal,
+      })),
+    );
   const isActive = activeVaultItem?.id === item.id;
   const isNote = item.type === "note";
-
   const loadChildren = async () => {
     if (isNote) return;
     const res = await vaultService.getFolderContents(item.path);
     setChildren(res);
   };
-
   useEffect(() => {
     if (expanded && !isNote) loadChildren();
   }, [expanded]);
-
   let Icon = FileText;
   if (!isNote) {
     Icon = expanded ? Circle : CircleDashed;
   }
-
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <div
         onClick={() => {
           if (isNote) {
@@ -107,7 +112,10 @@ export default function VaultNode({ item, level }) {
               setExpanded(true);
               openCreateVaultItemModal("container", item.path);
             }}
-            style={{ display: "flex", alignItems: "center" }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+            }}
           >
             <Plus size={14} />
           </div>

@@ -1,3 +1,5 @@
+import { useShallow } from "zustand/react/shallow";
+import { openFileFromSidebar } from "../../store/actions/index.js";
 import React from "react";
 import { Folder, FileText, CornerLeftUp } from "lucide-react";
 import { useStore } from "../../store/index";
@@ -10,8 +12,11 @@ import { useStore } from "../../store/index";
  * @returns {React.ReactElement} The rendered file tree fragment.
  */
 export function FileTree({ files }) {
-  const { theme, openFileFromSidebar } = useStore();
-
+  const { theme } = useStore(
+    useShallow((s) => ({
+      theme: s.theme,
+    })),
+  );
   return (
     <>
       {files.map((file, i) => {
