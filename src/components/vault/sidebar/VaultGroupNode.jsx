@@ -24,12 +24,13 @@ export default function VaultGroupNode({ group }) {
   };
   useEffect(() => {
     if (expanded) loadChildren();
-  }, [expanded]);
-
-  // Handle reloads globally
-  useEffect(() => {
-    if (expanded) loadChildren();
-  }, [group]); // if group object changes, maybe reload? Actually we need an event, but reloadVaultHierarchy will trigger top-level re-render
+    const unsub = vaultService.subscribe((changedPath) => {
+      if (!changedPath || changedPath === group.path) {
+        if (expanded) loadChildren();
+      }
+    });
+    return unsub;
+  }, [expanded, group.path]);
 
   return (
     <div

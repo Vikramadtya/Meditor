@@ -4,7 +4,8 @@ import { selectShowDashboard } from "../store/selectors/index";
 
 import Sidebar from "../components/layout/Sidebar";
 import VaultApp from "../apps/VaultApp";
-import EditorApp from "../apps/EditorApp";
+import { lazy, Suspense } from "react";
+const EditorApp = lazy(() => import("../apps/EditorApp"));
 
 /**
  * Handles routing between different workspace modalities (Vault vs Folder vs Editor)
@@ -20,7 +21,11 @@ export default function WorkspaceRouter() {
       {workspaceMode === "vault" && showDashboard ? (
         <VaultApp />
       ) : (
-        <EditorApp />
+        <Suspense
+          fallback={<div style={{ padding: 40 }}>Loading Editor...</div>}
+        >
+          <EditorApp />
+        </Suspense>
       )}
     </>
   );

@@ -10,6 +10,16 @@ class VaultService {
     this.vaultPath = null;
     this._sqlPromise = initSqlJs({ locateFile: () => wasmUrl });
     this.isSyncing = false;
+    this.listeners = new Set();
+  }
+
+  subscribe(callback) {
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
+
+  notify(path = null) {
+    this.listeners.forEach((cb) => cb(path));
   }
 
   async init(sqlPromise) {
@@ -307,6 +317,7 @@ class VaultService {
       metadata: meta,
     });
     await this.saveVault();
+    this.notify(parentRelPath);
     return meta;
   }
 
@@ -326,6 +337,7 @@ class VaultService {
       updated_at: Date.now(),
     });
     await this.saveVault();
+    this.notify(parentRelPath);
     return { id, name, path: newRel, type: "note" };
   }
 

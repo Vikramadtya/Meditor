@@ -36,7 +36,13 @@ export default function VaultNode({ item, level }) {
   };
   useEffect(() => {
     if (expanded && !isNote) loadChildren();
-  }, [expanded]);
+    const unsub = vaultService.subscribe((changedPath) => {
+      if (!changedPath || changedPath === item.path) {
+        if (expanded && !isNote) loadChildren();
+      }
+    });
+    return unsub;
+  }, [expanded, item.path, isNote]);
   let Icon = FileText;
   if (!isNote) {
     Icon = expanded ? Circle : CircleDashed;
