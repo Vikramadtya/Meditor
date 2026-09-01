@@ -41,7 +41,15 @@ export default function VaultApp() {
           flex: 1,
         }}
       >
-        {PageComponent ? <PageComponent /> : <GlobalDashboard />}
+        <Suspense
+          fallback={
+            <div style={{ padding: 40, textAlign: "center" }}>
+              Loading Vault Dashboard...
+            </div>
+          }
+        >
+          {PageComponent ? <PageComponent /> : <GlobalDashboard />}
+        </Suspense>
       </div>
     </>
   );
