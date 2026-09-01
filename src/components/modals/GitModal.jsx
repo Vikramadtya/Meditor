@@ -18,6 +18,7 @@ import {
   inputStyle,
 } from "../Settings/SettingsStyles";
 import toast from "react-hot-toast";
+import { GitStatusView } from "./git/GitStatusView";
 import { GitDiffViewer } from "./git/GitDiffViewer";
 import { GitCommitForm } from "./git/GitCommitForm";
 

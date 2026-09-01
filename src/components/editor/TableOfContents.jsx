@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useStore } from "../../store/index";
+import { useTableOfContents } from "../../hooks/useTableOfContents";
 
 import { searchService } from "../../application/editor/SearchService.js";
 
