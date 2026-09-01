@@ -1,4 +1,4 @@
-export class SqliteVaultRepository {
+class SqliteVaultRepository {
   constructor() {
     this.db = null;
   }

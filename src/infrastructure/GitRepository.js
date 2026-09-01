@@ -13,7 +13,7 @@ import {
 /**
  * Git operations adapter using Neutralino os.execCommand.
  */
-export class GitRepository {
+class GitRepository {
   constructor() {
     this._log = Logger.forContext("GitRepository");
   }

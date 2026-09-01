@@ -8,7 +8,7 @@ import { Logger } from "../../infrastructure/Logger.js";
 import { fileSystem } from "../../infrastructure/NeutralinoFileSystem.js";
 import { vaultService } from "../vault/VaultService.js";
 
-export class WorkspaceService {
+class WorkspaceService {
   constructor() {
     this._log = Logger.forContext("WorkspaceService");
   }

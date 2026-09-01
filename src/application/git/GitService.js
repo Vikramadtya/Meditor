@@ -8,7 +8,7 @@ import { Logger } from "../../infrastructure/Logger.js";
 import { gitRepository } from "../../infrastructure/GitRepository.js";
 import { GitError } from "../../domain/errors/index.js";
 
-export class GitService {
+class GitService {
   constructor() {
     this._log = Logger.forContext("GitService");
   }

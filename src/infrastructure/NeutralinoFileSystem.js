@@ -22,7 +22,7 @@ import {
  * Filesystem adapter using Neutralino APIs.
  * Apply Dependency Inversion: upper layers depend on this class, not raw Neutralino globals.
  */
-export class NeutralinoFileSystem {
+class NeutralinoFileSystem {
   constructor() {
     this._log = Logger.forContext("NeutralinoFileSystem");
     /** @type {Map<string, DirectoryEntry[]>} */

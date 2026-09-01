@@ -1,74 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Folder, FileText, Book, LayoutGrid, List } from "lucide-react";
+import { Folder, Book, LayoutGrid, List } from "lucide-react";
+import { GridCard } from "./dashboard/GridCard";
+import { TocView } from "./dashboard/TocView";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
-
-function TocNode({ item, level = 0 }) {
-  const { setActiveVaultItem, openNoteFromVault } = useStore();
-  const [children, setChildren] = useState(null);
-  const isNote = item.type === "note";
-
-  useEffect(() => {
-    if (!isNote) {
-      vaultService.getFolderContents(item.path).then(setChildren);
-    }
-  }, [item.path, isNote]);
-
-  return (
-    <div style={{ marginTop: level === 0 ? "16px" : "8px" }}>
-      <div
-        onClick={() =>
-          isNote ? openNoteFromVault(item) : setActiveVaultItem(item)
-        }
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "10px",
-          cursor: "pointer",
-          padding: "8px 12px",
-          borderRadius: "8px",
-          transition: "background 0.2s",
-        }}
-        onMouseEnter={(e) =>
-          (e.currentTarget.style.backgroundColor = "var(--bg-secondary)")
-        }
-        onMouseLeave={(e) =>
-          (e.currentTarget.style.backgroundColor = "transparent")
-        }
-      >
-        {isNote ? (
-          <FileText size={18} style={{ color: "var(--text-secondary)" }} />
-        ) : (
-          <Folder size={18} style={{ color: "var(--accent)" }} />
-        )}
-        <span
-          style={{
-            fontWeight: isNote ? 500 : 600,
-            fontSize: isNote ? "14px" : "15px",
-            color: isNote ? "var(--text-secondary)" : "var(--text-primary)",
-          }}
-        >
-          {item.name}
-        </span>
-      </div>
-
-      {!isNote && children && children.length > 0 && (
-        <div
-          style={{
-            paddingLeft: "24px",
-            marginLeft: "21px",
-            borderLeft: "1px dashed var(--glass-border)",
-            marginTop: "4px",
-          }}
-        >
-          {children.map((child) => (
-            <TocNode key={child.id} item={child} level={level + 1} />
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function ContainerDashboard() {
   const { activeVaultItem, setActiveVaultItem, openNoteFromVault } = useStore();
@@ -193,116 +128,12 @@ export default function ContainerDashboard() {
             gap: "24px",
           }}
         >
-          {children.map((child) => {
-            const isNote = child.type === "note";
-            const childCount = child.metadata?.children_order?.length || 0;
-            return (
-              <div
-                key={child.id}
-                onClick={() =>
-                  isNote ? openNoteFromVault(child) : setActiveVaultItem(child)
-                }
-                style={{
-                  backgroundColor: "var(--bg-secondary)",
-                  border: "1px solid var(--glass-border)",
-                  borderRadius: "16px",
-                  overflow: "hidden",
-                  cursor: "pointer",
-                  transition: "transform 0.2s, box-shadow 0.2s",
-                  boxShadow: "0 4px 6px rgba(0,0,0,0.05)",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow =
-                    "0 10px 15px rgba(0,0,0,0.1)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow =
-                    "0 4px 6px rgba(0,0,0,0.05)";
-                }}
-              >
-                {/* Blue Header Section */}
-                <div
-                  style={{
-                    height: "120px",
-                    backgroundColor: "#3b82f6",
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  <Book
-                    size={90}
-                    style={{
-                      position: "absolute",
-                      bottom: "-15px",
-                      right: "10px",
-                      color: "rgba(255,255,255,0.2)",
-                      transform: "rotate(15deg)",
-                    }}
-                  />
-                </div>
-
-                {/* White Body Section */}
-                <div
-                  style={{
-                    padding: "20px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    flex: 1,
-                    minHeight: "130px",
-                    backgroundColor: "var(--bg-primary)",
-                  }}
-                >
-                  <div
-                    style={{
-                      fontWeight: 700,
-                      fontSize: "15px",
-                      color: "var(--text-primary)",
-                      lineHeight: "1.4",
-                    }}
-                  >
-                    {child.name}
-                  </div>
-
-                  <div style={{ marginTop: "16px" }}>
-                    <span
-                      style={{
-                        backgroundColor: "var(--bg-secondary)",
-                        padding: "4px 10px",
-                        borderRadius: "12px",
-                        fontSize: "11px",
-                        fontWeight: 600,
-                        color: "var(--text-secondary)",
-                      }}
-                    >
-                      {isNote ? "1 note" : `${childCount} items`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div style={{ maxWidth: "800px", padding: "16px 0" }}>
-          <h2
-            style={{
-              fontSize: "20px",
-              borderBottom: "1px solid var(--glass-border)",
-              paddingBottom: "16px",
-              marginBottom: "8px",
-            }}
-          >
-            Table of Contents
-          </h2>
           {children.map((child) => (
-            <TocNode key={child.id} item={child} level={0} />
+            <GridCard key={child.id} child={child} />
           ))}
         </div>
+      ) : (
+        <TocView children={children} />
       )}
 
       {children.length === 0 && (

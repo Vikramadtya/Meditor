@@ -8,7 +8,7 @@ import { Logger } from "../../infrastructure/Logger.js";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository.js";
 import { vaultService } from "./VaultService.js";
 
-export class NoteService {
+class NoteService {
   constructor() {
     this._log = Logger.forContext("NoteService");
   }

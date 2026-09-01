@@ -8,7 +8,7 @@ const logger = Logger.forContext("SearchService");
  * Service orchestrating search strategies (Vault vs Folder mode)
  * for features like Backlinks and Tag aggregation.
  */
-export class SearchService {
+class SearchService {
   /**
    * Resolves the correct search strategy based on the active mode.
    * @param {"vault"|"folder"} workspaceMode - The current workspace mode.

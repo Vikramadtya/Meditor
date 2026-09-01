@@ -18,6 +18,8 @@ import {
   inputStyle,
 } from "../Settings/SettingsStyles";
 import toast from "react-hot-toast";
+import { GitDiffViewer } from "./git/GitDiffViewer";
+import { GitCommitForm } from "./git/GitCommitForm";
 
 /**
  * Modal component for managing Git operations within the vault.
