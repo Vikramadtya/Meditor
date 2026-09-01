@@ -2,13 +2,16 @@ import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { Logger } from "../../infrastructure/Logger";
 import initSqlJs from "sql.js";
-import wasmUrl from "sql.js/dist/sql-wasm.wasm?url";
 
 class VaultService {
   constructor() {
     this._log = Logger.forContext("VaultService");
     this.vaultPath = null;
-    this._sqlPromise = initSqlJs({ locateFile: () => wasmUrl });
+    // sql-wasm.wasm is copied to the dist root by Vite (not in /assets/).
+    // Neutralino serves dist/ as the resource root, so the file is reachable
+    // at the same origin as index.html. Returning just the filename lets the
+    // browser resolve it relative to the page — works in both dev and prod.
+    this._sqlPromise = initSqlJs({ locateFile: () => "sql-wasm.wasm" });
     this.isSyncing = false;
     this.listeners = new Set();
   }
