@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useStore } from "../../store/index";
+import { selectIsDirty } from "../../store/selectors/editor.selectors";
 import { selectShowDashboard } from "../../store/selectors/index";
 
 /**
@@ -10,8 +11,8 @@ import { selectShowDashboard } from "../../store/selectors/index";
  * @returns {React.ReactElement} The rendered Titlebar component.
  */
 export default function Titlebar() {
-  const { fileName, markdown, isDirty, isSidebarOpen, toggleSidebar } =
-    useStore();
+  const { fileName, markdown, isSidebarOpen, toggleSidebar } = useStore();
+  const isDirty = useStore(selectIsDirty);
   const showDashboard = useStore(selectShowDashboard);
 
   const stats = useMemo(() => {

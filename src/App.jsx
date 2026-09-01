@@ -1,24 +1,16 @@
 import React from "react";
 import { Toaster } from "react-hot-toast";
 
-import { useStore } from "./store/index";
-import { selectShowDashboard } from "./store/selectors/index";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useSystemEffects } from "./hooks/useSystemEffects";
 
 import Titlebar from "./components/layout/Titlebar";
-import Sidebar from "./components/layout/Sidebar";
 import ModalManager from "./components/modals/ModalManager";
-import WelcomeScreen from "./components/layout/WelcomeScreen";
-import VaultApp from "./apps/VaultApp";
-import EditorApp from "./apps/EditorApp";
+import RootRouter from "./routers/RootRouter";
 
 import "./styles/Modals.css";
 
 function App() {
-  const { currentFolder, workspaceMode } = useStore();
-  const showDashboard = useStore(selectShowDashboard);
-
   // Bind global side effects
   useKeyboardShortcuts();
   useSystemEffects();
@@ -43,18 +35,7 @@ function App() {
 
       <Titlebar />
       <div className="app-container">
-        {!currentFolder ? (
-          <WelcomeScreen />
-        ) : (
-          <>
-            <Sidebar />
-            {workspaceMode === "vault" && showDashboard ? (
-              <VaultApp />
-            ) : (
-              <EditorApp />
-            )}
-          </>
-        )}
+        <RootRouter />
       </div>
 
       <ModalManager />

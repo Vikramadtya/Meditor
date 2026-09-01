@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { X, Clock, RotateCcw, Columns, Eye } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useStore } from "../../store/index";
+import { selectRepoPath } from "../../store/selectors/vault.selectors";
 
 import { gitService } from "../../application/git/GitService";
 import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
@@ -19,14 +20,7 @@ import { GitCommitPreview } from "./git/GitCommitPreview";
  * @returns {React.ReactElement|null} The Git history modal or null if not open.
  */
 export default function GitHistoryModal({ isOpen, onClose }) {
-  const {
-    currentFilePath,
-    fileName,
-    markdown,
-    setMarkdown,
-    workspaceRoot,
-    currentFolder,
-  } = useStore();
+  const { currentFilePath, fileName, markdown, setMarkdown } = useStore();
   const [viewMode, setViewMode] = useState("diff"); // "diff" or "preview"
 
   const [history, setHistory] = useState([]);
@@ -34,7 +28,7 @@ export default function GitHistoryModal({ isOpen, onClose }) {
   const [selectedCommit, setSelectedCommit] = useState(null);
   const [previewContent, setPreviewContent] = useState("");
 
-  const repoPath = workspaceRoot || currentFolder;
+  const repoPath = useStore(selectRepoPath);
 
   useEffect(() => {
     if (isOpen && currentFilePath && repoPath) {

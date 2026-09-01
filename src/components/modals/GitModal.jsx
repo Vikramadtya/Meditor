@@ -11,6 +11,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useStore } from "../../store/index";
+import { selectRepoPath } from "../../store/selectors/vault.selectors";
 import { gitService } from "../../application/git/GitService";
 import {
   iconBtnStyle,
@@ -29,8 +30,8 @@ import { GitCommitForm } from "./git/GitCommitForm";
  * @returns {React.ReactElement|null} The Git management modal or null if not open.
  */
 export default function GitModal() {
-  const { isGitModalOpen, setGitModalOpen, workspaceRoot, currentFolder } =
-    useStore();
+  const repoPath = useStore(selectRepoPath);
+  const { isGitModalOpen, setGitModalOpen } = useStore();
   useModalEscape(isGitModalOpen, () => setGitModalOpen(false));
   const [isRepo, setIsRepo] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -48,7 +49,7 @@ export default function GitModal() {
 
   const checkRepo = async () => {
     setLoading(true);
-    const repoPath = workspaceRoot || currentFolder;
+
     if (!repoPath) {
       setIsRepo(false);
       setLoading(false);
@@ -61,7 +62,6 @@ export default function GitModal() {
 
   const handleInit = async () => {
     try {
-      const repoPath = workspaceRoot || currentFolder;
       await gitService.initRepo(repoPath);
       toast.success("Git repository initialized!");
       checkRepo();
@@ -72,7 +72,6 @@ export default function GitModal() {
 
   const handleCommitAll = async () => {
     try {
-      const repoPath = workspaceRoot || currentFolder;
       await gitService.commitAll(repoPath, "Manual commit from Meditor");
       toast.success("Saved to Git History!");
     } catch (e) {
@@ -81,7 +80,6 @@ export default function GitModal() {
   };
 
   const handleReviewSync = async () => {
-    const repoPath = workspaceRoot || currentFolder;
     toast.loading("Gathering changes...", { id: "sync-prep" });
     try {
       const changes = await gitService.getStatus(repoPath);
@@ -95,7 +93,6 @@ export default function GitModal() {
 
   const handleConfirmSync = async () => {
     try {
-      const repoPath = workspaceRoot || currentFolder;
       toast.loading("Committing & Syncing...", { id: "sync" });
       if (uncommittedChanges.length > 0) {
         await gitService.commitAll(repoPath, commitMessage);

@@ -3,8 +3,6 @@
  * @param {Object} state - The global state.
  * @returns {Object|null} The active tab object.
  */
-export const selectActiveTab = (state) =>
-  state.tabs?.find((t) => t.id === state.activeTabId) ?? null;
 
 /**
  * Selects whether the current active file has unsaved changes.
