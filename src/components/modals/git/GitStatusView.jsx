@@ -1,12 +1,14 @@
 import React from "react";
 import { FolderGit2, History, Cloud, Save, RefreshCw } from "lucide-react";
 import { chipStyle } from "../../Settings/SettingsStyles";
+import { GitDiffViewer } from "./GitDiffViewer";
 export function GitStatusView({
   loading,
   isRepo,
   handleInit,
   handleCommitAll,
   handleReviewSync,
+  uncommittedChanges,
 }) {
   if (loading) {
     return (
@@ -90,6 +92,20 @@ export function GitStatusView({
         gap: "24px",
       }}
     >
+      <div style={{ marginBottom: "8px" }}>
+        <h3
+          style={{
+            margin: "0 0 8px 0",
+            fontSize: "14px",
+            color: "var(--text-secondary)",
+            fontWeight: 600,
+          }}
+        >
+          Uncommitted Changes ({uncommittedChanges?.length || 0})
+        </h3>
+        <GitDiffViewer uncommittedChanges={uncommittedChanges || []} />
+      </div>
+
       <div
         style={{
           background: "var(--bg-secondary)",

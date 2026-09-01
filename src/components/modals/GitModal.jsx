@@ -60,6 +60,14 @@ export default function GitModal() {
     }
     const repoExists = await gitService.isRepo(repoPath);
     setIsRepo(repoExists);
+    if (repoExists) {
+      try {
+        const changes = await gitService.getStatus(repoPath);
+        setUncommittedChanges(changes);
+      } catch (e) {
+        console.error("Failed to get status", e);
+      }
+    }
     setLoading(false);
   };
   const handleInit = async () => {
@@ -284,6 +292,7 @@ export default function GitModal() {
               handleInit={handleInit}
               handleCommitAll={handleCommitAll}
               handleReviewSync={handleReviewSync}
+              uncommittedChanges={uncommittedChanges}
             />
           </div>
         )}
