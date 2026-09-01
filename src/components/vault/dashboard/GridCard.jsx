@@ -10,7 +10,8 @@ export function GridCard({ child }) {
     })),
   );
   const isNote = child.type === "note";
-  const childCount = child.metadata?.children_order?.length || 0;
+  const childCount =
+    child.itemCount ?? (child.metadata?.children_order?.length || 0);
   return (
     <div
       onClick={() =>

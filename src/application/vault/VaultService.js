@@ -97,11 +97,24 @@ class VaultService {
 
         if (e.type === "DIRECTORY") {
           let metadata = {};
+          let itemCount = 0;
           try {
             const metaContent = await fileSystem.readFile(
               `${fullPath}/${e.entry}/.metadata`,
             );
             metadata = JSON.parse(metaContent);
+          } catch (_) {}
+
+          try {
+            const subEntries = await window.Neutralino.filesystem.readDirectory(
+              `${fullPath}/${e.entry}`,
+            );
+            itemCount = subEntries.filter(
+              (se) =>
+                se.entry !== "." &&
+                se.entry !== ".." &&
+                se.entry !== ".metadata",
+            ).length;
           } catch (_) {}
 
           results.push({
@@ -110,6 +123,7 @@ class VaultService {
             type: "container",
             path: childRelPath,
             metadata,
+            itemCount,
           });
         } else if (e.entry.endsWith(".md")) {
           // It's a note. Get its ID from DB cache for fast render, or parse if missing.
