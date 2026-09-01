@@ -1,6 +1,8 @@
+import { Logger } from "./Logger.js";
 class SqliteVaultRepository {
   constructor() {
     this.db = null;
+    this._log = Logger.forContext("SqliteVaultRepository");
   }
 
   attach(dbInstance) {
