@@ -65,7 +65,9 @@ async function ensureDir(dirPath, currentFolder) {
     if (current.startsWith(currentFolder)) {
       try {
         await fileService.createDirectory(current);
-      } catch (_) {}
+      } catch (e) {
+        /* ignore parse error */
+      }
     }
   }
 }
@@ -198,7 +200,9 @@ async function handleImageFile(
     // Copy link to clipboard
     try {
       await navigator.clipboard.writeText(insertText);
-    } catch (_) {}
+    } catch (e) {
+      /* ignore parse error */
+    }
 
     toast.success(`Image saved! Link copied to clipboard.`);
     logger.info(`Image saved: ${destPath}`);

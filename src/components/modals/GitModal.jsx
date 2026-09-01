@@ -20,6 +20,8 @@ import {
   inputStyle,
 } from "../Settings/SettingsStyles";
 import toast from "react-hot-toast";
+import { Logger } from "../../infrastructure/Logger";
+const log = Logger.forContext("GitModal");
 import { GitStatusView } from "./git/GitStatusView";
 import { GitDiffViewer } from "./git/GitDiffViewer";
 import { GitCommitForm } from "./git/GitCommitForm";
@@ -65,7 +67,7 @@ export default function GitModal() {
         const changes = await gitService.getStatus(repoPath);
         setUncommittedChanges(changes);
       } catch (e) {
-        console.error("Failed to get status", e);
+        log.error("Failed to get status", e);
       }
     }
     setLoading(false);

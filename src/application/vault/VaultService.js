@@ -103,7 +103,9 @@ class VaultService {
               `${fullPath}/${e.entry}/.metadata`,
             );
             metadata = JSON.parse(metaContent);
-          } catch (_) {}
+          } catch (e) {
+            this._log.debug("Ignored expected file read exception", e);
+          }
 
           try {
             const subEntries = await window.Neutralino.filesystem.readDirectory(
@@ -115,7 +117,9 @@ class VaultService {
                 se.entry !== ".." &&
                 se.entry !== ".metadata",
             ).length;
-          } catch (_) {}
+          } catch (e) {
+            this._log.debug("Ignored expected file read exception", e);
+          }
 
           results.push({
             id: metadata.id || childRelPath,
@@ -204,7 +208,9 @@ class VaultService {
                 `${full}/${e.entry}/.metadata`,
               );
               meta = JSON.parse(metaStr);
-            } catch (_) {} // fine, we'll just use path as ID
+            } catch (e) {
+              this._log.debug("Ignored expected file read exception", e);
+            } // fine, we'll just use path as ID
 
             vaultRepository.upsertContainer({
               id: meta.id,

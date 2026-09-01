@@ -36,7 +36,7 @@ export default function CreateVaultItemModal() {
       closeCreateVaultItemModal();
       reloadVaultHierarchy();
     } catch (err) {
-      console.error(err);
+      log.error("Failed to create vault item", err);
       alert("Failed to create item.");
     }
   };

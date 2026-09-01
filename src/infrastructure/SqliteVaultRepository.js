@@ -11,7 +11,9 @@ class SqliteVaultRepository {
   _assertDb() {
     try {
       this.db.run("ALTER TABLE notes ADD COLUMN agenda_date INTEGER DEFAULT 0");
-    } catch (e) {}
+    } catch (e) {
+      this._log.debug("Ignored exception:", e);
+    }
 
     if (!this.db) throw new Error("Database not initialized");
   }
@@ -57,7 +59,7 @@ class SqliteVaultRepository {
       stmt.free();
       return rows;
     } catch (e) {
-      console.error(e);
+      this._log.error("Database operation failed", e);
       return [];
     }
   }
@@ -291,7 +293,9 @@ class SqliteVaultRepository {
       result.notesByGroup = Object.entries(containerCounts)
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count);
-    } catch (e) {}
+    } catch (e) {
+      this._log.debug("Ignored exception:", e);
+    }
     return result;
   }
   findFavoriteNotes() {
