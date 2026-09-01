@@ -294,6 +294,12 @@ export class SqliteVaultRepository {
     } catch (e) {}
     return result;
   }
+  findFavoriteNotes() {
+    this._assertDb();
+    return this._queryAll(
+      "SELECT * FROM notes WHERE is_deleted=0 AND is_favorite=1",
+    );
+  }
 }
 
 export const vaultRepository = new SqliteVaultRepository();
