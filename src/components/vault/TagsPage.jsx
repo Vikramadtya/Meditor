@@ -16,8 +16,10 @@ export default function TagsPage() {
   const [selectedTag, setSelectedTag] = useState(null);
 
   const loadTags = useCallback(() => {
-    // We can use getGraphDataFiltered with no filters to just get all notes and tags
-    const notes = vaultRepository.getGraphDataFiltered([], []);
+    // Fetch all notes to build the tags map
+    const notes = vaultRepository._queryAll(
+      "SELECT id, name, tags FROM notes WHERE is_deleted=0 AND tags != ''",
+    );
 
     const tMap = new Map();
     notes.forEach((note) => {
