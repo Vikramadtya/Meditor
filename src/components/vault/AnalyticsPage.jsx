@@ -96,24 +96,6 @@ export default function AnalyticsPage() {
           }}
         >
           <HeroCard
-            icon={<FileText size={20} />}
-            label="Total Notes"
-            value={analytics.notes}
-            color="#6366f1"
-          />
-          <HeroCard
-            icon={<Brain size={20} />}
-            label="Flashcards"
-            value={analytics.flashcards}
-            color="#3b82f6"
-          />
-          <HeroCard
-            icon={<Zap size={20} />}
-            label="Due Today"
-            value={analytics.dueToday}
-            color="#f59e0b"
-          />
-          <HeroCard
             icon={<BarChart2 size={20} />}
             label="Groups"
             value={analytics.groups}
