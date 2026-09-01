@@ -81,7 +81,6 @@ export const createUISlice = (set) => ({
       s.isGraphModalOpen = v;
     }),
 
-  isStatsModalOpen: false,
   setStatsModalOpen: (v) =>
     set((s) => {
       s.isStatsModalOpen = v;

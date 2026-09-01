@@ -5,7 +5,6 @@ import SettingsModal from "../Settings/SettingsModal";
 import GlobalSearchModal from "./GlobalSearchModal";
 import CreateVaultItemModal from "./CreateVaultItemModal";
 import TrashModal from "./TrashModal";
-import StatsModal from "./StatsModal";
 import GitModal from "./GitModal";
 import GitHistoryModal from "./GitHistoryModal";
 import TagModal from "./TagModal";
@@ -26,7 +25,6 @@ export default function ModalManager() {
       <GlobalSearchModal />
       <CreateVaultItemModal />
       <TrashModal />
-      <StatsModal />
       <GitModal />
       <GitHistoryModal
         isOpen={isHistoryModalOpen}

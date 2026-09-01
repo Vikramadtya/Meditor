@@ -14,7 +14,6 @@ const PAGE_MAP = {
   container: ContainerDashboard,
   favorites: FavoritesDashboard,
   today: TodayPage,
-  agenda: AgendaPage,
   analytics: AnalyticsPage,
   tags: TagsPage,
 };

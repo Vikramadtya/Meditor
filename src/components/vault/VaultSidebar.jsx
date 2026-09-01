@@ -49,7 +49,6 @@ export default function VaultSidebar() {
   const {
     setCommandPaletteOpen,
     setGraphModalOpen,
-    setStatsModalOpen,
     setSettingsOpen,
     setGitModalOpen,
     openCreateVaultItemModal,
