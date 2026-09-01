@@ -14,68 +14,16 @@ import { searchService } from "../../application/editor/SearchService.js";
 export default function TableOfContents({ toc }) {
   const {
     isTocOpen,
-    markdown,
-    currentFilePath,
-    fileName,
-    activeVaultItem,
-    workspaceMode,
+    activeTab,
+    setActiveTab,
+    backlinks,
+    stats,
+    handleScroll,
     setTagModalOpen,
-  } = useStore();
-
-  const [activeTab, setActiveTab] = useState("outline"); // "outline" or "stats"
-  const [backlinks, setBacklinks] = useState([]);
-
-  useEffect(() => {
-    if (isTocOpen && activeTab === "stats" && fileName) {
-      // The filename might have .md, getBacklinksForNote handles it or we pass it
-      (async () => {
-        const state = useStore.getState();
-        return searchService.getBacklinks(
-          fileName,
-          state.workspaceMode,
-          state.workspaceRoot || state.currentFolder,
-        );
-      })().then((links) => {
-        setBacklinks(links);
-      });
-    }
-  }, [isTocOpen, activeTab, fileName]);
-
-  const stats = useMemo(() => {
-    const text = markdown.trim();
-    const words = text ? text.split(/\s+/).length : 0;
-    const chars = text.length;
-    const readTime = Math.ceil(words / 200);
-
-    // Extract tags
-    const tags = [];
-    if (workspaceMode === "vault" && activeVaultItem && activeVaultItem.tags) {
-      activeVaultItem.tags
-        .split(",")
-        .filter(Boolean)
-        .forEach((t) => {
-          if (!tags.includes(t)) tags.push(t);
-        });
-    }
-
-    const tagRegex = /(?:^|\s)#([a-zA-Z0-9_-]+)/g;
-    let match;
-    while ((match = tagRegex.exec(text)) !== null) {
-      if (!tags.includes(match[1])) tags.push(match[1]);
-    }
-
-    return { words, chars, readTime, tags };
-  }, [markdown, workspaceMode, activeVaultItem]);
+    workspaceMode,
+  } = useTableOfContents();
 
   if (!isTocOpen) return null;
-
-  const handleScroll = (id) => {
-    if (!id) return;
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
 
   return (
     <div className="toc-sidebar">

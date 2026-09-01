@@ -4,6 +4,8 @@ import { X, Tag, Save } from "lucide-react";
 import { useStore } from "../../store/index";
 import { noteService } from "../../application/vault/NoteService";
 import toast from "react-hot-toast";
+import { TagChipInput } from "./tags/TagChipInput";
+import { AgendaForm } from "./tags/AgendaForm";
 
 /**
  * Modal component for managing tags and scheduling agenda dates for a specific note.
@@ -124,143 +126,16 @@ export default function TagModal() {
         </div>
 
         <div style={{ padding: "24px" }}>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: "6px",
-              padding: "10px 14px",
-              background: "var(--bg-secondary)",
-              border: "1px solid var(--glass-border)",
-              borderRadius: "8px",
-              cursor: "text",
-              minHeight: "46px",
-            }}
-            onClick={() => tagInputRef.current?.focus()}
-          >
-            {tags.map((tag) => (
-              <span
-                key={tag}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  padding: "3px 8px",
-                  borderRadius: "999px",
-                  background: "var(--bg-primary)",
-                  border: "1px solid var(--glass-border)",
-                  fontSize: "12px",
-                  color: "var(--text-secondary)",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                #{tag}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeTag(tag);
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "0 2px",
-                    color: "var(--text-secondary)",
-                    fontSize: "13px",
-                    lineHeight: 1,
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-            <input
-              ref={tagInputRef}
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={handleTagKeyDown}
-              placeholder={tags.length === 0 ? "Tags (press Enter)..." : ""}
-              style={{
-                flex: 1,
-                minWidth: "120px",
-                background: "none",
-                border: "none",
-                outline: "none",
-                fontSize: "14px",
-                color: "var(--text-primary)",
-                padding: "2px 0",
-              }}
-            />
-          </div>
-          <div
-            style={{
-              fontSize: "11px",
-              color: "var(--text-secondary)",
-              marginTop: "6px",
-              paddingLeft: "2px",
-            }}
-          >
-            Press Enter or comma to add a tag
-          </div>
-
-          <div
-            style={{
-              marginTop: "20px",
-              paddingTop: "16px",
-              borderTop: "1px solid var(--glass-border)",
-            }}
-          >
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: 700,
-                marginBottom: "8px",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              📅 Schedule for Agenda
-            </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <input
-                type="date"
-                value={agendaDate}
-                onChange={(e) => setAgendaDate(e.target.value)}
-                style={{
-                  flex: 1,
-                  padding: "8px 12px",
-                  background: "var(--bg-secondary)",
-                  border: "1px solid var(--glass-border)",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  color: "var(--text-primary)",
-                  outline: "none",
-                }}
-              />
-              {agendaDate && (
-                <button
-                  onClick={() => setAgendaDate("")}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "var(--text-secondary)",
-                    padding: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-          </div>
+          <TagChipInput
+            tags={tags}
+            tagInput={tagInput}
+            setTagInput={setTagInput}
+            handleTagKeyDown={handleTagKeyDown}
+            removeTag={removeTag}
+            tagInputRef={tagInputRef}
+          />
+          <AgendaForm agendaDate={agendaDate} setAgendaDate={setAgendaDate} />
         </div>
-
         <div
           style={{
             padding: "16px 24px",
