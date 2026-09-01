@@ -6,6 +6,7 @@ import {
   Circle,
   CircleDashed,
   Calendar,
+  Home,
   Network,
   BarChart2,
   ChevronRight,
@@ -128,9 +129,15 @@ export default function VaultSidebar() {
           }}
         >
           <SidebarLink
+            icon={<Home size={14} />}
+            label="Home"
+            isActive={!activeVaultItem}
+            onClick={() => setActiveVaultItem(null)}
+          />
+          <SidebarLink
             icon={<Calendar size={14} />}
             label="Today"
-            isActive={!activeVaultItem}
+            isActive={activeVaultItem?.type === "today"}
             onClick={() =>
               setActiveVaultItem({
                 type: "today",
