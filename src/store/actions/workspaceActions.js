@@ -40,9 +40,16 @@ export const createVaultDialog = async () => {
   try {
     const folder = await workspaceService.pickFolder();
     if (folder) {
-      await fileSystem.createDirectory(`${folder}/.meditor`);
+      const isExisting = await fileSystem.exists(`${folder}/.meditor`);
+      if (!isExisting) {
+        await fileSystem.createDirectory(`${folder}/.meditor`);
+      }
       await loadWorkspace(folder);
-      toast.success("Initialized new Vault!");
+      if (isExisting) {
+        toast.success("Reading existing vault!");
+      } else {
+        toast.success("Initialized new Vault!");
+      }
     }
   } catch (err) {
     log.error("Create vault cancelled or failed", err);

@@ -1,5 +1,5 @@
 import React from "react";
-import { Columns, Eye, RotateCcw } from "lucide-react";
+import { Clock, Columns, Eye, RotateCcw } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 export function GitCommitPreview({
   selectedCommit,
