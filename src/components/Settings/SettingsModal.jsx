@@ -9,6 +9,7 @@ import MarkdownTab from "./MarkdownTab";
 import CustomRulesTab from "./CustomRulesTab";
 import EditorTab from "./EditorTab";
 import SystemTab from "./SystemTab";
+import HelpTab from "./HelpTab";
 
 /**
  * Main modal component for application settings.
@@ -72,6 +73,13 @@ export default function SettingsModal() {
             >
               System / Storage
             </button>
+
+            <button
+              className={`settings-nav-item ${activeTab === "help" ? "active" : ""}`}
+              onClick={() => setActiveTab("help")}
+            >
+              Help & Guide
+            </button>
           </div>
         </div>
 
@@ -88,6 +96,7 @@ export default function SettingsModal() {
             {activeTab === "markdown" && <MarkdownTab />}
             {activeTab === "rules" && <CustomRulesTab />}
             {activeTab === "system" && <SystemTab />}
+            {activeTab === "help" && <HelpTab />}
           </div>
         </div>
       </div>
