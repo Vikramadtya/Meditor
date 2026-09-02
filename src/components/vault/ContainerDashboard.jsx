@@ -78,16 +78,7 @@ export default function ContainerDashboard() {
           </div>
         </div>
 
-        {/* View Toggle */}
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: "var(--bg-secondary)",
-            borderRadius: "8px",
-            border: "1px solid var(--glass-border)",
-            padding: "4px",
-          }}
-        >
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {/* Add New Button */}
           <div
             onClick={() =>
@@ -105,7 +96,6 @@ export default function ContainerDashboard() {
               fontWeight: 600,
               fontSize: "14px",
               boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
-              marginRight: "16px",
               transition: "transform 0.1s ease-in-out",
             }}
             onMouseDown={(e) =>
@@ -117,51 +107,62 @@ export default function ContainerDashboard() {
             <Book size={18} /> Add New
           </div>
 
+          {/* View Toggle */}
           <div
-            onClick={() => setViewMode("grid")}
             style={{
-              padding: "6px 12px",
-              borderRadius: "6px",
-              cursor: "pointer",
               display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontSize: "13px",
-              fontWeight: 600,
-              backgroundColor:
-                viewMode === "grid" ? "var(--bg-primary)" : "transparent",
-              color:
-                viewMode === "grid"
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-              boxShadow:
-                viewMode === "grid" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+              backgroundColor: "var(--bg-secondary)",
+              borderRadius: "8px",
+              border: "1px solid var(--glass-border)",
+              padding: "4px",
             }}
           >
-            <LayoutGrid size={16} /> Grid
-          </div>
-          <div
-            onClick={() => setViewMode("toc")}
-            style={{
-              padding: "6px 12px",
-              borderRadius: "6px",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              fontSize: "13px",
-              fontWeight: 600,
-              backgroundColor:
-                viewMode === "toc" ? "var(--bg-primary)" : "transparent",
-              color:
-                viewMode === "toc"
-                  ? "var(--text-primary)"
-                  : "var(--text-secondary)",
-              boxShadow:
-                viewMode === "toc" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
-            }}
-          >
-            <List size={16} /> TOC
+            <div
+              onClick={() => setViewMode("grid")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "13px",
+                fontWeight: 600,
+                backgroundColor:
+                  viewMode === "grid" ? "var(--bg-primary)" : "transparent",
+                color:
+                  viewMode === "grid"
+                    ? "var(--text-primary)"
+                    : "var(--text-secondary)",
+                boxShadow:
+                  viewMode === "grid" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+              }}
+            >
+              <LayoutGrid size={16} /> Grid
+            </div>
+            <div
+              onClick={() => setViewMode("toc")}
+              style={{
+                padding: "6px 12px",
+                borderRadius: "6px",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "13px",
+                fontWeight: 600,
+                backgroundColor:
+                  viewMode === "toc" ? "var(--bg-primary)" : "transparent",
+                color:
+                  viewMode === "toc"
+                    ? "var(--text-primary)"
+                    : "var(--text-secondary)",
+                boxShadow:
+                  viewMode === "toc" ? "0 2px 4px rgba(0,0,0,0.05)" : "none",
+              }}
+            >
+              <List size={16} /> TOC
+            </div>
           </div>
         </div>
       </div>
