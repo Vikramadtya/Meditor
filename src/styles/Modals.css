@@ -78,7 +78,8 @@
 
 /* ── Settings Modal ─────────────────────────────────────────── */
 .settings-modal {
-  width: 720px;
+  width: 900px;
+  max-width: 90vw;
   height: 85vh;
   padding: 0;
   display: flex;
