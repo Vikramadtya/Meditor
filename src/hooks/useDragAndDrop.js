@@ -34,28 +34,20 @@ const sanitize = (s) => s.replace(/[/\\:*?"<>|]/g, "_");
  * @param {string} currentFolder - The current folder path.
  * @returns {{destFolder: string, markdownPath: string}|null} The destination folder and markdown path, or null if note can't be located.
  */
-function resolveVaultImagePaths(noteId, currentFolder) {
-  const lp = vaultRepository.getLogicalPath(noteId);
-  if (!lp) return null;
-  const pathSegment = `${sanitize(lp.group)}/${sanitize(lp.collection)}/${sanitize(lp.module)}`;
+function resolveVaultImagePaths(activeVaultItem, currentFolder) {
+  if (!activeVaultItem || !activeVaultItem.path) return null;
+
+  const pathParts = activeVaultItem.path.split("/");
+  // Remove the note name itself to get the directory segment
+  pathParts.pop();
+  const pathSegment = pathParts.join("/");
+
   return {
-    destFolder: `${currentFolder}/assets/${pathSegment}`,
-    // Notes live at: vault/notes/<group>/<collection>/<module>/<note>.md
-    // Assets live at: vault/assets/<group>/<collection>/<module>/
-    // Relative from note → asset: ../../../../../assets/<segment>/
-    // Simpler: store as vault-absolute path the image interceptor will handle
-    markdownPath: `../assets/${pathSegment}`,
+    destFolder: `${currentFolder}/assets/images/${pathSegment}`,
+    markdownPath: `/assets/images/${pathSegment}`,
   };
 }
 
-/**
- * Ensures all directories in a path exist (best-effort).
- * Only creates directories inside the currentFolder boundary.
- *
- * @param {string} dirPath - The directory path to ensure exists.
- * @param {string} currentFolder - The boundary folder to restrict creation within.
- * @returns {Promise<void>}
- */
 async function ensureDir(dirPath, currentFolder) {
   const parts = dirPath.split("/");
   let current = "";
@@ -87,7 +79,7 @@ async function persistImage(arrayBuffer, destPath, noteId, fileName) {
   // Record in vault DB (best-effort — non-fatal if it fails)
   try {
     const imageId = generateId();
-    vaultRepository.insertImage(imageId, noteId, fileName, Date.now());
+    // No longer needed, image is just placed on disk
     await vaultService.save();
   } catch (err) {
     logger.warn("Could not record image in DB:", err);
@@ -164,7 +156,7 @@ async function handleImageFile(
       toast.error("Could not identify the current note.");
       return;
     }
-    const paths = resolveVaultImagePaths(noteId, folder);
+    const paths = resolveVaultImagePaths(activeVaultItem, folder);
     if (!paths) {
       toast.error("Could not locate note in vault hierarchy.");
       return;
