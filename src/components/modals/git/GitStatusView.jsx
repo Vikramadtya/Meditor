@@ -6,8 +6,8 @@ export function GitStatusView({
   loading,
   isRepo,
   handleInit,
-  handleCommitAll,
-  handleReviewSync,
+  handleReviewCommit,
+  handleSyncVault,
   uncommittedChanges,
 }) {
   if (loading) {
@@ -145,7 +145,7 @@ export function GitStatusView({
           view history later from the command palette.
         </p>
         <button
-          onClick={handleCommitAll}
+          onClick={handleReviewCommit}
           style={{
             ...chipStyle,
             background: "var(--bg-primary)",
@@ -198,7 +198,7 @@ export function GitStatusView({
           server. Ensure you have configured a remote origin.
         </p>
         <button
-          onClick={handleReviewSync}
+          onClick={handleSyncVault}
           style={{
             ...chipStyle,
             background: "var(--accent)",

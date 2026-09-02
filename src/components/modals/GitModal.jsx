@@ -81,47 +81,40 @@ export default function GitModal() {
       toast.error("Failed to initialize git");
     }
   };
-  const handleCommitAll = async () => {
-    try {
-      await gitService.commitAll(repoPath, "Manual commit from Meditor");
-      toast.success("Saved to Git History!");
-    } catch (e) {
-      toast.error("Nothing to commit, or error occurred");
-    }
-  };
-  const handleReviewSync = async () => {
-    toast.loading("Gathering changes...", {
-      id: "sync-prep",
-    });
+  const handleReviewCommit = async () => {
+    toast.loading("Gathering changes...", { id: "commit-prep" });
     try {
       const changes = await gitService.getStatus(repoPath);
       setUncommittedChanges(changes);
+      setCommitMessage("Manual commit from Meditor");
       setView("review");
-      toast.dismiss("sync-prep");
+      toast.dismiss("commit-prep");
     } catch (e) {
-      toast.error("Failed to gather status", {
-        id: "sync-prep",
-      });
+      toast.error("Failed to gather status", { id: "commit-prep" });
     }
   };
-  const handleConfirmSync = async () => {
+  const handleSyncVault = async () => {
+    toast.loading("Syncing with origin/main...", { id: "sync" });
     try {
-      toast.loading("Committing & Syncing...", {
-        id: "sync",
-      });
-      if (uncommittedChanges.length > 0) {
-        await gitService.commitAll(repoPath, commitMessage);
-      }
       await gitService.sync(repoPath);
-      toast.success("Synced successfully!", {
-        id: "sync",
-      });
-      setView("main");
+      toast.success("Synced successfully!", { id: "sync" });
       setGitModalOpen(false);
     } catch (e) {
-      toast.error("Sync failed. Check remote configuration.", {
-        id: "sync",
-      });
+      toast.error("Sync failed. Check remote configuration.", { id: "sync" });
+    }
+  };
+  const handleConfirmCommit = async () => {
+    try {
+      toast.loading("Committing...", { id: "commit" });
+      if (uncommittedChanges.length > 0) {
+        await gitService.commitAll(repoPath, commitMessage);
+        toast.success("Committed successfully!", { id: "commit" });
+      } else {
+        toast.success("Nothing to commit.", { id: "commit" });
+      }
+      setView("main");
+    } catch (e) {
+      toast.error("Commit failed.", { id: "commit" });
     }
   };
   if (!isGitModalOpen) return null;
@@ -266,7 +259,7 @@ export default function GitModal() {
                 Cancel
               </button>
               <button
-                onClick={handleConfirmSync}
+                onClick={handleConfirmCommit}
                 style={{
                   padding: "10px 20px",
                   borderRadius: "8px",
@@ -278,7 +271,7 @@ export default function GitModal() {
                   fontSize: "14px",
                 }}
               >
-                Confirm & Sync
+                Confirm Commit
               </button>
             </div>
           </div>
@@ -292,8 +285,8 @@ export default function GitModal() {
               loading={loading}
               isRepo={isRepo}
               handleInit={handleInit}
-              handleCommitAll={handleCommitAll}
-              handleReviewSync={handleReviewSync}
+              handleReviewCommit={handleReviewCommit}
+              handleSyncVault={handleSyncVault}
               uncommittedChanges={uncommittedChanges}
             />
           </div>
