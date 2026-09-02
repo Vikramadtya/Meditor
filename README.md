@@ -106,41 +106,51 @@ Under the hood, Meditor is a thin Neutralino.js shell wrapping a React + Vite ap
 
 ## 3. Architecture
 
-Meditor is built on three distinct layers:
+Meditor is built on a strict **Domain-Driven Design (DDD) + Layered Architecture**, separating core business logic from infrastructure and presentation concerns. The frontend application is powered by React 19, Vite 8, and Zustand, wrapping around the Neutralino.js native OS shell.
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                   Native OS Shell                        │
-│              (Neutralino.js v5.3.0)                      │
-│   - Borderless window, native title bar drag region     │
-│   - File system access, native dialogs                  │
-│   - App lifecycle events (windowClose, etc.)            │
-└───────────────────────────┬─────────────────────────────┘
-                            │ window.Neutralino API
-┌───────────────────────────▼─────────────────────────────┐
-│                 Web Application Layer                    │
-│              (React 19 + Vite 8 + Zustand)               │
-│                                                         │
-│  ┌──────────┐  ┌──────────┐  ┌──────────────────────┐  │
-│  │ fileStore│  │ uiStore  │  │   settingsStore       │  │
-│  │ (zustand)│  │ (zustand)│  │   (zustand+persist)   │  │
-│  └────┬─────┘  └────┬─────┘  └──────────┬───────────┘  │
-│       │             │                   │               │
-│  ┌────▼─────────────▼───────────────────▼───────────┐  │
-│  │                 Component Tree                    │  │
-│  │  App → [Titlebar, Sidebar, EditorPane, FAB,       │  │
-│  │          SettingsModal, CommandPalette,            │  │
-│  │          GlobalSearchModal]                       │  │
-│  └───────────────────────────────────────────────────┘  │
-└───────────────────────────┬─────────────────────────────┘
-                            │
-┌───────────────────────────▼─────────────────────────────┐
-│                   Service Layer                          │
-│                                                         │
-│   fileService.js   ─── All Neutralino FS operations     │
-│   exportService.js ─── HTML/PDF rendering & download    │
-│   logger.js        ─── Structured console wrapper       │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                          Native OS Shell                        │
+│                       (Neutralino.js v5.3.0)                    │
+│   - Borderless window, native title bar drag region             │
+│   - File system access, native dialogs                          │
+│   - App lifecycle events (windowClose, etc.)                    │
+└─────────────────────────────────┬───────────────────────────────┘
+                                  │ window.Neutralino API
+┌─────────────────────────────────▼───────────────────────────────┐
+│                       Web Application Layer                     │
+│                   (React 19 + Vite 8 + Zustand)                 │
+│                                                                 │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │                        Core (src/core)                    │  │
+│  │   - Shared Kernel: Logger, ErrorBoundary, App Errors      │  │
+│  │   - Global Root Store Composer                            │  │
+│  └──────────────────────────────┬────────────────────────────┘  │
+│                                 │                               │
+│  ┌──────────────────────────────▼────────────────────────────┐  │
+│  │                         Domains (src/domains)             │  │
+│  │                                                           │  │
+│  │   ┌────────────┐ ┌────────────┐ ┌─────────────────────┐   │  │
+│  │   │   Editor   │ │   Vault    │ │     Workspace       │   │  │
+│  │   │  (Markdown │ │ (Notes DB, │ │  (FS, Shell UI)     │   │  │
+│  │   │   parser)  │ │ Favorites) │ │                     │   │  │
+│  │   └────────────┘ └────────────┘ └─────────────────────┘   │  │
+│  │   ┌────────────┐ ┌────────────┐                           │  │
+│  │   │  Settings  │ │  Version   │                           │  │
+│  │   │  (Themes,  │ │  Control   │                           │  │
+│  │   │   Rules)   │ │  (Git sync)│                           │  │
+│  │   └────────────┘ └────────────┘                           │  │
+│  └──────────────────────────────┬────────────────────────────┘  │
+│                                 │                               │
+│  ┌──────────────────────────────▼────────────────────────────┐  │
+│  │                        Layered Design                     │  │
+│  │  Each domain follows strict separation:                   │  │
+│  │  - presentation/: React components and hooks              │  │
+│  │  - application/: Stateless services and Use Cases         │  │
+│  │  - infrastructure/: Adapters (SQLite, Neutralino API)     │  │
+│  │  - store/: Zustand slices and selectors                   │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ### State Management
@@ -604,18 +614,18 @@ appimagetool Meditor.AppDir Meditor-x86_64.AppImage
 
 ### Adding a Custom Markdown Plugin
 
-1. Create `src/utils/markdown-it-your-plugin.js` following the `markdown-it` plugin API.
-2. Import and register it in `src/hooks/useMarkdown.js`:
+1. Create `src/domains/editor/infrastructure/plugins/markdown-it-your-plugin.js` following the `markdown-it` plugin API.
+2. Import and register it in `src/domains/editor/application/MarkdownParser.js`:
 
 ```js
-import yourPlugin from "../utils/markdown-it-your-plugin";
+import yourPlugin from "../infrastructure/plugins/markdown-it-your-plugin";
 // ...
-parser.use(yourPlugin, {/* options */});
+md.use(yourPlugin, {/* options */});
 ```
 
 ### Adding a New Keyboard Shortcut
 
-Open `src/hooks/useKeyboardShortcuts.js` and add a `case` to the `switch` statement:
+Open `src/core/ui/hooks/useKeyboardShortcuts.js` and add a `case` to the `switch` statement:
 
 ```js
 case "m":
@@ -626,9 +636,9 @@ case "m":
 
 ### Adding a New Settings Tab
 
-1. Create `src/components/Settings/YourTab.jsx`.
-2. Register it in `src/components/Settings/SettingsModal.jsx` alongside the existing tab definitions.
-3. Add any new state fields to `settingsStore.js`.
+1. Create `src/domains/settings/presentation/YourTab.jsx`.
+2. Register it in `src/domains/settings/presentation/SettingsModal.jsx` alongside the existing tab definitions.
+3. Add any new state fields to the settings slice/store.
 
 ### Custom Rules (No Code Required)
 
