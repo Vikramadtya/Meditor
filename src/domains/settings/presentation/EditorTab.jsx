@@ -1,7 +1,7 @@
 import React from "react";
 import { Section, Row, ToggleRow } from "./SettingsUI";
 import { selectStyle } from "./SettingsStyles";
-import { useSettingsStore } from "../../store/settingsStore";
+import { useSettingsStore } from "../application/settingsStore";
 
 /**
  * Settings tab for configuring editor preferences.

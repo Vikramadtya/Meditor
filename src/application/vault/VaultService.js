@@ -1,6 +1,6 @@
 import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
-import { Logger } from "../../infrastructure/Logger";
+import { Logger } from "../../core/infrastructure/Logger";
 import initSqlJs from "sql.js";
 
 class VaultService {

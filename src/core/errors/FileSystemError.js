@@ -1,4 +1,4 @@
-import { AppError } from "./AppError.js";
+import { AppError } from "./AppError";
 
 /** Errors originating from filesystem I/O via Neutralino. */
 export class FileSystemError extends AppError {

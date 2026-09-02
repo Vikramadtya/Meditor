@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useStore } from "../store/index";
+import { useStore } from "../core/store/index";
 
 /**
  * Global keyboard shortcut handler.

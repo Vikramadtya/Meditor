@@ -1,6 +1,6 @@
-import { fileSystem as fileService } from "../../../infrastructure/NeutralinoFileSystem.js";
-import { vaultRepository } from "../../../infrastructure/SqliteVaultRepository.js";
-import { vaultService } from "../../vault/VaultService.js";
+import { fileSystem as fileService } from "../../../infrastructure/NeutralinoFileSystem";
+import { vaultRepository } from "../../../infrastructure/SqliteVaultRepository";
+import { vaultService } from "../../vault/VaultService";
 
 /**
  * Search strategy optimized for Vault Mode.

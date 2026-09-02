@@ -1,4 +1,4 @@
-import { autoSaveFile } from "../../store/actions/index.js";
+import { autoSaveFile } from "../../store/actions/index";
 import { useShallow } from "zustand/react/shallow";
 import React, {
   useMemo,
@@ -21,10 +21,10 @@ import { lintGutter } from "@codemirror/lint";
 import prettier from "prettier/standalone";
 import prettierMarkdown from "prettier/plugins/markdown";
 import toast from "react-hot-toast";
-import { useStore } from "../../store/index";
-import { useSettingsStore } from "../../store/settingsStore";
+import { useStore } from "../../core/store/index";
+import { useSettingsStore } from "../../domains/settings/application/settingsStore";
 import { useDragAndDrop } from "../../hooks/useDragAndDrop";
-import { Logger } from "../../infrastructure/Logger";
+import { Logger } from "../../core/infrastructure/Logger";
 const logger = Logger.forContext("App");
 import BubbleMenu from "./BubbleMenu";
 import { slashCommands } from "../../utils/editor/slashCommands";

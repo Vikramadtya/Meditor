@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useStore } from "../store/index";
-import { searchService } from "../application/editor/SearchService.js";
+import { useStore } from "../core/store/index";
+import { searchService } from "../application/editor/SearchService";
 
 export function useTableOfContents() {
   const {

@@ -2,8 +2,8 @@ import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { Section, Row, ToggleRow } from "./SettingsUI";
 import { selectStyle } from "./SettingsStyles";
-import { useSettingsStore } from "../../store/settingsStore";
-import { useStore } from "../../store/index";
+import { useSettingsStore } from "../application/settingsStore";
+import { useStore } from "../../../core/store/index";
 
 /**
  * Settings tab for configuring the Markdown engine.

@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React, { useState } from "react";
 import { X } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../../core/store/index";
 import { iconBtnStyle } from "./SettingsStyles";
 import AppearanceTab from "./AppearanceTab";
 import TypographyTab from "./TypographyTab";

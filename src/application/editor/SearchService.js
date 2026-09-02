@@ -1,6 +1,6 @@
-import { Logger } from "../../infrastructure/Logger.js";
-import { VaultSearchStrategy } from "./search/VaultSearchStrategy.js";
-import { FolderSearchStrategy } from "./search/FolderSearchStrategy.js";
+import { Logger } from "../../core/infrastructure/Logger";
+import { VaultSearchStrategy } from "./search/VaultSearchStrategy";
+import { FolderSearchStrategy } from "./search/FolderSearchStrategy";
 
 const logger = Logger.forContext("SearchService");
 

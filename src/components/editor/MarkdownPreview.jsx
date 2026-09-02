@@ -1,9 +1,9 @@
-import { openNoteByName } from "../../store/actions/index.js";
+import { openNoteByName } from "../../store/actions/index";
 import { useShallow } from "zustand/react/shallow";
 import React, { forwardRef, useEffect, useState } from "react";
 import FrontmatterBlock from "./FrontmatterBlock";
-import { useStore } from "../../store/index";
-import { searchService } from "../../application/editor/SearchService.js";
+import { useStore } from "../../core/store/index";
+import { searchService } from "../../application/editor/SearchService";
 import { Link } from "lucide-react";
 import { useImageInterceptor } from "../../hooks/useImageInterceptor";
 import { useMermaidRenderer } from "../../hooks/useMermaidRenderer";

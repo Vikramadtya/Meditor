@@ -1,5 +1,5 @@
 import React from "react";
-import { useStore } from "../store/index";
+import { useStore } from "../core/store/index";
 import { selectShowDashboard } from "../store/selectors/index";
 
 import Sidebar from "../components/layout/Sidebar";

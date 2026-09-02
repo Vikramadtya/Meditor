@@ -60,7 +60,7 @@ export const slashCommands = (context) => {
         info: "Schedule this note on the Agenda",
         apply: (view, completion, from, to) => {
           view.dispatch({ changes: { from, to, insert: "" } });
-          import("../../store/index").then((m) =>
+          import("../../core/store/index").then((m) =>
             m.useStore.getState().setTagModalOpen(true),
           );
         },

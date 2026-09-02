@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React, { useState, useRef, useEffect } from "react";
-import { useStore } from "../../store/index";
-import { useSettingsStore } from "../../store/settingsStore";
+import { useStore } from "../../core/store/index";
+import { useSettingsStore } from "../../domains/settings/application/settingsStore";
 import "../../styles/Sidebar.css";
 
 /**

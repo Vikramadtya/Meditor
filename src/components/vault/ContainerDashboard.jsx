@@ -1,10 +1,10 @@
 import { useShallow } from "zustand/react/shallow";
-import { openNoteFromVault } from "../../store/actions/index.js";
+import { openNoteFromVault } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
 import { Folder, Book, LayoutGrid, List } from "lucide-react";
 import { GridCard } from "./dashboard/GridCard";
 import { TocView } from "./dashboard/TocView";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { vaultService } from "../../application/vault/VaultService";
 export default function ContainerDashboard() {
   const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal } =

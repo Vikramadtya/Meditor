@@ -4,9 +4,9 @@
  * Orchestrates between fileSystem and vaultService.
  */
 
-import { Logger } from "../../infrastructure/Logger.js";
-import { fileSystem } from "../../infrastructure/NeutralinoFileSystem.js";
-import { vaultService } from "../vault/VaultService.js";
+import { Logger } from "../../core/infrastructure/Logger";
+import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
+import { vaultService } from "../vault/VaultService";
 
 class WorkspaceService {
   constructor() {

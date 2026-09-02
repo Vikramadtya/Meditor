@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React, { useMemo } from "react";
 import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { selectIsDirty } from "../../store/selectors/editor.selectors";
 import { selectShowDashboard } from "../../store/selectors/index";
 

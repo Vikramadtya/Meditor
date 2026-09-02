@@ -1,5 +1,5 @@
 import React from "react";
-import { useStore } from "../store/index";
+import { useStore } from "../core/store/index";
 
 import WelcomeScreen from "../components/layout/WelcomeScreen";
 import WorkspaceRouter from "./WorkspaceRouter";

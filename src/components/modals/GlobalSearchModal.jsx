@@ -1,9 +1,9 @@
 import { useShallow } from "zustand/react/shallow";
-import { openFile } from "../../store/actions/index.js";
-import { Logger } from "../../infrastructure/Logger";
+import { openFile } from "../../store/actions/index";
+import { Logger } from "../../core/infrastructure/Logger";
 import React, { useState, useEffect } from "react";
 import { Search, FileText } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
 
 /**

@@ -15,7 +15,7 @@ import {
   FolderPlus,
   Trash2,
 } from "lucide-react";
-import { useStore } from "../../../store/index";
+import { useStore } from "../../../core/store/index";
 import { vaultService } from "../../../application/vault/VaultService";
 export default function VaultNode({ item, level }) {
   const [expanded, setExpanded] = useState(false);

@@ -1,7 +1,7 @@
 import React from "react";
 import { Clock, Columns, Eye, RotateCcw } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
-import { useStore } from "../../../store/index";
+import { useStore } from "../../../core/store/index";
 export function GitCommitPreview({
   theme,
   selectedCommit,

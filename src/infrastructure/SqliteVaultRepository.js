@@ -1,4 +1,4 @@
-import { Logger } from "./Logger.js";
+import { Logger } from "../core/infrastructure/Logger";
 class SqliteVaultRepository {
   constructor() {
     this.db = null;

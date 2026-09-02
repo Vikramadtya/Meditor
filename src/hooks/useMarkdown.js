@@ -8,8 +8,8 @@ import customRulesPlugin from "../utils/markdown-it-custom-rules";
 import markdownItMkDocsTabs from "../utils/markdown-it-mkdocs-tabs";
 import markdownItMark from "markdown-it-mark";
 import wikilinksPlugin from "../utils/markdown-it-wikilinks";
-import { useStore } from "../store/index";
-import { Logger } from "../infrastructure/Logger";
+import { useStore } from "../core/store/index";
+import { Logger } from "../core/infrastructure/Logger";
 const log = Logger.forContext("useMarkdown");
 
 let mdInstance = null;

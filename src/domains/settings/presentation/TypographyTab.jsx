@@ -1,7 +1,7 @@
 import React from "react";
 import { Section, Row } from "./SettingsUI";
 import { selectStyle, rangeStyle, chipStyle } from "./SettingsStyles";
-import { useSettingsStore, PROSE_FONTS } from "../../store/settingsStore";
+import { useSettingsStore, PROSE_FONTS } from "../application/settingsStore";
 
 /**
  * Settings tab for configuring typography preferences.

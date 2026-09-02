@@ -21,7 +21,7 @@ import {
   FileCode,
   FileText,
 } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { exportService } from "../../application/editor/ExportService";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 

@@ -1,6 +1,6 @@
-import { openNoteFromVault } from "../../store/actions/index.js";
+import { openNoteFromVault } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { Star, FileText } from "lucide-react";
 import { noteService } from "../../application/vault/NoteService";
 

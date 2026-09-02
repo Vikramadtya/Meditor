@@ -19,7 +19,7 @@ import {
   BrainCircuit,
   Tag,
 } from "lucide-react";
-import { useStore } from "../../../store/index";
+import { useStore } from "../../../core/store/index";
 import { noteService } from "../../../application/vault/NoteService";
 import { vaultService } from "../../../application/vault/VaultService";
 

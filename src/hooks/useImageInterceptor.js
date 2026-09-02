@@ -13,8 +13,8 @@
 
 import { useEffect } from "react";
 import { fileSystem as fileService } from "../infrastructure/NeutralinoFileSystem";
-import { Logger } from "../infrastructure/Logger";
-import { useStore } from "../store/index";
+import { Logger } from "../core/infrastructure/Logger";
+import { useStore } from "../core/store/index";
 
 const logger = Logger.forContext("ImageInterceptor");
 

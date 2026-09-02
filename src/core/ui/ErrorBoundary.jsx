@@ -1,5 +1,5 @@
 import React from "react";
-import { Logger } from "../../infrastructure/Logger";
+import { Logger } from "../infrastructure/Logger";
 const logger = Logger.forContext("App");
 import { AlertOctagon, RefreshCw } from "lucide-react";
 

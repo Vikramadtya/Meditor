@@ -13,11 +13,11 @@ import { useMemo } from "react";
 import { EditorView } from "@codemirror/view";
 import toast from "react-hot-toast";
 import { fileSystem as fileService } from "../infrastructure/NeutralinoFileSystem";
-import { Logger } from "../infrastructure/Logger";
-import { useStore } from "../store/index";
+import { Logger } from "../core/infrastructure/Logger";
+import { useStore } from "../core/store/index";
 import { vaultRepository } from "../infrastructure/SqliteVaultRepository";
 import { vaultService } from "../application/vault/VaultService";
-import { generateId } from "../utils/generateId";
+import { generateId } from "../core/utils/generateId";
 import { clearImageCache } from "./useMarkdown";
 
 const logger = Logger.forContext("DragAndDrop");

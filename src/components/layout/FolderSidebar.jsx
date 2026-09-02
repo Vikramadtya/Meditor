@@ -1,8 +1,8 @@
 import { useShallow } from "zustand/react/shallow";
-import { createNewFile, createNewFolder } from "../../store/actions/index.js";
+import { createNewFile, createNewFolder } from "../../store/actions/index";
 import React, { useState, useRef, useEffect } from "react";
 import { Folder, FileText, FilePlus, FolderPlus } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { FileTree } from "./FileTree";
 
 /**

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { ActivityCalendar } from "react-activity-calendar";
 import { BarChart2, Brain, FileText, Tag, Star, Zap } from "lucide-react";
 import { subYears, eachDayOfInterval, format } from "date-fns";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { ActivityHeatmap } from "./analytics/ActivityHeatmap";
 import { ContainerDistribution } from "./analytics/ContainerDistribution";

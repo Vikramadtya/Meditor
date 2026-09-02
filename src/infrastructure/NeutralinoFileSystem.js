@@ -4,13 +4,13 @@
  * All Neutralino calls are isolated here — nothing else touches window.Neutralino.filesystem.
  */
 
-import { Logger } from "./Logger.js";
+import { Logger } from "../core/infrastructure/Logger";
 import {
   FileNotFoundError,
   FileWriteError,
   DirectoryReadError,
   FileSystemError,
-} from "../domain/errors/index.js";
+} from "../core/errors/index.js";
 
 /**
  * @typedef {Object} DirectoryEntry

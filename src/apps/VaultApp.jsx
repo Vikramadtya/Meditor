@@ -1,6 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
-import { useStore } from "../store/index";
+import { useStore } from "../core/store/index";
 const AgendaPage = lazy(() => import("../components/vault/AgendaPage"));
 import { lazy, Suspense } from "react";
 const GlobalDashboard = lazy(

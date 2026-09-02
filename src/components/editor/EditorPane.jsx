@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React, { useEffect, useRef } from "react";
-import { useStore } from "../../store/index";
-import { useSettingsStore } from "../../store/settingsStore";
+import { useStore } from "../../core/store/index";
+import { useSettingsStore } from "../../domains/settings/application/settingsStore";
 import { useMarkdown } from "../../hooks/useMarkdown";
 import { useScrollSync } from "../../hooks/useScrollSync";
 import CodeEditor from "./CodeEditor";

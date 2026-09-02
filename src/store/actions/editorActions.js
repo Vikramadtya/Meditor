@@ -1,8 +1,8 @@
-import { useStore } from "../index.js";
-import { loadWorkspace } from "./workspaceActions.js";
-import { vaultService } from "../../application/vault/VaultService.js";
-import { fileSystem } from "../../infrastructure/NeutralinoFileSystem.js";
-import { Logger } from "../../infrastructure/Logger.js";
+import { useStore } from "../../core/store/index";
+import { loadWorkspace } from "./workspaceActions";
+import { vaultService } from "../../application/vault/VaultService";
+import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
+import { Logger } from "../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
 
 const log = Logger.forContext("EditorActions");
@@ -83,7 +83,8 @@ export const saveActiveFile = async () => {
       currentFolder,
       markSaved,
     } = useStore.getState();
-    const { useSettingsStore } = await import("../settingsStore.js");
+    const { useSettingsStore } =
+      await import("../../domains/settings/application/settingsStore");
     const { editorConfig } = useSettingsStore.getState();
 
     const state = useStore.getState();
@@ -114,7 +115,8 @@ export const autoSaveFile = async () => {
   const { currentFilePath, markdown, markSaved } = useStore.getState();
   if (!currentFilePath) return;
   try {
-    const { useSettingsStore } = await import("../settingsStore.js");
+    const { useSettingsStore } =
+      await import("../../domains/settings/application/settingsStore");
     const { editorConfig } = useSettingsStore.getState();
     const activeTab = useStore
       .getState()

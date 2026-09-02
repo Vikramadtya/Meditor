@@ -1,5 +1,5 @@
-import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem.js";
-import { logger } from "../../infrastructure/Logger.js";
+import { fileSystem as fileService } from "../../infrastructure/NeutralinoFileSystem";
+import { logger } from "../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
 
 export const exportService = {

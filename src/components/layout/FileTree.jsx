@@ -1,8 +1,8 @@
 import { useShallow } from "zustand/react/shallow";
-import { openFileFromSidebar } from "../../store/actions/index.js";
+import { openFileFromSidebar } from "../../store/actions/index";
 import React from "react";
 import { Folder, FileText, CornerLeftUp } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 
 /**
  * Renders a list of files and directories for a sidebar.

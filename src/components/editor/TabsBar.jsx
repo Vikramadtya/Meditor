@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { X, FileText } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import "../../styles/TabsBar.css";
 
 /**

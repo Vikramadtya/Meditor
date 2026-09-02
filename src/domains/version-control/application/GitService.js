@@ -4,9 +4,9 @@
  * the store/components from raw git infrastructure.
  */
 
-import { Logger } from "../../infrastructure/Logger.js";
-import { gitRepository } from "../../infrastructure/GitRepository.js";
-import { GitError } from "../../domain/errors/index.js";
+import { Logger } from "../../../core/infrastructure/Logger";
+import { gitRepository } from "../infrastructure/GitRepository";
+import { GitError } from "../../../core/errors/index";
 
 class GitService {
   constructor() {

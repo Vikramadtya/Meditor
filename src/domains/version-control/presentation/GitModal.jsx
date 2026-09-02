@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { useModalEscape } from "../../hooks/useModalEscape";
+import { useModalEscape } from "../../../hooks/useModalEscape";
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -11,20 +11,20 @@ import {
   Cloud,
   FileText,
 } from "lucide-react";
-import { useStore } from "../../store/index";
-import { selectRepoPath } from "../../store/selectors/vault.selectors";
-import { gitService } from "../../application/git/GitService";
+import { useStore } from "../../../core/store/index";
+import { selectRepoPath } from "../../../store/selectors/vault.selectors";
+import { gitService } from "../application/GitService";
 import {
   iconBtnStyle,
   chipStyle,
   inputStyle,
-} from "../Settings/SettingsStyles";
+} from "../../settings/presentation/SettingsStyles";
 import toast from "react-hot-toast";
-import { Logger } from "../../infrastructure/Logger";
+import { Logger } from "../../../core/infrastructure/Logger";
 const log = Logger.forContext("GitModal");
-import { GitStatusView } from "./git/GitStatusView";
-import { GitDiffViewer } from "./git/GitDiffViewer";
-import { GitCommitForm } from "./git/GitCommitForm";
+import { GitStatusView } from "./GitStatusView";
+import { GitDiffViewer } from "./GitDiffViewer";
+import { GitCommitForm } from "./GitCommitForm";
 
 /**
  * Modal component for managing Git operations within the vault.

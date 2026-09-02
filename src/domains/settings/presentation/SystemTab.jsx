@@ -2,7 +2,7 @@ import React from "react";
 import { Trash2 } from "lucide-react";
 import { Section, Row } from "./SettingsUI";
 import { inputStyle, chipStyle } from "./SettingsStyles";
-import { useSettingsStore } from "../../store/settingsStore";
+import { useSettingsStore } from "../application/settingsStore";
 
 /**
  * Settings tab for configuring system and storage preferences.
@@ -60,7 +60,7 @@ export default function SystemTab() {
         <button
           onClick={async () => {
             const { fileSystem } =
-              await import("../../infrastructure/NeutralinoFileSystem");
+              await import("../../../infrastructure/NeutralinoFileSystem");
             fileSystem.clearDirectoryCache();
             alert("Cache cleared successfully!");
           }}

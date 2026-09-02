@@ -1,8 +1,8 @@
 import { useShallow } from "zustand/react/shallow";
-import { reloadVaultHierarchy } from "../../store/actions/index.js";
+import { reloadVaultHierarchy } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
 import { FolderPlus, FileText, X } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { vaultService } from "../../application/vault/VaultService";
 export default function CreateVaultItemModal() {
   const {

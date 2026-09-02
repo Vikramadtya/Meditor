@@ -1,9 +1,9 @@
 import { useShallow } from "zustand/react/shallow";
-import { openNoteFromVault } from "../../store/actions/index.js";
+import { openNoteFromVault } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
 import { Sun, FileText, Clock, Plus } from "lucide-react";
 import { format, startOfDay } from "date-fns";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
 /**

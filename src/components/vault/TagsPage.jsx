@@ -1,7 +1,7 @@
-import { openNoteFromVault } from "../../store/actions/index.js";
+import { openNoteFromVault } from "../../store/actions/index";
 import React, { useState, useEffect, useCallback } from "react";
 import { Tag, FileText, Hash } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 
 /**

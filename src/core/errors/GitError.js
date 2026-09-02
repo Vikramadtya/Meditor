@@ -1,4 +1,4 @@
-import { AppError } from "./AppError.js";
+import { AppError } from "./AppError";
 
 /** Errors from Git operations. */
 export class GitError extends AppError {

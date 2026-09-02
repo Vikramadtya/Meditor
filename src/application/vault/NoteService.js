@@ -4,9 +4,9 @@
  * Single Responsibility: only concerned with note metadata and state.
  */
 
-import { Logger } from "../../infrastructure/Logger.js";
-import { vaultRepository } from "../../infrastructure/SqliteVaultRepository.js";
-import { vaultService } from "./VaultService.js";
+import { Logger } from "../../core/infrastructure/Logger";
+import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
+import { vaultService } from "./VaultService";
 
 class NoteService {
   constructor() {

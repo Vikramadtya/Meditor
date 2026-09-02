@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2, Edit2, Save } from "lucide-react";
 import { chipStyle, inputStyle, iconBtnStyle } from "./SettingsStyles";
-import { useSettingsStore } from "../../store/settingsStore";
+import { useSettingsStore } from "../application/settingsStore";
 
 /**
  * Settings tab for managing custom markdown rendering rules using Regular Expressions.

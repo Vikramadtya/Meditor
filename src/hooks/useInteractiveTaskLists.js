@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useStore as useDocumentStore } from "../store/index";
+import { useStore as useDocumentStore } from "../core/store/index";
 
 /**
  * Hook to enable interactive task lists in rendered markdown.

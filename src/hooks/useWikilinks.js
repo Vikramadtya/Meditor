@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { searchService } from "../application/editor/SearchService.js";
-import { useStore } from "../store/index.js";
+import { searchService } from "../application/editor/SearchService";
+import { useStore } from "../core/store/index";
 
 /**
  * Hook to handle clicks on wikilinks in rendered Markdown.

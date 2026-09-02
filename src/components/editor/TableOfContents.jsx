@@ -1,8 +1,8 @@
-import { openNoteByName } from "../../store/actions/index.js";
+import { openNoteByName } from "../../store/actions/index";
 import React, { useState, useEffect, useMemo } from "react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { useTableOfContents } from "../../hooks/useTableOfContents";
-import { searchService } from "../../application/editor/SearchService.js";
+import { searchService } from "../../application/editor/SearchService";
 
 /**
  * Renders the table of contents sidebar, providing an outline of the markdown document

@@ -1,6 +1,6 @@
 import React from "react";
 import { FolderGit2, History, Cloud, Save, RefreshCw } from "lucide-react";
-import { chipStyle } from "../../Settings/SettingsStyles";
+import { chipStyle } from "../../settings/presentation/SettingsStyles";
 import { GitDiffViewer } from "./GitDiffViewer";
 export function GitStatusView({
   loading,

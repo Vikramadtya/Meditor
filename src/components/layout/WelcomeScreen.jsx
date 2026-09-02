@@ -5,7 +5,7 @@ import {
 } from "../../store/actions/index.js";
 import React from "react";
 import { Folder, FolderOpen } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 
 /**
  * A welcome screen shown to the user when no workspace or vault is currently open.

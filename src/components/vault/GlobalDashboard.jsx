@@ -1,8 +1,8 @@
 import { useShallow } from "zustand/react/shallow";
-import { openNoteFromVault } from "../../store/actions/index.js";
+import { openNoteFromVault } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { Folder, FileText, CalendarDays } from "lucide-react";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 export default function GlobalDashboard() {

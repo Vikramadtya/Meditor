@@ -1,10 +1,10 @@
-import { openNoteFromVault } from "../../store/actions/index.js";
+import { openNoteFromVault } from "../../store/actions/index";
 import React, { useState, useEffect, useCallback } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import { CalendarDays, FileText, X } from "lucide-react";
 import { format, startOfDay, endOfDay } from "date-fns";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";
 import { noteService } from "../../application/vault/NoteService";
 import toast from "react-hot-toast";

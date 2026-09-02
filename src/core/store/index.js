@@ -18,16 +18,19 @@ import { immer } from "zustand/middleware/immer";
 import { persist, createJSONStorage } from "zustand/middleware";
 import toast from "react-hot-toast";
 
-import { createEditorSlice, WELCOME_MD } from "./slices/editorSlice.js";
-import { createUISlice } from "./slices/uiSlice.js";
-import { createVaultSlice } from "./slices/vaultSlice.js";
+import {
+  createEditorSlice,
+  WELCOME_MD,
+} from "../../store/slices/editorSlice.js";
+import { createUISlice } from "../../store/slices/uiSlice.js";
+import { createVaultSlice } from "../../store/slices/vaultSlice.js";
 
-import { Logger } from "../infrastructure/Logger.js";
-import { fileSystem } from "../infrastructure/NeutralinoFileSystem.js";
-import { vaultRepository } from "../infrastructure/SqliteVaultRepository.js";
-import { vaultService } from "../application/vault/VaultService.js";
-import { workspaceService } from "../application/workspace/WorkspaceService.js";
-import { gitService } from "../application/git/GitService.js";
+import { Logger } from "../infrastructure/Logger";
+import { fileSystem } from "../../infrastructure/NeutralinoFileSystem.js";
+import { vaultRepository } from "../../infrastructure/SqliteVaultRepository.js";
+import { vaultService } from "../../application/vault/VaultService.js";
+import { workspaceService } from "../../application/workspace/WorkspaceService.js";
+import { gitService } from "../../domains/version-control/application/GitService";
 
 const log = Logger.forContext("Store");
 

@@ -1,4 +1,4 @@
-import { AppError } from "./AppError.js";
+import { AppError } from "./AppError";
 
 /** Errors originating from Vault operations (SQLite, hierarchy). */
 export class VaultError extends AppError {

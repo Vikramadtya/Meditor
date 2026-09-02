@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { ActivityCalendar } from "react-activity-calendar";
-import { useStore } from "../../../store/index";
+import { useStore } from "../../../core/store/index";
 export function ActivityHeatmap({ heatmapData }) {
   const { theme } = useStore(
     useShallow((s) => ({

@@ -1,7 +1,7 @@
-import { useStore } from "../index.js";
-import { openFile } from "./editorActions.js";
-import { vaultService } from "../../application/vault/VaultService.js";
-import { Logger } from "../../infrastructure/Logger.js";
+import { useStore } from "../../core/store/index";
+import { openFile } from "./editorActions";
+import { vaultService } from "../../application/vault/VaultService";
+import { Logger } from "../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
 
 const log = Logger.forContext("VaultActions");

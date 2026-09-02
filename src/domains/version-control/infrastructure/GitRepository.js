@@ -3,12 +3,12 @@
  * Wraps Neutralino shell commands. Single place for all git operations.
  */
 
-import { Logger } from "./Logger.js";
+import { Logger } from "../../../core/infrastructure/Logger";
 import {
   GitCommandError,
   GitNotInitializedError,
   GitSyncError,
-} from "../domain/errors/index.js";
+} from "../../../core/errors/index.js";
 
 /**
  * Git operations adapter using Neutralino os.execCommand.

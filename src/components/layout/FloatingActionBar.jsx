@@ -17,7 +17,7 @@ import {
   Star,
   History,
 } from "lucide-react";
-import { useStore } from "../../store/index";
+import { useStore } from "../../core/store/index";
 import { selectIsVaultNote } from "../../store/selectors/index";
 import { noteService } from "../../application/vault/NoteService";
 import { vaultRepository } from "../../infrastructure/SqliteVaultRepository";

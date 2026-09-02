@@ -1,4 +1,4 @@
-import { Logger } from "../infrastructure/Logger";
+import { Logger } from "../core/infrastructure/Logger";
 /**
  * Markdown-It plugin to apply custom regex-based replacements to inline text.
  *

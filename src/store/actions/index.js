@@ -1,3 +1,3 @@
-export * from "./workspaceActions.js";
-export * from "./editorActions.js";
-export * from "./vaultActions.js";
+export * from "./workspaceActions";
+export * from "./editorActions";
+export * from "./vaultActions";
