@@ -6,14 +6,6 @@ const logger = Logger.forContext("App");
 let mermaidRenderQueue = Promise.resolve();
 const mermaidCache = new Map();
 
-/**
- * Hook to render Mermaid diagrams in markdown content.
- * Replaces `code.language-mermaid` blocks with rendered SVG diagrams.
- *
- * @param {import("react").RefObject<HTMLElement>} proseRef - Reference to the element containing the rendered markdown.
- * @param {string} htmlContent - The rendered HTML content.
- * @param {string} theme - The current UI theme ("light" or "dark").
- */
 export function useMermaidRenderer(proseRef, htmlContent, theme) {
   const effectIdRef = useRef(0);
 
@@ -24,7 +16,6 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
       theme: theme === "dark" ? "dark" : "default",
     });
 
-    // Find all markdown code blocks tagged with "mermaid"
     const mermaidNodes = proseRef.current.querySelectorAll(
       "code.language-mermaid",
     );
@@ -39,26 +30,26 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
         for (let i = 0; i < mermaidNodes.length; i++) {
           if (!isMounted || currentEffectId !== effectIdRef.current) break;
           const node = mermaidNodes[i];
-          const parent = node.parentElement; // The <pre> tag
+          const parent = node.parentElement;
           if (parent && parent.tagName === "PRE") {
             const rawText = node.textContent;
 
-            // If we have a cached SVG for this exact text, inject it synchronously!
             if (mermaidCache.has(rawText)) {
-              const svg = mermaidCache.get(rawText);
-              if (svg) {
-                const div = document.createElement("div");
-                div.className = "mermaid-diagram";
-                div.innerHTML = svg;
-                parent.replaceWith(div);
+              const cachedSvg = mermaidCache.get(rawText);
+              const div = document.createElement("div");
+              div.className = "mermaid-diagram";
+              if (cachedSvg.startsWith("<svg")) {
+                div.innerHTML = cachedSvg;
+              } else {
+                div.innerHTML = `<pre style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; overflow-x: auto;">Mermaid Error:\n${cachedSvg}</pre>`;
               }
-              continue; // Skip async render
+              parent.replaceWith(div);
+              continue;
             }
 
             const id = `mermaid-svg-${Date.now()}-${i}-${currentEffectId}`;
 
-            // Queue mermaid renders to prevent concurrent render errors
-            const { svg } = await new Promise((resolve, reject) => {
+            const { svg, error } = await new Promise((resolve) => {
               mermaidRenderQueue = mermaidRenderQueue
                 .then(async () => {
                   if (!isMounted || currentEffectId !== effectIdRef.current) {
@@ -67,30 +58,37 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
                   }
                   try {
                     const result = await mermaid.render(id, rawText);
-                    resolve(result);
+                    resolve({ svg: result.svg });
                   } catch (e) {
-                    reject(e);
+                    resolve({ error: e.message || String(e) });
                   }
                 })
                 .catch((err) => {
-                  reject(err);
+                  resolve({ error: err.message || String(err) });
                 });
             });
 
-            if (svg && isMounted && currentEffectId === effectIdRef.current) {
-              mermaidCache.set(rawText, svg);
+            if (
+              (svg || error) &&
+              isMounted &&
+              currentEffectId === effectIdRef.current
+            ) {
               const div = document.createElement("div");
               div.className = "mermaid-diagram";
-              div.innerHTML = svg;
+              if (svg) {
+                div.innerHTML = svg;
+                mermaidCache.set(rawText, svg);
+              } else if (error) {
+                const errorStr = `Mermaid Error:\n${error}`;
+                div.innerHTML = `<pre style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; overflow-x: auto;">${errorStr}</pre>`;
+                mermaidCache.set(rawText, errorStr);
+              }
               parent.replaceWith(div);
             }
           }
         }
       } catch (err) {
-        logger.warn("Mermaid rendering error", err);
-        import("react-hot-toast").then(({ default: toast }) => {
-          toast.error("Mermaid error: " + err.message);
-        });
+        logger.error("Error in useMermaidRenderer", err);
       }
     };
 
@@ -99,5 +97,5 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
     return () => {
       isMounted = false;
     };
-  }, [htmlContent, theme, proseRef]);
+  }, [htmlContent, theme]);
 }

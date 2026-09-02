@@ -7,6 +7,16 @@ import toast from "react-hot-toast";
 
 const log = Logger.forContext("EditorActions");
 
+function splitFrontmatter(text) {
+  if (text.startsWith("---")) {
+    const match = text.match(/^---\n[\\s\\S]*?\n---\n/);
+    if (match) {
+      return { fm: match[0], content: text.slice(match[0].length) };
+    }
+  }
+  return { fm: "", content: text };
+}
+
 async function formatMarkdown(text) {
   try {
     const prettier = (await import("prettier/standalone.js")).default;
@@ -33,12 +43,18 @@ export const openFile = async (
       (t) => t.id === fullPath || t.currentFilePath === fullPath,
     );
     if (existing) {
-      if (vaultItem) existing.vaultItem = vaultItem;
+      if (vaultItem) {
+        useStore.setState((s) => {
+          const t = s.tabs.find((x) => x.id === existing.id);
+          if (t) t.vaultItem = vaultItem;
+        });
+      }
       state.setActiveTab(existing.id);
       useStore.setState({ isEditMode: false });
       return;
     }
-    const content = await fileSystem.readFile(fullPath);
+    const rawContent = await fileSystem.readFile(fullPath);
+    const { fm, content } = splitFrontmatter(rawContent);
     const fileName = logicalName ?? fullPath.split(/[/\\]/).pop();
     state.openTab({
       id: fullPath,
@@ -46,6 +62,7 @@ export const openFile = async (
       currentFilePath: fullPath,
       markdown: content,
       savedMarkdown: content,
+      frontmatterRaw: fm,
       isDirty: false,
       vaultItem,
     });
@@ -69,13 +86,16 @@ export const saveActiveFile = async () => {
     const { useSettingsStore } = await import("../settingsStore.js");
     const { editorConfig } = useSettingsStore.getState();
 
+    const state = useStore.getState();
+    const activeTab = state.tabs.find((t) => t.id === state.activeTabId);
+    const fm = activeTab?.frontmatterRaw || "";
     let content = markdown;
     let savePath = currentFilePath;
     if (editorConfig?.autoFormatOnSave) content = await formatMarkdown(content);
     if (!savePath) savePath = await fileSystem.showSaveDialog();
     if (!savePath) return;
 
-    await fileSystem.writeFile(savePath, content);
+    await fileSystem.writeFile(savePath, fm + content);
     markSaved(savePath, content);
 
     if (workspaceMode === "folder" && currentFolder) {
@@ -96,10 +116,14 @@ export const autoSaveFile = async () => {
   try {
     const { useSettingsStore } = await import("../settingsStore.js");
     const { editorConfig } = useSettingsStore.getState();
+    const activeTab = useStore
+      .getState()
+      .tabs.find((t) => t.id === useStore.getState().activeTabId);
+    const fm = activeTab?.frontmatterRaw || "";
     let content = editorConfig?.autoFormatOnSave
       ? await formatMarkdown(markdown)
       : markdown;
-    await fileSystem.writeFile(currentFilePath, content);
+    await fileSystem.writeFile(currentFilePath, fm + content);
     markSaved(currentFilePath, content);
     log.info(`Auto-saved: ${currentFilePath}`);
   } catch (err) {

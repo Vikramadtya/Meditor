@@ -1,7 +1,9 @@
 import React from "react";
 import { Clock, Columns, Eye, RotateCcw } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
+import { useStore } from "../../../store/index";
 export function GitCommitPreview({
+  theme,
   selectedCommit,
   viewMode,
   setViewMode,
@@ -190,11 +192,21 @@ export function GitCommitPreview({
             newValue={markdown}
             splitView={true}
             hideLineNumbers={false}
-            useDarkTheme={true}
+            useDarkTheme={theme === "dark"}
             leftTitle="Historical Version"
             rightTitle="Current Version"
             styles={{
               variables: {
+                light: {
+                  diffViewerBackground: "transparent",
+                  diffViewerTitleBackground: "var(--bg-secondary)",
+                  addedBackground: "rgba(34, 197, 94, 0.15)",
+                  addedColor: "#166534",
+                  removedBackground: "rgba(239, 68, 68, 0.15)",
+                  removedColor: "#991b1b",
+                  wordAddedBackground: "rgba(34, 197, 94, 0.3)",
+                  wordRemovedBackground: "rgba(239, 68, 68, 0.3)",
+                },
                 dark: {
                   diffViewerBackground: "transparent",
                   diffViewerTitleBackground: "var(--bg-secondary)",

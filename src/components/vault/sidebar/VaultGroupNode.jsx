@@ -1,7 +1,14 @@
 import { useShallow } from "zustand/react/shallow";
 import { reloadVaultHierarchy } from "../../../store/actions/index.js";
 import React, { useState, useEffect } from "react";
-import { ChevronRight, ChevronDown, Plus, Trash2 } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronDown,
+  Plus,
+  FilePlus,
+  FolderPlus,
+  Trash2,
+} from "lucide-react";
 import { useStore } from "../../../store/index";
 import { vaultService } from "../../../application/vault/VaultService";
 import VaultNode from "./VaultNode";

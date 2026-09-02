@@ -11,6 +11,8 @@ import {
   ChevronRight,
   ChevronDown,
   Plus,
+  FilePlus,
+  FolderPlus,
   Trash2,
 } from "lucide-react";
 import { useStore } from "../../../store/index";

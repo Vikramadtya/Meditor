@@ -355,6 +355,8 @@ class VaultService {
         vaultRepository.deleteContainerById(id);
       }
       await this.saveVault();
+      const parentRelPath = relPath.substring(0, relPath.lastIndexOf("/"));
+      this.notify(parentRelPath);
     }
   }
 

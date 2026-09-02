@@ -6,6 +6,7 @@ import markdownItKatex from "markdown-it-katex";
 import admonitionPlugin from "../utils/markdown-it-admonitions";
 import customRulesPlugin from "../utils/markdown-it-custom-rules";
 import markdownItMkDocsTabs from "../utils/markdown-it-mkdocs-tabs";
+import markdownItMark from "markdown-it-mark";
 import wikilinksPlugin from "../utils/markdown-it-wikilinks";
 import { useStore } from "../store/index";
 import { Logger } from "../infrastructure/Logger";
@@ -44,6 +45,7 @@ function getMarkdownInstance(mdConfig) {
   parser.use(markdownItKatex);
   parser.use(admonitionPlugin);
   parser.use(markdownItMkDocsTabs);
+  parser.use(markdownItMark);
   parser.use(wikilinksPlugin);
   parser.use(customRulesPlugin, { customRules: mdConfig.customRules });
 

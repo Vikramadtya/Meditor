@@ -20,11 +20,12 @@ import { GitCommitPreview } from "./git/GitCommitPreview";
  * @returns {React.ReactElement|null} The Git history modal or null if not open.
  */
 export default function GitHistoryModal({ isOpen, onClose }) {
-  const { currentFilePath, fileName, markdown, setMarkdown } = useStore(
+  const { currentFilePath, fileName, markdown, setMarkdown, theme } = useStore(
     useShallow((s) => ({
       currentFilePath: s.currentFilePath,
       fileName: s.fileName,
       markdown: s.markdown,
+      theme: s.theme,
       setMarkdown: s.setMarkdown,
     })),
   );
@@ -155,6 +156,7 @@ export default function GitHistoryModal({ isOpen, onClose }) {
             onSelectCommit={handleSelectCommit}
           />
           <GitCommitPreview
+            theme={theme}
             selectedCommit={selectedCommit}
             viewMode={viewMode}
             setViewMode={setViewMode}
