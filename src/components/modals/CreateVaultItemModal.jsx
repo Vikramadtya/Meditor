@@ -23,11 +23,29 @@ export default function CreateVaultItemModal() {
   useEffect(() => {
     if (isOpen) {
       setName("");
-      setSelectedType(type === "auto" || !type ? "note" : type);
-      setAllowedTypes(["note", "container"]);
+      // If parentId has no slash, it's a root group. Root groups can ONLY hold collections.
+      const isGroup = parentId && !parentId.includes("/");
+
+      if (isGroup) {
+        setSelectedType("container");
+        setAllowedTypes(["container"]);
+      } else {
+        setSelectedType(
+          type === "auto" || !type
+            ? "note"
+            : type === "container"
+              ? "note"
+              : type,
+        );
+        // We default to note if they didn't explicitly restrict, but wait, type === "container" shouldn't lock it if it was passed accidentally.
+        // Actually, let's always default to Note if allowed both, but if type is explicitly set to something else, we use it.
+        // In VaultNode.jsx, we will pass "auto".
+        setSelectedType(type === "auto" || !type ? "note" : type);
+        setAllowedTypes(["note", "container"]);
+      }
 
       // Enforce the rule: only one type of children per container
-      if (parentId) {
+      if (parentId && !isGroup) {
         vaultService.getFolderContents(parentId).then((children) => {
           const hasNotes = children.some((c) => c.type === "note");
           const hasContainers = children.some((c) => c.type === "container");

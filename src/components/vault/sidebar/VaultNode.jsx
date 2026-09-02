@@ -118,7 +118,7 @@ export default function VaultNode({ item, level }) {
             onClick={(e) => {
               e.stopPropagation();
               setExpanded(true);
-              openCreateVaultItemModal("container", item.path);
+              openCreateVaultItemModal("auto", item.path);
             }}
             style={{
               display: "flex",

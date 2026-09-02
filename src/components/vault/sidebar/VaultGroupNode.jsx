@@ -92,7 +92,7 @@ export default function VaultGroupNode({ group }) {
           onClick={(e) => {
             e.stopPropagation();
             setExpanded(true);
-            openCreateVaultItemModal("container", group.path);
+            openCreateVaultItemModal("auto", group.path);
           }}
           style={{
             opacity: hovered ? 1 : 0,
