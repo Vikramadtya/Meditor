@@ -1,20 +1,31 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { useStore } from "../core/store/index";
-const AgendaPage = lazy(() => import("../components/vault/AgendaPage"));
+const AgendaPage = lazy(
+  () => import("../domains/vault/presentation/components/vault/AgendaPage"),
+);
 import { lazy, Suspense } from "react";
 const GlobalDashboard = lazy(
-  () => import("../components/vault/GlobalDashboard"),
+  () =>
+    import("../domains/vault/presentation/components/vault/GlobalDashboard"),
 );
 const ContainerDashboard = lazy(
-  () => import("../components/vault/ContainerDashboard"),
+  () =>
+    import("../domains/vault/presentation/components/vault/ContainerDashboard"),
 );
 const FavoritesDashboard = lazy(
-  () => import("../components/vault/FavoritesDashboard"),
+  () =>
+    import("../domains/vault/presentation/components/vault/FavoritesDashboard"),
 );
-const TodayPage = lazy(() => import("../components/vault/TodayPage"));
-const AnalyticsPage = lazy(() => import("../components/vault/AnalyticsPage"));
-const TagsPage = lazy(() => import("../components/vault/TagsPage"));
+const TodayPage = lazy(
+  () => import("../domains/vault/presentation/components/vault/TodayPage"),
+);
+const AnalyticsPage = lazy(
+  () => import("../domains/vault/presentation/components/vault/AnalyticsPage"),
+);
+const TagsPage = lazy(
+  () => import("../domains/vault/presentation/components/vault/TagsPage"),
+);
 const PAGE_MAP = {
   agenda: AgendaPage,
   container: ContainerDashboard,

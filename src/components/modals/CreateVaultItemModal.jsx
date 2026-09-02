@@ -3,7 +3,7 @@ import { reloadVaultHierarchy } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
 import { FolderPlus, FileText, X } from "lucide-react";
 import { useStore } from "../../core/store/index";
-import { vaultService } from "../../application/vault/VaultService";
+import { vaultService } from "../../domains/vault/application/VaultService";
 export default function CreateVaultItemModal() {
   const {
     createVaultItemModal,

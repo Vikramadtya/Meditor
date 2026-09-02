@@ -1,6 +1,6 @@
 import React from "react";
-import EditorPane from "../components/editor/EditorPane";
-import FloatingActionBar from "../components/layout/FloatingActionBar";
+import EditorPane from "../domains/editor/presentation/components/EditorPane";
+import FloatingActionBar from "../domains/workspace/presentation/components/FloatingActionBar";
 
 /**
  * The main application component when in Folder mode.

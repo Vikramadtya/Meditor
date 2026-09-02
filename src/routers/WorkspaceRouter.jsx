@@ -2,7 +2,7 @@ import React from "react";
 import { useStore } from "../core/store/index";
 import { selectShowDashboard } from "../store/selectors/index";
 
-import Sidebar from "../components/layout/Sidebar";
+import Sidebar from "../domains/workspace/presentation/components/Sidebar";
 import VaultApp from "../apps/VaultApp";
 import { lazy, Suspense } from "react";
 const EditorApp = lazy(() => import("../apps/EditorApp"));

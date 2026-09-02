@@ -3,7 +3,7 @@ import { useModalEscape } from "../../hooks/useModalEscape";
 import React, { useState, useEffect, useRef } from "react";
 import { X, Tag, Save } from "lucide-react";
 import { useStore } from "../../core/store/index";
-import { noteService } from "../../application/vault/NoteService";
+import { noteService } from "../../domains/vault/application/NoteService";
 import toast from "react-hot-toast";
 import { TagChipInput } from "./tags/TagChipInput";
 import { AgendaForm } from "./tags/AgendaForm";

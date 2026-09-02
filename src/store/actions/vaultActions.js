@@ -1,6 +1,6 @@
 import { useStore } from "../../core/store/index";
 import { openFile } from "./editorActions";
-import { vaultService } from "../../application/vault/VaultService";
+import { vaultService } from "../../domains/vault/application/VaultService";
 import { Logger } from "../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
 

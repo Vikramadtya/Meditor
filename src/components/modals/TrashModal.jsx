@@ -3,7 +3,7 @@ import { reloadVaultHierarchy } from "../../store/actions/index";
 import React, { useState, useEffect } from "react";
 import { X, Trash2, RefreshCw } from "lucide-react";
 import { useStore } from "../../core/store/index";
-import { vaultService } from "../../application/vault/VaultService";
+import { vaultService } from "../../domains/vault/application/VaultService";
 import { iconBtnStyle } from "../../domains/settings/presentation/SettingsStyles";
 
 /**

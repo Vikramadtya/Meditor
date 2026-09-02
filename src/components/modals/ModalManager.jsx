@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { useStore } from "../../core/store/index";
-import CommandPalette from "../layout/CommandPalette";
+import CommandPalette from "../../domains/workspace/presentation/components/CommandPalette";
 import SettingsModal from "../../domains/settings/presentation/SettingsModal";
 import GlobalSearchModal from "./GlobalSearchModal";
 import CreateVaultItemModal from "./CreateVaultItemModal";

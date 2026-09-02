@@ -22,14 +22,14 @@ import {
   createEditorSlice,
   WELCOME_MD,
 } from "../../store/slices/editorSlice.js";
-import { createUISlice } from "../../store/slices/uiSlice.js";
-import { createVaultSlice } from "../../store/slices/vaultSlice.js";
+import { createUISlice } from "../../store/slices/uiSlice";
+import { createVaultSlice } from "../../store/slices/vaultSlice";
 
 import { Logger } from "../infrastructure/Logger";
-import { fileSystem } from "../../infrastructure/NeutralinoFileSystem.js";
-import { vaultRepository } from "../../infrastructure/SqliteVaultRepository.js";
-import { vaultService } from "../../application/vault/VaultService.js";
-import { workspaceService } from "../../application/workspace/WorkspaceService.js";
+import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
+import { vaultRepository } from "../../domains/vault/infrastructure/SqliteVaultRepository";
+import { vaultService } from "../../domains/vault/application/VaultService";
+import { workspaceService } from "../../domains/workspace/application/WorkspaceService";
 import { gitService } from "../../domains/version-control/application/GitService";
 
 const log = Logger.forContext("Store");

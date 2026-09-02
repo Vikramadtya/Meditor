@@ -1,7 +1,7 @@
 import React from "react";
 import { useStore } from "../core/store/index";
 
-import WelcomeScreen from "../components/layout/WelcomeScreen";
+import WelcomeScreen from "../domains/workspace/presentation/components/WelcomeScreen";
 import WorkspaceRouter from "./WorkspaceRouter";
 
 /**
