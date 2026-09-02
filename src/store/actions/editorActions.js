@@ -9,7 +9,7 @@ const log = Logger.forContext("EditorActions");
 
 function splitFrontmatter(text) {
   if (text.startsWith("---")) {
-    const match = text.match(/^---\n[\\s\\S]*?\n---\n/);
+    const match = text.match(/^---\r?\n[\s\S]*?\r?\n---\r?(?:\n|$)/);
     if (match) {
       return { fm: match[0], content: text.slice(match[0].length) };
     }
@@ -55,7 +55,7 @@ export const openFile = async (
     }
     const rawContent = await fileSystem.readFile(fullPath);
     const { fm, content } = splitFrontmatter(rawContent);
-    const fileName = logicalName ?? fullPath.split(/[/\\]/).pop();
+    const fileName = logicalName ?? fullPath.split(/[/[\s\S]]/).pop();
     state.openTab({
       id: fullPath,
       fileName,
@@ -163,7 +163,7 @@ export const openFileFromSidebar = async (file) => {
   if (file.type === "DIRECTORY") {
     let newFolder = currentFolder;
     if (file.entry === "..") {
-      const parts = currentFolder.split(/[/\\]/);
+      const parts = currentFolder.split(/[/[\s\S]]/);
       if (parts.length > 1) {
         parts.pop();
         newFolder = parts.join("/") || "/";

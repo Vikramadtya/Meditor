@@ -279,7 +279,7 @@ class VaultService {
 
   extractFrontmatter(content) {
     if (!content.startsWith("---")) return null;
-    const match = content.match(/^---\n([\s\S]*?)\n---/);
+    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/);
     if (!match) return null;
 
     const fm = {};

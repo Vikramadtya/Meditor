@@ -73,7 +73,7 @@ export class VaultSearchStrategy {
       const content = await fileService.readFile(filePath);
       const tagsForFile = new Set();
 
-      const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n/);
+      const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/);
       if (fmMatch) {
         fmMatch[1].split("\n").forEach((line) => {
           const idx = line.indexOf(":");

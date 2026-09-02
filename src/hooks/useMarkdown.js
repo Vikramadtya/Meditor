@@ -123,7 +123,7 @@ function resolveAbsolutePath(
   const base = currentFilePath || currentFolder;
   if (!base) return null;
 
-  const parts = base.split(/[/\\]/);
+  const parts = base.split(/[/[\s\S]]/);
   parts.pop(); // remove filename
 
   for (const segment of src.split("/")) {
@@ -273,7 +273,9 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
         let content = markdown;
         let parsedFm = null;
 
-        const fmMatch = markdown.match(/^---\n([\s\S]*?)\n---\n/);
+        const fmMatch = markdown.match(
+          /^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/,
+        );
         if (fmMatch) {
           content = markdown.slice(fmMatch[0].length);
           const yamlString = fmMatch[1];
