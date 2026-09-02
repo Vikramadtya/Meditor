@@ -1,275 +1,111 @@
 import { fileSystem } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../infrastructure/SqliteVaultRepository";
 import { Logger } from "../../../core/infrastructure/Logger";
-import initSqlJs from "sql.js";
+
+import { syncVaultCommand } from "./VaultSyncUseCase";
+import { getFolderContentsCommand } from "./VaultQueryUseCase";
+import {
+  createContainerCommand,
+  createNoteCommand,
+  deleteItemCommand,
+} from "./VaultMutationUseCase";
 
 class VaultService {
   constructor() {
-    this._log = Logger.forContext("VaultService");
     this.vaultPath = null;
-    // sql-wasm.wasm is copied to the dist root by Vite (not in /assets/).
-    // Neutralino serves dist/ as the resource root, so the file is reachable
-    // at the same origin as index.html. Returning just the filename lets the
-    // browser resolve it relative to the page — works in both dev and prod.
-    this._sqlPromise = initSqlJs({ locateFile: () => "sql-wasm.wasm" });
+    this.db = null;
     this.isSyncing = false;
-    this.listeners = new Set();
+    this._log = Logger.forContext("VaultService");
+    this._listeners = new Set();
   }
 
   subscribe(callback) {
-    this.listeners.add(callback);
-    return () => this.listeners.delete(callback);
+    this._listeners.add(callback);
+    return () => this._listeners.delete(callback);
   }
 
-  notify(path = null) {
-    this.listeners.forEach((cb) => cb(path));
+  notify(path) {
+    for (let cb of this._listeners) {
+      try {
+        cb(path);
+      } catch (e) {
+        this._log.error(e);
+      }
+    }
   }
 
   async init(sqlPromise) {
-    this._sqlPromise = sqlPromise;
-    this._log.info("Initialized with SQL instance");
+    this.db = await sqlPromise;
+    vaultRepository.init(this.db);
   }
 
   async initVault(folderPath) {
+    if (!this.db) throw new Error("Vault DB not initialized");
+    const notesPath = `${folderPath}/notes`;
     try {
-      const SQL = await this._sqlPromise;
-      const db = new SQL.Database();
-      const exported = db.export();
-      await fileSystem.writeBinaryFile(`${folderPath}/vault.db`, exported);
-      try {
-        await window.Neutralino.filesystem.createDirectory(
-          `${folderPath}/notes`,
-        );
-      } catch (e) {
-        // directory might already exist
-      }
-      return true;
+      const stats = await window.Neutralino.filesystem.getStats(notesPath);
+      if (!stats.isDirectory) throw new Error("Not a directory");
     } catch (e) {
-      this._log.error("Failed to init vault", e);
-      return false;
+      await window.Neutralino.filesystem.createDirectory(notesPath);
     }
+
+    let rootMeta = {};
+    try {
+      const metaStr = await fileSystem.readFile(`${notesPath}/.metadata`);
+      rootMeta = JSON.parse(metaStr);
+    } catch (e) {
+      rootMeta = { id: "notes", type: "container", children_order: [] };
+      await fileSystem.writeFile(
+        `${notesPath}/.metadata`,
+        JSON.stringify(rootMeta, null, 2),
+      );
+    }
+    this.vaultPath = folderPath;
+    vaultRepository.upsertContainer({
+      id: "notes",
+      path: "notes",
+      name: "notes",
+      metadata: rootMeta,
+    });
   }
 
   async loadVault(folderPath) {
+    if (!this.db) throw new Error("Vault DB not initialized");
+    this.vaultPath = folderPath;
     try {
-      const SQL = await this._sqlPromise;
-      let buffer;
-      try {
-        buffer = await fileSystem.readBinaryFile(`${folderPath}/vault.db`);
-      } catch (e) {
-        this._log.warn("No existing vault.db found, creating new.");
-        const db = new SQL.Database();
-        const exported = db.export();
-        await fileSystem.writeBinaryFile(`${folderPath}/vault.db`, exported);
-        buffer = exported;
-      }
-
-      const db = new SQL.Database(new Uint8Array(buffer));
-      vaultRepository.attach(db);
-      this.vaultPath = folderPath;
-
-      await this.saveVault();
-      this._log.info(`Loaded vault from ${folderPath}`);
-
-      // Kick off background sync
-      this.syncVault().catch((e) => this._log.error("Sync failed", e));
-      return true;
-    } catch (error) {
-      this._log.error("Failed to load vault", error);
-      return false;
+      const notesPath = `${folderPath}/notes`;
+      await window.Neutralino.filesystem.getStats(notesPath);
+    } catch (e) {
+      throw new Error("Invalid vault: missing 'notes' directory.");
     }
+    this._log.info(`Vault loaded at ${folderPath}`);
+    // Sync runs asynchronously
+    this.syncVault().catch((e) => this._log.error("Sync failed", e));
   }
 
   async saveVault() {
-    if (!this.vaultPath) return;
-    try {
-      const data = vaultRepository.export();
-      await fileSystem.writeBinaryFile(`${this.vaultPath}/vault.db`, data);
-    } catch (e) {
-      this._log.error("Failed to save vault.db", e);
+    if (this.db) {
+      const data = this.db.export();
+      const buffer = new Uint8Array(data).buffer;
+      if (this.vaultPath) {
+        await window.Neutralino.filesystem.writeBinaryFile(
+          `${this.vaultPath}/.meditor/vault.sqlite`,
+          buffer,
+        );
+      }
     }
   }
 
-  /**
-   * Lazily loads contents of a folder inside the vault.
-   * @param {string} relPath - Path relative to vault root (e.g., 'notes' or 'notes/Books')
-   */
   async getFolderContents(relPath = "notes") {
-    if (!this.vaultPath) return [];
-    try {
-      const fullPath = `${this.vaultPath}/${relPath}`;
-      const entries =
-        await window.Neutralino.filesystem.readDirectory(fullPath);
-
-      const results = [];
-      for (const e of entries) {
-        if (e.entry === "." || e.entry === ".." || e.entry === ".metadata")
-          continue;
-
-        const childRelPath = `${relPath}/${e.entry}`;
-
-        if (e.type === "DIRECTORY") {
-          let metadata = {};
-          let itemCount = 0;
-          try {
-            const metaContent = await fileSystem.readFile(
-              `${fullPath}/${e.entry}/.metadata`,
-            );
-            metadata = JSON.parse(metaContent);
-          } catch (e) {
-            this._log.debug("Ignored expected file read exception", e);
-          }
-
-          try {
-            const subEntries = await window.Neutralino.filesystem.readDirectory(
-              `${fullPath}/${e.entry}`,
-            );
-            itemCount = subEntries.filter(
-              (se) =>
-                se.entry !== "." &&
-                se.entry !== ".." &&
-                se.entry !== ".metadata",
-            ).length;
-          } catch (e) {
-            this._log.debug("Ignored expected file read exception", e);
-          }
-
-          results.push({
-            id: metadata.id || childRelPath,
-            name: e.entry,
-            type: "container",
-            path: childRelPath,
-            metadata,
-            itemCount,
-          });
-        } else if (e.entry.endsWith(".md")) {
-          // It's a note. Get its ID from DB cache for fast render, or parse if missing.
-          const name = e.entry.replace(/\.md$/, "");
-          const cached = vaultRepository.getNoteByPath(childRelPath);
-          results.push({
-            id: cached ? cached.id : childRelPath, // fallback to path if not synced yet
-            name,
-            type: "note",
-            path: childRelPath,
-          });
-        }
-      }
-
-      // Sort by container metadata if available
-      try {
-        const parentMeta = await fileSystem.readFile(`${fullPath}/.metadata`);
-        const { children_order } = JSON.parse(parentMeta);
-        if (children_order && Array.isArray(children_order)) {
-          results.sort((a, b) => {
-            const idxA = children_order.indexOf(a.id);
-            const idxB = children_order.indexOf(b.id);
-            if (idxA !== -1 && idxB !== -1) return idxA - idxB;
-            if (idxA !== -1) return -1;
-            if (idxB !== -1) return 1;
-            return a.name.localeCompare(b.name);
-          });
-        } else {
-          results.sort((a, b) => a.name.localeCompare(b.name));
-        }
-      } catch (_) {
-        results.sort((a, b) => a.name.localeCompare(b.name));
-      }
-
-      return results;
-    } catch (e) {
-      this._log.error(`Failed to get contents for ${relPath}`, e);
-      return [];
-    }
+    return getFolderContentsCommand(this.vaultPath, relPath, this._log);
   }
 
-  /**
-   * Background task: scans the `notes/` directory for any changes and updates the SQLite index.
-   */
   async syncVault() {
     if (!this.vaultPath || this.isSyncing) return;
     this.isSyncing = true;
-    this._log.info("Starting background vault sync...");
-
     try {
-      const activeIds = new Set();
-      const activeContainers = new Set();
-
-      const walk = async (relDir) => {
-        const full = `${this.vaultPath}/${relDir}`;
-        let entries = [];
-        try {
-          entries = await window.Neutralino.filesystem.readDirectory(full);
-        } catch (e) {
-          return;
-        }
-
-        for (const e of entries) {
-          if (
-            e.entry === "." ||
-            e.entry === ".." ||
-            e.entry === ".metadata" ||
-            e.entry === ".DS_Store"
-          )
-            continue;
-
-          const childRel = `${relDir}/${e.entry}`;
-          if (e.type === "DIRECTORY") {
-            // Container
-            let meta = { id: childRel, type: "container", children_order: [] };
-            try {
-              const metaStr = await fileSystem.readFile(
-                `${full}/${e.entry}/.metadata`,
-              );
-              meta = JSON.parse(metaStr);
-            } catch (e) {
-              this._log.debug("Ignored expected file read exception", e);
-            } // fine, we'll just use path as ID
-
-            vaultRepository.upsertContainer({
-              id: meta.id,
-              path: childRel,
-              name: e.entry,
-              metadata: meta,
-            });
-            activeContainers.add(meta.id);
-            await walk(childRel);
-          } else if (e.entry.endsWith(".md")) {
-            // Note
-            try {
-              const content = await fileSystem.readFile(`${full}/${e.entry}`);
-              const fm = this.extractFrontmatter(content);
-              if (fm && fm.id) {
-                vaultRepository.upsertNote({
-                  id: fm.id,
-                  path: childRel,
-                  name: e.entry.replace(/\.md$/, ""),
-                  tags: Array.isArray(fm.tags)
-                    ? fm.tags.join(",")
-                    : fm.tags || "",
-                  is_favorite: fm.is_favorite ? 1 : 0,
-                  updated_at: Date.now(), // Ideally use OS stat, but fine for now
-                });
-                activeIds.add(fm.id);
-              }
-            } catch (err) {
-              this._log.warn(`Failed to sync note ${childRel}`, err);
-            }
-          }
-        }
-      };
-
-      await walk("notes");
-
-      // Cleanup deleted notes
-      const allNotes = vaultRepository._queryAll("SELECT id FROM notes");
-      for (const n of allNotes) {
-        if (!activeIds.has(n.id)) {
-          vaultRepository.deleteNoteById(n.id);
-        }
-      }
-
+      await syncVaultCommand(this.vaultPath, this._log);
       await this.saveVault();
-      this._log.info("Background vault sync complete.");
     } catch (e) {
       this._log.error("Error during syncVault", e);
     } finally {
@@ -277,84 +113,32 @@ class VaultService {
     }
   }
 
-  extractFrontmatter(content) {
-    if (!content.startsWith("---")) return null;
-    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/);
-    if (!match) return null;
-
-    const fm = {};
-    const lines = match[1].split("\n");
-    let currentKey = null;
-
-    for (let line of lines) {
-      if (line.trim().startsWith("- ") && currentKey) {
-        if (!Array.isArray(fm[currentKey])) fm[currentKey] = [];
-        fm[currentKey].push(line.replace("- ", "").trim());
-      } else if (line.includes(":")) {
-        const [k, ...v] = line.split(":");
-        currentKey = k.trim();
-        const val = v.join(":").trim();
-        if (val) fm[currentKey] = val;
-      }
-    }
-    return fm;
-  }
-
-  // Create Operations
   async createContainer(parentRelPath, name) {
-    const newRel = `${parentRelPath}/${name}`;
-    const full = `${this.vaultPath}/${newRel}`;
-    await window.Neutralino.filesystem.createDirectory(full);
-
-    const id = crypto.randomUUID();
-    const meta = { id, type: "container", children_order: [] };
-    await fileSystem.writeFile(
-      `${full}/.metadata`,
-      JSON.stringify(meta, null, 2),
-    );
-
-    vaultRepository.upsertContainer({
-      id,
-      path: newRel,
+    const meta = await createContainerCommand(
+      this.vaultPath,
+      parentRelPath,
       name,
-      metadata: meta,
-    });
+    );
     await this.saveVault();
     this.notify(parentRelPath);
     return meta;
   }
 
   async createNote(parentRelPath, name) {
-    const id = crypto.randomUUID();
-    const newRel = `${parentRelPath}/${name}.md`;
-    const full = `${this.vaultPath}/${newRel}`;
-
-    const fm = `---\nid: ${id}\ntags:\n---\n\n# ${name}\n`;
-    await fileSystem.writeFile(full, fm);
-
-    vaultRepository.upsertNote({
-      id,
-      path: newRel,
+    const noteMeta = await createNoteCommand(
+      this.vaultPath,
+      parentRelPath,
       name,
-      tags: "",
-      updated_at: Date.now(),
-    });
+    );
     await this.saveVault();
     this.notify(parentRelPath);
-    return { id, name, path: newRel, type: "note" };
+    return noteMeta;
   }
 
   async deleteItem(type, id, relPath, hard = true) {
-    if (hard && relPath) {
-      const full = `${this.vaultPath}/${relPath}`;
-      if (type === "note") {
-        await fileSystem.removeFile(full);
-        vaultRepository.deleteNoteById(id);
-      } else {
-        await fileSystem.removeDirectory(full);
-        vaultRepository.deleteContainerById(id);
-      }
-      await this.saveVault();
+    await deleteItemCommand(this.vaultPath, type, id, relPath, hard);
+    await this.saveVault();
+    if (relPath) {
       const parentRelPath = relPath.substring(0, relPath.lastIndexOf("/"));
       this.notify(parentRelPath);
     }
