@@ -81,6 +81,7 @@ class VaultService {
     this._log.info(`Vault loaded at ${folderPath}`);
     // Sync runs asynchronously
     this.syncVault().catch((e) => this._log.error("Sync failed", e));
+    return true;
   }
 
   async saveVault() {

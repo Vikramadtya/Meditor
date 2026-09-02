@@ -19,9 +19,6 @@ class WorkspaceService {
    * @returns {Promise<boolean>}
    */
   async isVault(folderPath) {
-    // First try a direct load — if it succeeds, it's a vault.
-    // We use tryLoadVault here to avoid relying on filesystem.exists()
-    // which requires the Neutralino runtime to be available.
     try {
       const loaded = await vaultService.loadVault(folderPath);
       return loaded === true;
@@ -37,13 +34,20 @@ class WorkspaceService {
    */
   async loadWorkspace(folderPath) {
     // Try to load as vault first (reads vault.db from disk)
-    const loaded = await vaultService.loadVault(folderPath);
-    if (loaded) {
-      const hierarchy = await vaultService.getFolderContents("notes");
-      this._log.info(
-        `Opened vault at ${folderPath} — ${hierarchy.length} groups`,
+    try {
+      const loaded = await vaultService.loadVault(folderPath);
+      if (loaded) {
+        const hierarchy = await vaultService.getFolderContents("notes");
+        this._log.info(
+          `Opened vault at ${folderPath} — ${hierarchy.length} groups`,
+        );
+        return { mode: "vault", files: [], hierarchy };
+      }
+    } catch (e) {
+      this._log.debug(
+        "Folder is not a valid vault, falling back to folder mode",
+        e,
       );
-      return { mode: "vault", files: [], hierarchy };
     }
 
     // Folder mode fallback
