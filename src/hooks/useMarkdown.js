@@ -123,7 +123,7 @@ function resolveAbsolutePath(
   const base = currentFilePath || currentFolder;
   if (!base) return null;
 
-  const parts = base.split(/[/[\s\S]]/);
+  const parts = base.split(/[\/\\]/);
   parts.pop(); // remove filename
 
   for (const segment of src.split("/")) {
