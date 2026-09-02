@@ -1,6 +1,6 @@
 import React from "react";
 import { useStore } from "../core/store/index";
-import { selectShowDashboard } from "../store/selectors/index";
+import { selectShowDashboard } from "../domains/vault/store/vault.selectors";
 
 import Sidebar from "../domains/workspace/presentation/components/Sidebar";
 import VaultApp from "../apps/VaultApp";

@@ -2,7 +2,7 @@ import { useShallow } from "zustand/react/shallow";
 import {
   saveActiveFile,
   openWorkspaceDialog,
-} from "../../../../store/actions/index.js";
+} from "../../../../core/store/actions.js";
 import React, { useState, useEffect } from "react";
 import {
   Eye,
@@ -18,7 +18,7 @@ import {
   History,
 } from "lucide-react";
 import { useStore } from "../../../../core/store/index";
-import { selectIsVaultNote } from "../../../../store/selectors/index";
+import { selectIsVaultNote } from "../../../vault/store/vault.selectors";
 import { noteService } from "../../../vault/application/NoteService";
 import { vaultRepository } from "../../../vault/infrastructure/SqliteVaultRepository";
 

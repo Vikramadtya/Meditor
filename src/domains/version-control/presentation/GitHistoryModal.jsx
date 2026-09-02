@@ -1,12 +1,12 @@
 import { useShallow } from "zustand/react/shallow";
-import { useModalEscape } from "../../../hooks/useModalEscape";
+import { useModalEscape } from "../../../core/ui/hooks/useModalEscape";
 import React, { useState, useEffect } from "react";
 import { X, Clock, RotateCcw, Columns, Eye } from "lucide-react";
 import ReactDiffViewer from "react-diff-viewer-continued";
 import { useStore } from "../../../core/store/index";
-import { selectRepoPath } from "../../../store/selectors/vault.selectors";
+import { selectRepoPath } from "../../vault/store/vault.selectors";
 import { gitService } from "../application/GitService";
-import { fileSystem as fileService } from "../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem as fileService } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import toast from "react-hot-toast";
 import { GitTimelineSidebar } from "./GitTimelineSidebar";
 import { GitCommitPreview } from "./GitCommitPreview";

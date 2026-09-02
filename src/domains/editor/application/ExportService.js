@@ -1,4 +1,4 @@
-import { fileSystem as fileService } from "../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem as fileService } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { logger } from "../../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
 

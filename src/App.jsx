@@ -1,9 +1,9 @@
 import React from "react";
 import { Toaster } from "react-hot-toast";
-import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
-import { useSystemEffects } from "./hooks/useSystemEffects";
+import { useKeyboardShortcuts } from "./core/ui/hooks/useKeyboardShortcuts";
+import { useSystemEffects } from "./core/ui/hooks/useSystemEffects";
 import Titlebar from "./domains/workspace/presentation/components/Titlebar";
-import ModalManager from "./components/modals/ModalManager";
+import ModalManager from "./core/ui/ModalManager";
 import RootRouter from "./routers/RootRouter";
 import "./styles/Modals.css";
 function App() {

@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { openFileFromSidebar } from "../../../../store/actions/index";
+import { openFileFromSidebar } from "../../../../core/store/actions";
 import React from "react";
 import { Folder, FileText, CornerLeftUp } from "lucide-react";
 import { useStore } from "../../../../core/store/index";

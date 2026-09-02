@@ -1,7 +1,7 @@
-import { useStore } from "../../core/store/index";
-import { workspaceService } from "../../domains/workspace/application/WorkspaceService";
-import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
-import { Logger } from "../../core/infrastructure/Logger";
+import { useStore } from "../../../core/store/index";
+import { workspaceService } from "../application/WorkspaceService";
+import { fileSystem } from "../infrastructure/NeutralinoFileSystem";
+import { Logger } from "../../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
 
 const log = Logger.forContext("WorkspaceActions");

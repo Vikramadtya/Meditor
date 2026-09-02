@@ -1,4 +1,4 @@
-import { openNoteByName } from "../../../../store/actions/index";
+import { openNoteByName } from "../../../../core/store/actions";
 import { useShallow } from "zustand/react/shallow";
 import React, { forwardRef, useEffect, useState } from "react";
 import FrontmatterBlock from "./FrontmatterBlock";
@@ -7,8 +7,8 @@ import { searchService } from "../../application/SearchService";
 import { Link } from "lucide-react";
 import { useImageInterceptor } from "../hooks/useImageInterceptor";
 import { useMermaidRenderer } from "../hooks/useMermaidRenderer";
-import { useMkDocsTabs } from "../../../../hooks/useMkDocsTabs";
-import { useInteractiveTaskLists } from "../../../../hooks/useInteractiveTaskLists";
+import { useMkDocsTabs } from "../hooks/useMkDocsTabs";
+import { useInteractiveTaskLists } from "../hooks/useInteractiveTaskLists";
 import { useWikilinks } from "../hooks/useWikilinks";
 
 /**

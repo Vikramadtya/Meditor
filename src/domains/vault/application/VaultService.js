@@ -1,4 +1,4 @@
-import { fileSystem } from "../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../infrastructure/SqliteVaultRepository";
 import { Logger } from "../../../core/infrastructure/Logger";
 import initSqlJs from "sql.js";

@@ -1,14 +1,14 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
-import { useStore } from "../../core/store/index";
+import { useStore } from "../store/index";
 import CommandPalette from "../../domains/workspace/presentation/components/CommandPalette";
 import SettingsModal from "../../domains/settings/presentation/SettingsModal";
-import GlobalSearchModal from "./GlobalSearchModal";
-import CreateVaultItemModal from "./CreateVaultItemModal";
-import TrashModal from "./TrashModal";
+import GlobalSearchModal from "../../domains/workspace/presentation/components/GlobalSearchModal";
+import CreateVaultItemModal from "../../domains/vault/presentation/components/CreateVaultItemModal";
+import TrashModal from "../../domains/vault/presentation/components/TrashModal";
 import GitModal from "../../domains/version-control/presentation/GitModal";
 import GitHistoryModal from "../../domains/version-control/presentation/GitHistoryModal";
-import TagModal from "./TagModal";
+import TagModal from "../../domains/vault/presentation/components/TagModal";
 
 /**
  * Manager component that renders all global modals in the application.

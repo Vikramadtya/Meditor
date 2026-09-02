@@ -12,7 +12,7 @@
  */
 
 import { useEffect } from "react";
-import { fileSystem as fileService } from "../../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem as fileService } from "../../../workspace/infrastructure/NeutralinoFileSystem";
 import { Logger } from "../../../../core/infrastructure/Logger";
 import { useStore } from "../../../../core/store/index";
 

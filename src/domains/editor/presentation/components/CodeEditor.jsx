@@ -1,4 +1,4 @@
-import { autoSaveFile } from "../../../../store/actions/index";
+import { autoSaveFile } from "../../../../core/store/actions";
 import { useShallow } from "zustand/react/shallow";
 import React, {
   useMemo,
@@ -27,7 +27,7 @@ import { useDragAndDrop } from "../hooks/useDragAndDrop";
 import { Logger } from "../../../../core/infrastructure/Logger";
 const logger = Logger.forContext("App");
 import BubbleMenu from "./BubbleMenu";
-import { slashCommands } from "../../../../utils/editor/slashCommands";
+import { slashCommands } from "../../application/slashCommands";
 
 /**
  * Renders the CodeMirror-based markdown editor.

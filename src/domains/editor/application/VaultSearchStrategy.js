@@ -1,4 +1,4 @@
-import { fileSystem as fileService } from "../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem as fileService } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../../vault/infrastructure/SqliteVaultRepository";
 import { vaultService } from "../../vault/application/VaultService";
 

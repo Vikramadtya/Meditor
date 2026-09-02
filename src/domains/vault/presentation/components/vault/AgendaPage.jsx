@@ -1,4 +1,4 @@
-import { openNoteFromVault } from "../../../../../store/actions/index";
+import { openNoteFromVault } from "../../../../../core/store/actions";
 import React, { useState, useEffect, useCallback } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";

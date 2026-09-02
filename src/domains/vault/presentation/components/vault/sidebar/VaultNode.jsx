@@ -2,7 +2,7 @@ import { useShallow } from "zustand/react/shallow";
 import {
   openNoteFromVault,
   reloadVaultHierarchy,
-} from "../../../../../../store/actions/index.js";
+} from "../../../../../../core/store/actions.js";
 import React, { useState, useEffect } from "react";
 import {
   Circle,

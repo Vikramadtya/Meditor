@@ -12,7 +12,7 @@
 import { useMemo } from "react";
 import { EditorView } from "@codemirror/view";
 import toast from "react-hot-toast";
-import { fileSystem as fileService } from "../../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem as fileService } from "../../../workspace/infrastructure/NeutralinoFileSystem";
 import { Logger } from "../../../../core/infrastructure/Logger";
 import { useStore } from "../../../../core/store/index";
 import { vaultRepository } from "../../../vault/infrastructure/SqliteVaultRepository";

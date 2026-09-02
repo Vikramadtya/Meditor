@@ -2,8 +2,8 @@ import { useShallow } from "zustand/react/shallow";
 import React, { useMemo } from "react";
 import { FileText, PanelLeft, PanelLeftClose } from "lucide-react";
 import { useStore } from "../../../../core/store/index";
-import { selectIsDirty } from "../../../../store/selectors/editor.selectors";
-import { selectShowDashboard } from "../../../../store/selectors/index";
+import { selectIsDirty } from "../../../editor/store/editor.selectors";
+import { selectShowDashboard } from "../../../vault/store/vault.selectors";
 
 /**
  * Custom window titlebar for the application.

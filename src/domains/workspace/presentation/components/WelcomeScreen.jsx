@@ -2,7 +2,7 @@ import { useShallow } from "zustand/react/shallow";
 import {
   createVaultDialog,
   openWorkspaceDialog,
-} from "../../../../store/actions/index.js";
+} from "../../../../core/store/actions.js";
 import React from "react";
 import { Folder, FolderOpen } from "lucide-react";
 import { useStore } from "../../../../core/store/index";

@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { useModalEscape } from "../../../hooks/useModalEscape";
+import { useModalEscape } from "../../../core/ui/hooks/useModalEscape";
 import React, { useState, useEffect } from "react";
 import {
   X,
@@ -12,7 +12,7 @@ import {
   FileText,
 } from "lucide-react";
 import { useStore } from "../../../core/store/index";
-import { selectRepoPath } from "../../../store/selectors/vault.selectors";
+import { selectRepoPath } from "../../vault/store/vault.selectors";
 import { gitService } from "../application/GitService";
 import {
   iconBtnStyle,

@@ -6,7 +6,7 @@ import {
   createVaultDialog,
   createNewFile,
   createNewFolder,
-} from "../../../../store/actions/index.js";
+} from "../../../../core/store/actions.js";
 import React, { useState } from "react";
 import {
   Eye,

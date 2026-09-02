@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { useStore } from "../../../../core/store/index";
 import { useSettingsStore } from "../../../settings/application/settingsStore";
 import { useMarkdown } from "../hooks/useMarkdown";
-import { useScrollSync } from "../../../../hooks/useScrollSync";
+import { useScrollSync } from "../hooks/useScrollSync";
 import CodeEditor from "./CodeEditor";
 import MarkdownPreview from "./MarkdownPreview";
 import TableOfContents from "./TableOfContents";

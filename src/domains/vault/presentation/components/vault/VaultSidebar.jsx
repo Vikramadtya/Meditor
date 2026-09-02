@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { openNoteFromVault } from "../../../../../store/actions/index";
+import { openNoteFromVault } from "../../../../../core/store/actions";
 import React, { useState, useEffect } from "react";
 import {
   Search,

@@ -21,12 +21,12 @@ import toast from "react-hot-toast";
 import {
   createEditorSlice,
   WELCOME_MD,
-} from "../../store/slices/editorSlice.js";
-import { createUISlice } from "../../store/slices/uiSlice";
-import { createVaultSlice } from "../../store/slices/vaultSlice";
+} from "../../domains/editor/store/editorSlice.js";
+import { createUISlice } from "../ui/store/uiSlice";
+import { createVaultSlice } from "../../domains/vault/store/vaultSlice";
 
 import { Logger } from "../infrastructure/Logger";
-import { fileSystem } from "../../infrastructure/NeutralinoFileSystem";
+import { fileSystem } from "../../domains/workspace/infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../../domains/vault/infrastructure/SqliteVaultRepository";
 import { vaultService } from "../../domains/vault/application/VaultService";
 import { workspaceService } from "../../domains/workspace/application/WorkspaceService";

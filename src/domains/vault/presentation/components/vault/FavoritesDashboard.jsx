@@ -1,4 +1,4 @@
-import { openNoteFromVault } from "../../../../../store/actions/index";
+import { openNoteFromVault } from "../../../../../core/store/actions";
 import React, { useState, useEffect } from "react";
 import { useStore } from "../../../../../core/store/index";
 import { Star, FileText } from "lucide-react";

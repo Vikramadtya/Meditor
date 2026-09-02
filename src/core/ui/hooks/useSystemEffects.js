@@ -1,8 +1,8 @@
 import { useEffect } from "react";
-import { useStore } from "../core/store/index";
-import { useSettingsStore } from "../domains/settings/application/settingsStore";
-import { fileSystem as fileService } from "../infrastructure/NeutralinoFileSystem";
-import { Logger } from "../core/infrastructure/Logger";
+import { useStore } from "../../store/index";
+import { useSettingsStore } from "../../../domains/settings/application/settingsStore";
+import { fileSystem as fileService } from "../../../domains/workspace/infrastructure/NeutralinoFileSystem";
+import { Logger } from "../../infrastructure/Logger";
 
 const logger = Logger.forContext("App");
 

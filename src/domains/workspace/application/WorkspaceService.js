@@ -5,7 +5,7 @@
  */
 
 import { Logger } from "../../../core/infrastructure/Logger";
-import { fileSystem } from "../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem } from "../infrastructure/NeutralinoFileSystem";
 import { vaultService } from "../../vault/application/VaultService";
 
 class WorkspaceService {

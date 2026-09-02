@@ -1,10 +1,10 @@
 import { useShallow } from "zustand/react/shallow";
-import { reloadVaultHierarchy } from "../../store/actions/index";
+import { reloadVaultHierarchy } from "../../../../core/store/actions";
 import React, { useState, useEffect } from "react";
 import { X, Trash2, RefreshCw } from "lucide-react";
-import { useStore } from "../../core/store/index";
-import { vaultService } from "../../domains/vault/application/VaultService";
-import { iconBtnStyle } from "../../domains/settings/presentation/SettingsStyles";
+import { useStore } from "../../../../core/store/index";
+import { vaultService } from "../../application/VaultService";
+import { iconBtnStyle } from "../../../settings/presentation/SettingsStyles";
 
 /**
  * Modal component for managing deleted notes in the trash bin.

@@ -60,7 +60,7 @@ export default function SystemTab() {
         <button
           onClick={async () => {
             const { fileSystem } =
-              await import("../../../infrastructure/NeutralinoFileSystem");
+              await import("../../workspace/infrastructure/NeutralinoFileSystem");
             fileSystem.clearDirectoryCache();
             alert("Cache cleared successfully!");
           }}

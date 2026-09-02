@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { useStore } from "../../../../core/store/index";
-import SidebarContainer from "../../../../components/shared/SidebarContainer";
+import SidebarContainer from "../../../../core/ui/SidebarContainer";
 import VaultSidebar from "../../../vault/presentation/components/vault/VaultSidebar";
 import FolderSidebar from "./FolderSidebar";
 

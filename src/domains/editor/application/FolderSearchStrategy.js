@@ -1,4 +1,4 @@
-import { fileSystem as fileService } from "../../../infrastructure/NeutralinoFileSystem";
+import { fileSystem as fileService } from "../../workspace/infrastructure/NeutralinoFileSystem";
 
 /**
  * Search strategy for standard Folder Mode.
