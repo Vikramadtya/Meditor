@@ -13,7 +13,8 @@ import {
 class VaultService {
   constructor() {
     this.vaultPath = null;
-    this.db = null;
+    this.db = null; // The actual SQL.Database instance
+    this._sqlPromise = null;
     this.isSyncing = false;
     this._log = Logger.forContext("VaultService");
     this._listeners = new Set();
@@ -35,12 +36,17 @@ class VaultService {
   }
 
   async init(sqlPromise) {
-    this.db = await sqlPromise;
-    vaultRepository.init(this.db);
+    this._sqlPromise = sqlPromise;
+  }
+
+  async _getSqlModule() {
+    if (!this._sqlPromise)
+      throw new Error("SQL Promise not provided to VaultService");
+    return await this._sqlPromise;
   }
 
   async initVault(folderPath) {
-    if (!this.db) throw new Error("Vault DB not initialized");
+    const SQL = await this._getSqlModule();
     const notesPath = `${folderPath}/notes`;
     try {
       const stats = await window.Neutralino.filesystem.getStats(notesPath);
@@ -48,6 +54,10 @@ class VaultService {
     } catch (e) {
       await window.Neutralino.filesystem.createDirectory(notesPath);
     }
+
+    this.db = new SQL.Database();
+    vaultRepository.attach(this.db);
+    this.vaultPath = folderPath;
 
     let rootMeta = {};
     try {
@@ -60,40 +70,69 @@ class VaultService {
         JSON.stringify(rootMeta, null, 2),
       );
     }
-    this.vaultPath = folderPath;
+
     vaultRepository.upsertContainer({
       id: "notes",
       path: "notes",
       name: "notes",
       metadata: rootMeta,
     });
+
+    await this.saveVault();
   }
 
   async loadVault(folderPath) {
-    if (!this.db) throw new Error("Vault DB not initialized");
-    this.vaultPath = folderPath;
+    const SQL = await this._getSqlModule();
+
     try {
       const notesPath = `${folderPath}/notes`;
       await window.Neutralino.filesystem.getStats(notesPath);
     } catch (e) {
       throw new Error("Invalid vault: missing 'notes' directory.");
     }
+
+    let buffer;
+    try {
+      buffer = await fileSystem.readBinaryFile(
+        `${folderPath}/.meditor/vault.sqlite`,
+      );
+    } catch (e) {
+      try {
+        buffer = await fileSystem.readBinaryFile(`${folderPath}/vault.db`); // legacy fallback
+      } catch (err) {
+        this._log.warn("No existing vault DB found, creating new.");
+        const newDb = new SQL.Database();
+        buffer = newDb.export();
+        await window.Neutralino.filesystem
+          .createDirectory(`${folderPath}/.meditor`)
+          .catch(() => {});
+        await fileSystem.writeBinaryFile(
+          `${folderPath}/.meditor/vault.sqlite`,
+          buffer,
+        );
+      }
+    }
+
+    this.db = new SQL.Database(new Uint8Array(buffer));
+    vaultRepository.attach(this.db);
+    this.vaultPath = folderPath;
+
     this._log.info(`Vault loaded at ${folderPath}`);
-    // Sync runs asynchronously
     this.syncVault().catch((e) => this._log.error("Sync failed", e));
     return true;
   }
 
   async saveVault() {
-    if (this.db) {
+    if (this.db && this.vaultPath) {
       const data = this.db.export();
       const buffer = new Uint8Array(data).buffer;
-      if (this.vaultPath) {
-        await window.Neutralino.filesystem.writeBinaryFile(
-          `${this.vaultPath}/.meditor/vault.sqlite`,
-          buffer,
-        );
-      }
+      await window.Neutralino.filesystem
+        .createDirectory(`${this.vaultPath}/.meditor`)
+        .catch(() => {});
+      await window.Neutralino.filesystem.writeBinaryFile(
+        `${this.vaultPath}/.meditor/vault.sqlite`,
+        buffer,
+      );
     }
   }
 
