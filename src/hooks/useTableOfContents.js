@@ -73,5 +73,6 @@ export function useTableOfContents() {
     handleScroll,
     setTagModalOpen,
     workspaceMode,
+    activeVaultItem,
   };
 }

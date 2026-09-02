@@ -22,6 +22,7 @@ export default function TableOfContents({ toc }) {
     handleScroll,
     setTagModalOpen,
     workspaceMode,
+    activeVaultItem,
   } = useTableOfContents();
   if (!isTocOpen) return null;
   return (
