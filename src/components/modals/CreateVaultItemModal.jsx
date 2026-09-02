@@ -17,16 +17,37 @@ export default function CreateVaultItemModal() {
     })),
   );
   const [name, setName] = useState("");
+  const [selectedType, setSelectedType] = useState("note");
+  const [allowedTypes, setAllowedTypes] = useState(["note", "container"]);
   const { isOpen, type, parentId } = createVaultItemModal;
   useEffect(() => {
-    if (isOpen) setName("");
-  }, [isOpen]);
+    if (isOpen) {
+      setName("");
+      setSelectedType(type === "auto" || !type ? "note" : type);
+      setAllowedTypes(["note", "container"]);
+
+      // Enforce the rule: only one type of children per container
+      if (parentId) {
+        vaultService.getFolderContents(parentId).then((children) => {
+          const hasNotes = children.some((c) => c.type === "note");
+          const hasContainers = children.some((c) => c.type === "container");
+          if (hasNotes && !hasContainers) {
+            setAllowedTypes(["note"]);
+            setSelectedType("note");
+          } else if (hasContainers && !hasNotes) {
+            setAllowedTypes(["container"]);
+            setSelectedType("container");
+          }
+        });
+      }
+    }
+  }, [isOpen, type, parentId]);
   if (!isOpen) return null;
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim()) return;
     try {
-      if (type === "note") {
+      if (selectedType === "note") {
         const n = await vaultService.createNote(parentId, name.trim());
         useStore.getState().openNoteFromVault(n);
       } else {
@@ -85,12 +106,12 @@ export default function CreateVaultItemModal() {
               gap: "8px",
             }}
           >
-            {type === "note" ? (
+            {selectedType === "note" ? (
               <FileText size={18} />
             ) : (
               <FolderPlus size={18} />
             )}
-            {type === "note" ? "Create Note" : "Create Folder"}
+            {selectedType === "note" ? "Create Note" : "Create Folder"}
           </h2>
           <div
             onClick={closeCreateVaultItemModal}
@@ -104,11 +125,71 @@ export default function CreateVaultItemModal() {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div
-            style={{
-              marginBottom: "20px",
-            }}
-          >
+          {allowedTypes.length > 1 && (
+            <div
+              style={{
+                marginBottom: "20px",
+                display: "flex",
+                backgroundColor: "var(--bg-secondary)",
+                borderRadius: "8px",
+                padding: "4px",
+              }}
+            >
+              <div
+                onClick={() => setSelectedType("container")}
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  padding: "8px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  backgroundColor:
+                    selectedType === "container"
+                      ? "var(--bg-primary)"
+                      : "transparent",
+                  color:
+                    selectedType === "container"
+                      ? "var(--text-primary)"
+                      : "var(--text-secondary)",
+                  boxShadow:
+                    selectedType === "container"
+                      ? "0 2px 4px rgba(0,0,0,0.05)"
+                      : "none",
+                }}
+              >
+                Folder/Collection
+              </div>
+              <div
+                onClick={() => setSelectedType("note")}
+                style={{
+                  flex: 1,
+                  textAlign: "center",
+                  padding: "8px",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  backgroundColor:
+                    selectedType === "note"
+                      ? "var(--bg-primary)"
+                      : "transparent",
+                  color:
+                    selectedType === "note"
+                      ? "var(--text-primary)"
+                      : "var(--text-secondary)",
+                  boxShadow:
+                    selectedType === "note"
+                      ? "0 2px 4px rgba(0,0,0,0.05)"
+                      : "none",
+                }}
+              >
+                Note
+              </div>
+            </div>
+          )}
+          <div style={{ marginBottom: "20px" }}>
             <label
               style={{
                 display: "block",
@@ -125,7 +206,7 @@ export default function CreateVaultItemModal() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder={
-                type === "note"
+                selectedType === "note"
                   ? "e.g., REST API Design"
                   : "e.g., Backend Architecture"
               }

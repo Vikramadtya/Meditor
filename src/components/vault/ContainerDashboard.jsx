@@ -7,12 +7,14 @@ import { TocView } from "./dashboard/TocView";
 import { useStore } from "../../store/index";
 import { vaultService } from "../../application/vault/VaultService";
 export default function ContainerDashboard() {
-  const { activeVaultItem, setActiveVaultItem } = useStore(
-    useShallow((s) => ({
-      activeVaultItem: s.activeVaultItem,
-      setActiveVaultItem: s.setActiveVaultItem,
-    })),
-  );
+  const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal } =
+    useStore(
+      useShallow((s) => ({
+        activeVaultItem: s.activeVaultItem,
+        setActiveVaultItem: s.setActiveVaultItem,
+        openCreateVaultItemModal: s.openCreateVaultItemModal,
+      })),
+    );
   const [children, setChildren] = useState([]);
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'toc'
 
@@ -86,6 +88,35 @@ export default function ContainerDashboard() {
             padding: "4px",
           }}
         >
+          {/* Add New Button */}
+          <div
+            onClick={() =>
+              openCreateVaultItemModal("auto", activeVaultItem.path)
+            }
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              backgroundColor: "var(--accent)",
+              color: "white",
+              padding: "10px 16px",
+              borderRadius: "24px",
+              cursor: "pointer",
+              fontWeight: 600,
+              fontSize: "14px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              marginRight: "16px",
+              transition: "transform 0.1s ease-in-out",
+            }}
+            onMouseDown={(e) =>
+              (e.currentTarget.style.transform = "scale(0.96)")
+            }
+            onMouseUp={(e) => (e.currentTarget.style.transform = "scale(1)")}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
+          >
+            <Book size={18} /> Add New
+          </div>
+
           <div
             onClick={() => setViewMode("grid")}
             style={{
