@@ -51,23 +51,27 @@ chmod +x "${APP_DIR}/Contents/MacOS/${APP_NAME}"
 cp "dist/meditor/resources.neu" "${APP_DIR}/Contents/MacOS/"
 
 # ─── App Icon (ICNS) ──────────────────────────────────────────
-echo "==> Generating app icon (ICNS)"
-ICONSET="build/icon.iconset"
-mkdir -p "${ICONSET}"
+if [ ! -f "public/app-icon.png" ]; then
+  echo "WARNING: public/app-icon.png not found! Using default icon."
+else
+  echo "==> Generating app icon (ICNS)"
+  ICONSET="build/icon.iconset"
+  mkdir -p "${ICONSET}"
 
-sips -z 16   16   public/app-icon.png --out "${ICONSET}/icon_16x16.png"     > /dev/null
-sips -z 32   32   public/app-icon.png --out "${ICONSET}/icon_16x16@2x.png"  > /dev/null
-sips -z 32   32   public/app-icon.png --out "${ICONSET}/icon_32x32.png"     > /dev/null
-sips -z 64   64   public/app-icon.png --out "${ICONSET}/icon_32x32@2x.png"  > /dev/null
-sips -z 128  128  public/app-icon.png --out "${ICONSET}/icon_128x128.png"   > /dev/null
-sips -z 256  256  public/app-icon.png --out "${ICONSET}/icon_128x128@2x.png"> /dev/null
-sips -z 256  256  public/app-icon.png --out "${ICONSET}/icon_256x256.png"   > /dev/null
-sips -z 512  512  public/app-icon.png --out "${ICONSET}/icon_256x256@2x.png"> /dev/null
-sips -z 512  512  public/app-icon.png --out "${ICONSET}/icon_512x512.png"   > /dev/null
-sips -z 1024 1024 public/app-icon.png --out "${ICONSET}/icon_512x512@2x.png"> /dev/null
+  sips -z 16   16   public/app-icon.png --out "${ICONSET}/icon_16x16.png"     > /dev/null
+  sips -z 32   32   public/app-icon.png --out "${ICONSET}/icon_16x16@2x.png"  > /dev/null
+  sips -z 32   32   public/app-icon.png --out "${ICONSET}/icon_32x32.png"     > /dev/null
+  sips -z 64   64   public/app-icon.png --out "${ICONSET}/icon_32x32@2x.png"  > /dev/null
+  sips -z 128  128  public/app-icon.png --out "${ICONSET}/icon_128x128.png"   > /dev/null
+  sips -z 256  256  public/app-icon.png --out "${ICONSET}/icon_128x128@2x.png"> /dev/null
+  sips -z 256  256  public/app-icon.png --out "${ICONSET}/icon_256x256.png"   > /dev/null
+  sips -z 512  512  public/app-icon.png --out "${ICONSET}/icon_256x256@2x.png"> /dev/null
+  sips -z 512  512  public/app-icon.png --out "${ICONSET}/icon_512x512.png"   > /dev/null
+  sips -z 1024 1024 public/app-icon.png --out "${ICONSET}/icon_512x512@2x.png"> /dev/null
 
-iconutil -c icns "${ICONSET}" -o "${APP_DIR}/Contents/Resources/AppIcon.icns"
-rm -rf "${ICONSET}"
+  iconutil -c icns "${ICONSET}" -o "${APP_DIR}/Contents/Resources/AppIcon.icns"
+  rm -rf "${ICONSET}"
+fi
 
 # ─── Info.plist ───────────────────────────────────────────────
 echo "==> Writing Info.plist (version: ${VERSION})"
@@ -104,12 +108,21 @@ PLIST
 
 # ─── Package into DMG ─────────────────────────────────────────
 echo "==> Packaging DMG: ${DMG_PATH}"
+
+# Create a staging directory to include the Applications symlink
+STAGING_DIR="build/dmg_staging"
+mkdir -p "${STAGING_DIR}"
+cp -R "${APP_DIR}" "${STAGING_DIR}/"
+ln -s /Applications "${STAGING_DIR}/Applications"
+
 hdiutil create \
   -volname "${APP_NAME}" \
-  -srcfolder "${APP_DIR}" \
+  -srcfolder "${STAGING_DIR}" \
   -ov \
   -format UDZO \
   "${DMG_PATH}"
+
+rm -rf "${STAGING_DIR}"
 
 echo ""
 echo "✅ Build complete!"
