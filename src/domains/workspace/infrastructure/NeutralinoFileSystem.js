@@ -248,7 +248,7 @@ class NeutralinoFileSystem {
    */
   async removeFile(filePath) {
     try {
-      await window.Neutralino.filesystem.removeFile(filePath);
+      await window.Neutralino.filesystem.remove(filePath);
       const dir = filePath.substring(0, filePath.lastIndexOf("/"));
       this.clearDirectoryCache(dir);
     } catch (err) {
@@ -279,7 +279,7 @@ class NeutralinoFileSystem {
       } catch (err) {
         // Might not exist
       }
-      await window.Neutralino.filesystem.removeDirectory(dirPath);
+      await window.Neutralino.filesystem.remove(dirPath);
       const parentDir = dirPath.substring(0, dirPath.lastIndexOf("/"));
       this.clearDirectoryCache(parentDir);
     } catch (err) {

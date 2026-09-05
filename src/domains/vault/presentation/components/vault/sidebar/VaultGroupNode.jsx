@@ -108,8 +108,7 @@ export default function VaultGroupNode({ group }) {
         <div
           onClick={async (e) => {
             e.stopPropagation();
-            let res = await window.Neutralino.os.showMessageBox('Confirm Delete', `Are you sure you want to delete "${group.name}"?`, 'YES_NO', 'WARNING');
-            if (res === 'YES') {
+            {
               try {
                 await vaultService.deleteItem(
                   "container",
