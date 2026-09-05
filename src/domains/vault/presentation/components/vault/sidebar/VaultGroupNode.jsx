@@ -1,5 +1,6 @@
 import { useShallow } from "zustand/react/shallow";
 import { reloadVaultHierarchy } from "../../../../../../core/store/actions";
+import toast from "react-hot-toast";
 import React, { useState, useEffect } from "react";
 import {
   ChevronRight,

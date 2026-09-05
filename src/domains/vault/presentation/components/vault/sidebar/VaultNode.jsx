@@ -3,6 +3,7 @@ import {
   openNoteFromVault,
   reloadVaultHierarchy,
 } from "../../../../../../core/store/actions.js";
+import toast from "react-hot-toast";
 import React, { useState, useEffect } from "react";
 import {
   Circle,

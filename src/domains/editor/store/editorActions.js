@@ -55,7 +55,7 @@ export const openFile = async (
     }
     const rawContent = await fileSystem.readFile(fullPath);
     const { fm, content } = splitFrontmatter(rawContent);
-    const fileName = logicalName ?? fullPath.split(/[/[\s\S]]/).pop();
+    const fileName = logicalName ?? fullPath.split(/[\\/]/).pop();
     state.openTab({
       id: fullPath,
       fileName,

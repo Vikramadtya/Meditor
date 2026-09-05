@@ -253,6 +253,7 @@ class NeutralinoFileSystem {
       this.clearDirectoryCache(dir);
     } catch (err) {
       this._log.warn("Failed to remove file: " + filePath, err);
+      throw err;
     }
   }
 
@@ -283,6 +284,7 @@ class NeutralinoFileSystem {
       this.clearDirectoryCache(parentDir);
     } catch (err) {
       this._log.warn("Failed to remove directory: " + dirPath, err);
+      throw err;
     }
   }
 
