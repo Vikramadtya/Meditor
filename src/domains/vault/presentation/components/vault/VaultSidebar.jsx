@@ -21,6 +21,7 @@ import {
   CalendarDays,
   BrainCircuit,
   Tag,
+  Activity,
 } from "lucide-react";
 import { useStore } from "../../../../../core/store/index";
 import { noteService } from "../../../application/NoteService";
@@ -53,6 +54,7 @@ export default function VaultSidebar() {
     setGraphModalOpen,
     setSettingsOpen,
     setGitModalOpen,
+    setAuditModalOpen,
     openCreateVaultItemModal,
   } = useStore(
     useShallow((s) => ({
@@ -60,6 +62,7 @@ export default function VaultSidebar() {
       setGraphModalOpen: s.setGraphModalOpen,
       setSettingsOpen: s.setSettingsOpen,
       setGitModalOpen: s.setGitModalOpen,
+      setAuditModalOpen: s.setAuditModalOpen,
       openCreateVaultItemModal: s.openCreateVaultItemModal,
     })),
   );
@@ -195,6 +198,13 @@ export default function VaultSidebar() {
               })
             }
           />
+          <SidebarLink
+            icon={<Activity size={14} />}
+            label="Audit Log"
+            isActive={false}
+            onClick={() => setAuditModalOpen(true)}
+          />
+
         </div>
 
         {/* Groups */}

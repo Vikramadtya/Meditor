@@ -24,13 +24,14 @@ export default function VaultNode({ item, level }) {
   const [hovered, setHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
-  const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal, openConfirmDeleteModal } =
+  const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal, openConfirmDeleteModal, openContextMenu } =
     useStore(
       useShallow((s) => ({
         activeVaultItem: s.activeVaultItem,
         setActiveVaultItem: s.setActiveVaultItem,
         openCreateVaultItemModal: s.openCreateVaultItemModal,
         openConfirmDeleteModal: s.openConfirmDeleteModal,
+        openContextMenu: s.openContextMenu,
       })),
     );
   const isActive = activeVaultItem?.id === item.id;
@@ -73,7 +74,39 @@ export default function VaultNode({ item, level }) {
   }
   return (
     <div
-      style={{
+      
+        draggable={true}
+        onDragStart={(e) => {
+          e.stopPropagation();
+          e.dataTransfer.setData("application/meditor-item", JSON.stringify(item));
+        }}
+        onDragOver={(e) => {
+          if (!!isNote) return; // only containers can be dropped into
+          e.preventDefault();
+          e.stopPropagation();
+          e.currentTarget.style.backgroundColor = "var(--bg-active)";
+        }}
+        onDragLeave={(e) => {
+          if (!!isNote) return;
+          e.currentTarget.style.backgroundColor = isActive ? "var(--bg-active)" : "transparent";
+        }}
+        onDrop={async (e) => {
+          if (!!isNote) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.currentTarget.style.backgroundColor = isActive ? "var(--bg-active)" : "transparent";
+          try {
+            const data = JSON.parse(e.dataTransfer.getData("application/meditor-item"));
+            if (data && data.path !== item.path && !data.path.startsWith(item.path + "/")) {
+              await vaultService.moveItem(data.type, data.id, data.path, item.path);
+              toast.success(`Moved "${data.name}"`);
+              reloadVaultHierarchy();
+            }
+          } catch (err) {
+            toast.error("Move failed");
+          }
+        }}
+        style={{
         display: "flex",
         flexDirection: "column",
       }}
@@ -88,7 +121,10 @@ export default function VaultNode({ item, level }) {
           }
         }}
         onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        onMouseLeave={() => setHovered(false)} onContextMenu={(e) => {
+          e.preventDefault();
+          openContextMenu(item, e.clientX, e.clientY);
+        }}
         style={{
           display: "flex",
           alignItems: "center",
@@ -150,22 +186,7 @@ export default function VaultNode({ item, level }) {
             <Plus size={14} />
           </div>
         )}
-        {hovered && (
-          <div
-            onClick={(e) => {
-              e.stopPropagation();
-              openConfirmDeleteModal(item);
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginLeft: "4px",
-              color: "#ff5252",
-            }}
-          >
-            <Trash2 size={13} />
-          </div>
-        )}
+        
       </div>
 
       {expanded && !isNote && (

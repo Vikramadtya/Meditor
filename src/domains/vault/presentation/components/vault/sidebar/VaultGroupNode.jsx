@@ -26,6 +26,7 @@ export default function VaultGroupNode({ group }) {
         activeVaultItem: s.activeVaultItem,
         openCreateVaultItemModal: s.openCreateVaultItemModal,
         openConfirmDeleteModal: s.openConfirmDeleteModal,
+        openContextMenu: s.openContextMenu,
       })),
     );
   const isActive = activeVaultItem && activeVaultItem.id === group.id;
@@ -45,7 +46,39 @@ export default function VaultGroupNode({ group }) {
 
   return (
     <div
-      style={{
+      
+        draggable={true}
+        onDragStart={(e) => {
+          e.stopPropagation();
+          e.dataTransfer.setData("application/meditor-item", JSON.stringify(group));
+        }}
+        onDragOver={(e) => {
+          if (!true) return; // only containers can be dropped into
+          e.preventDefault();
+          e.stopPropagation();
+          e.currentTarget.style.backgroundColor = "var(--bg-active)";
+        }}
+        onDragLeave={(e) => {
+          if (!true) return;
+          e.currentTarget.style.backgroundColor = isActive ? "var(--bg-active)" : "transparent";
+        }}
+        onDrop={async (e) => {
+          if (!true) return;
+          e.preventDefault();
+          e.stopPropagation();
+          e.currentTarget.style.backgroundColor = isActive ? "var(--bg-active)" : "transparent";
+          try {
+            const data = JSON.parse(e.dataTransfer.getData("application/meditor-item"));
+            if (data && data.path !== group.path && !data.path.startsWith(group.path + "/")) {
+              await vaultService.moveItem(data.type, data.id, data.path, group.path);
+              toast.success(`Moved "${data.name}"`);
+              reloadVaultHierarchy();
+            }
+          } catch (err) {
+            toast.error("Move failed");
+          }
+        }}
+        style={{
         display: "flex",
         flexDirection: "column",
       }}

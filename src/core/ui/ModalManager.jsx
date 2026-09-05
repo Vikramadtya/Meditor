@@ -10,6 +10,9 @@ import GitModal from "../../domains/version-control/presentation/GitModal";
 import GitHistoryModal from "../../domains/version-control/presentation/GitHistoryModal";
 import TagModal from "../../domains/vault/presentation/components/TagModal";
 import ConfirmDeleteModal from "../../domains/vault/presentation/components/ConfirmDeleteModal";
+import AuditModal from "../../domains/vault/presentation/components/AuditModal";
+import MoveItemModal from "../../domains/vault/presentation/components/MoveItemModal";
+import VaultContextMenu from "../../domains/vault/presentation/components/vault/sidebar/VaultContextMenu";
 
 /**
  * Manager component that renders all global modals in the application.
@@ -38,6 +41,9 @@ export default function ModalManager() {
       />
       <TagModal />
       <ConfirmDeleteModal />
+      <AuditModal />
+      <MoveItemModal />
+      <VaultContextMenu />
     </>
   );
 }

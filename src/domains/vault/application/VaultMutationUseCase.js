@@ -19,6 +19,7 @@ export async function createContainerCommand(vaultPath, parentRelPath, name) {
     name,
     metadata: meta,
   });
+  vaultRepository.logAuditAction("CREATE_COLLECTION", `Created collection "${name}"`);
   return meta;
 }
 
@@ -37,6 +38,7 @@ export async function createNoteCommand(vaultPath, parentRelPath, name) {
     tags: "",
     updated_at: Date.now(),
   });
+  vaultRepository.logAuditAction("CREATE_NOTE", `Created note "${name}"`);
   return { id, name, path: newRel, type: "note" };
 }
 
@@ -52,9 +54,11 @@ export async function deleteItemCommand(
       const full = `${vaultPath}/${relPath}`;
       await fileSystem.removeFile(full);
       vaultRepository.deleteNoteById(id);
+      vaultRepository.logAuditAction("DELETE_NOTE", `Deleted note at ${relPath}`);
     } else {
       // Soft delete
       vaultRepository._run("UPDATE notes SET is_deleted=1 WHERE id=?", [id]);
+      vaultRepository.logAuditAction("SOFT_DELETE_NOTE", `Soft deleted note ${id}`);
     }
   } else {
     // Containers are always hard deleted
@@ -62,6 +66,7 @@ export async function deleteItemCommand(
       const full = `${vaultPath}/${relPath}`;
       await fileSystem.removeDirectory(full);
       vaultRepository.deleteContainerById(id);
+      vaultRepository.logAuditAction("DELETE_COLLECTION", `Deleted collection at ${relPath}`);
     }
   }
 }
@@ -84,7 +89,7 @@ export async function renameItemCommand(
 
   const newFull = `${vaultPath}/${newRel}`;
 
-  await window.Neutralino.filesystem.moveFile(oldFull, newFull);
+  await window.Neutralino.filesystem.move(oldFull, newFull);
 
   if (type === "note") {
     // If we rename a note, we just update the 'name' and 'path' in SQLite
@@ -94,6 +99,7 @@ export async function renameItemCommand(
       newRel,
       id,
     ]);
+    vaultRepository.logAuditAction("RENAME_NOTE", `Renamed note to "${newName}"`);
   } else {
     // If we rename a container, we update its name and path
     vaultRepository._run("UPDATE containers SET name=?, path=? WHERE id=?", [
@@ -101,9 +107,29 @@ export async function renameItemCommand(
       newRel,
       id,
     ]);
+    vaultRepository.logAuditAction("RENAME_COLLECTION", `Renamed collection to "${newName}"`);
     // WARNING: SQLite does not easily cascade paths for nested items in a tree unless we query them.
     // However, since we read the filesystem for hierarchy, the next refresh will fix the paths.
     // BUT we should update nested paths in SQLite too!
     // Since we don't have a simple cascading update, we will just syncVault to clean up DB state!
+  }
+}
+
+export async function moveItemCommand(vaultPath, type, id, oldRelPath, newParentRelPath) {
+  if (!oldRelPath) throw new Error("oldRelPath is required");
+  const oldFull = `${vaultPath}/${oldRelPath}`;
+  
+  const fileName = oldRelPath.split("/").pop();
+  const newRel = newParentRelPath === "notes" ? fileName : `${newParentRelPath}/${fileName}`;
+  const newFull = `${vaultPath}/${newRel}`;
+
+  await window.Neutralino.filesystem.move(oldFull, newFull);
+
+  if (type === "note") {
+    vaultRepository._run("UPDATE notes SET path=? WHERE id=?", [newRel, id]);
+    vaultRepository.logAuditAction("MOVE_NOTE", `Moved note "${fileName}" to ${newParentRelPath}`);
+  } else {
+    vaultRepository._run("UPDATE containers SET path=? WHERE id=?", [newRel, id]);
+    vaultRepository.logAuditAction("MOVE_COLLECTION", `Moved collection "${fileName}" to ${newParentRelPath}`);
   }
 }

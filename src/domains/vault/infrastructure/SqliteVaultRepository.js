@@ -40,6 +40,12 @@ class SqliteVaultRepository {
     this._assertDb();
     this._migrate();
     this.db.run(`
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id TEXT PRIMARY KEY,
+        action TEXT NOT NULL,
+        details TEXT,
+        timestamp INTEGER NOT NULL
+      );
       CREATE TABLE IF NOT EXISTS containers (
         id TEXT PRIMARY KEY,
         path TEXT UNIQUE NOT NULL,
@@ -266,6 +272,35 @@ class SqliteVaultRepository {
       [now],
     );
   }
+  
+  // ─── Audit Log ───────────────────────────────────────────────────────────
+
+  logAuditAction(action, details = "") {
+    if (!this.db) return;
+    const id = crypto.randomUUID();
+    const timestamp = Date.now();
+    try {
+      this._run(
+        "INSERT INTO audit_log (id, action, details, timestamp) VALUES (?, ?, ?, ?)",
+        [id, action, details, timestamp]
+      );
+    } catch (e) {
+      this._log.warn("Failed to log audit action", e);
+    }
+  }
+
+  getAuditLogs(limit = 100) {
+    if (!this.db) return [];
+    try {
+      return this._queryAll(
+        "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?",
+        [limit]
+      );
+    } catch (e) {
+      return [];
+    }
+  }
+
   // ─── Analytics ───────────────────────────────────────────────────────────
 
   getAnalytics() {

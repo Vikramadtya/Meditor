@@ -8,7 +8,7 @@ import {
   createContainerCommand,
   createNoteCommand,
   deleteItemCommand,
-  renameItemCommand,
+  renameItemCommand, moveItemCommand,
 } from "./VaultMutationUseCase";
 
 class VaultService {
@@ -177,6 +177,7 @@ class VaultService {
   }
 
   async renameItem(type, id, oldRelPath, newName) {
+    this._log.info(`Renaming ${type} "${oldRelPath}" to "${newName}"`);
     if (!this.db) return;
     await renameItemCommand(this.vaultPath, type, id, oldRelPath, newName);
     await this.saveVault();
@@ -196,12 +197,27 @@ class VaultService {
   }
 
   async deleteItem(type, id, relPath, hard = false) {
+    this._log.info(`Deleting ${type} "${relPath}" (hard: ${hard})`);
     await deleteItemCommand(this.vaultPath, type, id, relPath, hard);
     await this.saveVault();
     if (relPath) {
       const parentRelPath = relPath.substring(0, relPath.lastIndexOf("/"));
       this.notify(parentRelPath);
     }
+  }
+
+  
+  async moveItem(type, id, oldRelPath, newParentRelPath) {
+    this._log.info(`Moving ${type} ${oldRelPath} to ${newParentRelPath}`);
+    await moveItemCommand(this.vaultPath, type, id, oldRelPath, newParentRelPath);
+    await this.saveVault();
+    // Re-sync vault because moving a folder changes paths of all its children
+    if (type === 'container') {
+      await this.syncVault();
+    }
+    const oldParent = oldRelPath.substring(0, oldRelPath.lastIndexOf("/"));
+    this.notify(oldParent);
+    this.notify(newParentRelPath);
   }
 
   getNotePath(noteId) {
