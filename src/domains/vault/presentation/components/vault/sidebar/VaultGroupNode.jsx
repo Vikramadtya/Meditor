@@ -111,8 +111,18 @@ export default function VaultGroupNode({ group }) {
             if (
               window.confirm(`Are you sure you want to delete "${group.name}"?`)
             ) {
-              await vaultService.deleteItem("container", group.id, group.path);
-              reloadVaultHierarchy();
+              try {
+                await vaultService.deleteItem(
+                  "container",
+                  group.id,
+                  group.path,
+                );
+                toast.success(`Deleted "${group.name}"`);
+                reloadVaultHierarchy();
+              } catch (err) {
+                toast.error("Delete failed: " + err.message);
+                console.error("Delete failed", err);
+              }
             }
           }}
           style={{

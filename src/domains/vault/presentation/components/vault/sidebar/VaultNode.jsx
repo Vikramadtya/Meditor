@@ -154,8 +154,19 @@ export default function VaultNode({ item, level }) {
             onClick={async (e) => {
               e.stopPropagation();
               if (window.confirm(`Delete "${item.name}"?`)) {
-                await vaultService.deleteItem(item.type, item.id, item.path);
-                reloadVaultHierarchy(); // Actually this triggers a top-level reload, but that won't reload this node's parent automatically if the parent isn't at the root. We might need a better refresh mechanism.
+                try {
+                  await vaultService.deleteItem(
+                    item.type,
+                    item.id,
+                    item.path,
+                    true,
+                  ); // Hard delete to actually remove files
+                  toast.success(`Deleted "${item.name}"`);
+                  reloadVaultHierarchy();
+                } catch (err) {
+                  toast.error("Delete failed: " + err.message);
+                  console.error("Delete failed", err);
+                }
               }
             }}
             style={{
