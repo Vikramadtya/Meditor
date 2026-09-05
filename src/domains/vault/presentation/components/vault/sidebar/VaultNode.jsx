@@ -153,7 +153,8 @@ export default function VaultNode({ item, level }) {
           <div
             onClick={async (e) => {
               e.stopPropagation();
-              if (window.confirm(`Delete "${item.name}"?`)) {
+              let res = await window.Neutralino.os.showMessageBox('Confirm Delete', `Are you sure you want to delete "${item.name}"?`, 'YES_NO', 'WARNING');
+              if (res === 'YES') {
                 try {
                   await vaultService.deleteItem(
                     item.type,
