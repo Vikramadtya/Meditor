@@ -25,6 +25,7 @@ export default function VaultGroupNode({ group }) {
         setActiveVaultItem: s.setActiveVaultItem,
         activeVaultItem: s.activeVaultItem,
         openCreateVaultItemModal: s.openCreateVaultItemModal,
+        openConfirmDeleteModal: s.openConfirmDeleteModal,
       })),
     );
   const isActive = activeVaultItem && activeVaultItem.id === group.id;
@@ -106,22 +107,9 @@ export default function VaultGroupNode({ group }) {
           <Plus size={14} />
         </div>
         <div
-          onClick={async (e) => {
+          onClick={(e) => {
             e.stopPropagation();
-            {
-              try {
-                await vaultService.deleteItem(
-                  "container",
-                  group.id,
-                  group.path,
-                );
-                toast.success(`Deleted "${group.name}"`);
-                reloadVaultHierarchy();
-              } catch (err) {
-                toast.error("Delete failed: " + err.message);
-                console.error("Delete failed", err);
-              }
-            }
+            openConfirmDeleteModal(group);
           }}
           style={{
             opacity: hovered ? 1 : 0,

@@ -47,6 +47,10 @@ export const createUISlice = (set) => ({
     }),
 
   // ── Modals ───────────────────────────────────────────────────────────────
+  confirmDeleteModal: { isOpen: false, item: null },
+  openConfirmDeleteModal: (item) => set((s) => { s.confirmDeleteModal = { isOpen: true, item }; }),
+  closeConfirmDeleteModal: () => set((s) => { s.confirmDeleteModal = { isOpen: false, item: null }; }),
+  
   isSettingsOpen: false,
   setSettingsOpen: (v) =>
     set((s) => {

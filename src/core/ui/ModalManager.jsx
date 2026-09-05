@@ -9,6 +9,7 @@ import TrashModal from "../../domains/vault/presentation/components/TrashModal";
 import GitModal from "../../domains/version-control/presentation/GitModal";
 import GitHistoryModal from "../../domains/version-control/presentation/GitHistoryModal";
 import TagModal from "../../domains/vault/presentation/components/TagModal";
+import ConfirmDeleteModal from "../../domains/vault/presentation/components/ConfirmDeleteModal";
 
 /**
  * Manager component that renders all global modals in the application.
@@ -36,6 +37,7 @@ export default function ModalManager() {
         onClose={() => setHistoryModalOpen(false)}
       />
       <TagModal />
+      <ConfirmDeleteModal />
     </>
   );
 }

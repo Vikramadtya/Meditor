@@ -24,12 +24,13 @@ export default function VaultNode({ item, level }) {
   const [hovered, setHovered] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(item.name);
-  const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal } =
+  const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal, openConfirmDeleteModal } =
     useStore(
       useShallow((s) => ({
         activeVaultItem: s.activeVaultItem,
         setActiveVaultItem: s.setActiveVaultItem,
         openCreateVaultItemModal: s.openCreateVaultItemModal,
+        openConfirmDeleteModal: s.openConfirmDeleteModal,
       })),
     );
   const isActive = activeVaultItem?.id === item.id;
@@ -151,23 +152,9 @@ export default function VaultNode({ item, level }) {
         )}
         {hovered && (
           <div
-            onClick={async (e) => {
+            onClick={(e) => {
               e.stopPropagation();
-              {
-                try {
-                  await vaultService.deleteItem(
-                    item.type,
-                    item.id,
-                    item.path,
-                    true,
-                  ); // Hard delete to actually remove files
-                  toast.success(`Deleted "${item.name}"`);
-                  reloadVaultHierarchy();
-                } catch (err) {
-                  toast.error("Delete failed: " + err.message);
-                  console.error("Delete failed", err);
-                }
-              }
+              openConfirmDeleteModal(item);
             }}
             style={{
               display: "flex",
