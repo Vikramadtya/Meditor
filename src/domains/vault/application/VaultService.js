@@ -8,6 +8,7 @@ import {
   createContainerCommand,
   createNoteCommand,
   deleteItemCommand,
+  renameItemCommand,
 } from "./VaultMutationUseCase";
 
 class VaultService {
@@ -173,6 +174,25 @@ class VaultService {
     await this.saveVault();
     this.notify(parentRelPath);
     return noteMeta;
+  }
+
+  async renameItem(type, id, oldRelPath, newName) {
+    if (!this.db) return;
+    await renameItemCommand(this.vaultPath, type, id, oldRelPath, newName);
+    await this.saveVault();
+    // Re-sync vault to fix paths for nested notes if a directory was renamed
+    if (type === "container") {
+      await this.syncVault();
+    }
+
+    // Notify old parent to refresh
+    if (oldRelPath) {
+      const parentRelPath = oldRelPath.substring(
+        0,
+        oldRelPath.lastIndexOf("/"),
+      );
+      this.notify(parentRelPath);
+    }
   }
 
   async deleteItem(type, id, relPath, hard = false) {

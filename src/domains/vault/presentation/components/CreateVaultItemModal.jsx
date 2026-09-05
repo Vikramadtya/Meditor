@@ -4,6 +4,10 @@ import React, { useState, useEffect } from "react";
 import { FolderPlus, FileText, X } from "lucide-react";
 import { useStore } from "../../../../core/store/index";
 import { vaultService } from "../../application/VaultService";
+import { openNoteFromVault } from "../../store/vaultActions";
+import { Logger } from "../../../../core/infrastructure/Logger";
+
+const log = Logger.forContext("CreateVaultItemModal");
 export default function CreateVaultItemModal() {
   const {
     createVaultItemModal,
@@ -67,7 +71,7 @@ export default function CreateVaultItemModal() {
     try {
       if (selectedType === "note") {
         const n = await vaultService.createNote(parentId, name.trim());
-        useStore.getState().openNoteFromVault(n);
+        await openNoteFromVault(n);
       } else {
         const c = await vaultService.createContainer(parentId, name.trim());
         setActiveVaultItem(c);

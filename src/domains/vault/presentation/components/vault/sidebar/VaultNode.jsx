@@ -21,6 +21,8 @@ export default function VaultNode({ item, level }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(item.name);
   const { activeVaultItem, setActiveVaultItem, openCreateVaultItemModal } =
     useStore(
       useShallow((s) => ({
@@ -31,6 +33,24 @@ export default function VaultNode({ item, level }) {
     );
   const isActive = activeVaultItem?.id === item.id;
   const isNote = item.type === "note";
+
+  const submitRename = async () => {
+    if (editName.trim() && editName.trim() !== item.name) {
+      try {
+        await vaultService.renameItem(
+          item.type,
+          item.id,
+          item.path,
+          editName.trim(),
+        );
+        reloadVaultHierarchy();
+      } catch (e) {
+        alert("Rename failed: " + e.message);
+      }
+    }
+    setIsEditing(false);
+  };
+
   const loadChildren = async () => {
     if (isNote) return;
     const res = await vaultService.getFolderContents(item.path);

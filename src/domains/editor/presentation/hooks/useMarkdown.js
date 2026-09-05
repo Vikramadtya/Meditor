@@ -11,7 +11,9 @@ import {
 const log = Logger.forContext("useMarkdown");
 
 export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
-  const [html, setHtml] = useState("");
+  const [htmlContent, setHtmlContent] = useState("");
+  const [toc, setToc] = useState([]);
+  const [frontmatter, setFrontmatter] = useState(null);
   const [isRendering, setIsRendering] = useState(false);
 
   const currentFilePath = useStore((state) => state.activeVaultItem?.path);
@@ -30,14 +32,58 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
       try {
         const md = getMarkdownInstance(mdConfig);
 
-        // Strip frontmatter if present (simplified regex for frontmatter)
-        const frontmatterRegex = /^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/;
-        const markdownWithoutFrontmatter = markdown.replace(
-          frontmatterRegex,
-          "",
-        );
+        let contentToRender = markdown;
+        let parsedFm = null;
 
-        let rawHtml = md.render(markdownWithoutFrontmatter || "");
+        // Strip frontmatter if present
+        const fmMatch = markdown.match(
+          /^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/,
+        );
+        if (fmMatch) {
+          contentToRender = markdown.slice(fmMatch[0].length);
+          const yamlString = fmMatch[1];
+          parsedFm = {};
+          const lines = yamlString.split("\n");
+          let currentKey = null;
+          lines.forEach((line) => {
+            const trimmed = line.trim();
+            if (!trimmed) return;
+            if (trimmed.startsWith("- ") && currentKey) {
+              if (!Array.isArray(parsedFm[currentKey])) {
+                parsedFm[currentKey] = parsedFm[currentKey]
+                  ? [parsedFm[currentKey]]
+                  : [];
+              }
+              parsedFm[currentKey].push(trimmed.slice(2).trim());
+            } else {
+              const idx = line.indexOf(":");
+              if (idx > 0) {
+                currentKey = line.slice(0, idx).trim();
+                const val = line.slice(idx + 1).trim();
+                if (val) {
+                  parsedFm[currentKey] = val;
+                } else {
+                  parsedFm[currentKey] = [];
+                }
+              }
+            }
+          });
+        }
+
+        // Extract TOC
+        const newToc = [];
+        const headingRegex = /^(#{1,6})\s+(.+)$/gm;
+        let match;
+        while ((match = headingRegex.exec(contentToRender)) !== null) {
+          newToc.push({
+            level: match[1].length,
+            text: match[2]
+              .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+              .replace(/[*_~`]/g, ""),
+          });
+        }
+
+        let rawHtml = md.render(contentToRender || "");
 
         // Only inline images if we are in vault mode
         if (workspaceMode === "vault") {
@@ -85,12 +131,14 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
         DOMPurify.removeHook("afterSanitizeAttributes");
 
         if (!isCancelled) {
-          setHtml(safeHtml);
+          setHtmlContent(safeHtml);
+          setToc(newToc);
+          setFrontmatter(parsedFm);
         }
       } catch (err) {
         log.error("Error rendering markdown:", err);
         if (!isCancelled) {
-          setHtml(
+          setHtmlContent(
             `<div class="markdown-error">Failed to render markdown: ${err.message}</div>`,
           );
         }
@@ -123,7 +171,7 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
     activeVaultItem?.path,
   ]);
 
-  return { html, isRendering };
+  return { htmlContent, toc, frontmatter, isRendering };
 }
 
 export { clearImageCache };

@@ -76,8 +76,8 @@ export class Logger {
   async _writeToDisk(level, message, meta) {
     if (!window?.Neutralino?.filesystem) return;
     try {
-      const dataDir = await window.Neutralino.os.getPath("data");
-      const logFile = `${dataDir}/meditor.log`;
+      const logFile = ".tmp/meditor.log";
+
       const metaStr = meta
         ? meta instanceof Error
           ? meta.message + "\n" + meta.stack

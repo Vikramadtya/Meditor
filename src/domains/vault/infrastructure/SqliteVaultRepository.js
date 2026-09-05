@@ -122,6 +122,10 @@ class SqliteVaultRepository {
     );
   }
 
+  findAllNotes() {
+    return this._queryAll("SELECT * FROM notes WHERE is_deleted=0");
+  }
+
   getNoteById(id) {
     return this._queryAll("SELECT * FROM notes WHERE id=?", [id])[0] || null;
   }

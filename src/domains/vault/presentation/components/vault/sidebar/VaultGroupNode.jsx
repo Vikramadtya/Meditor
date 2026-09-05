@@ -16,6 +16,8 @@ export default function VaultGroupNode({ group }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(group.name);
   const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal } =
     useStore(
       useShallow((s) => ({

@@ -34,7 +34,7 @@ export const useSettingsStore = create(
         })),
 
       mdConfig: {
-        dialect: "gfm",
+        dialect: "default",
         allowHtml: true,
         linkify: true,
         typographer: true,
