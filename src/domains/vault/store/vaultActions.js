@@ -10,7 +10,7 @@ export const reloadVaultHierarchy = async () => {
   const { workspaceMode, currentFolder } = useStore.getState();
   if (workspaceMode !== "vault" || !currentFolder) return;
   try {
-    const hierarchy = await vaultService.buildHierarchy();
+    const hierarchy = await vaultService.getFolderContents("notes");
     useStore.setState({ vaultHierarchy: hierarchy });
     log.info("Vault hierarchy reloaded");
   } catch (err) {
