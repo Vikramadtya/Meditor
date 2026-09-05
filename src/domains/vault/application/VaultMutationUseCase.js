@@ -45,14 +45,21 @@ export async function deleteItemCommand(
   type,
   id,
   relPath,
-  hard = true,
+  hard = false,
 ) {
-  if (hard && relPath) {
-    const full = `${vaultPath}/${relPath}`;
-    if (type === "note") {
+  if (type === "note") {
+    if (hard && relPath) {
+      const full = `${vaultPath}/${relPath}`;
       await fileSystem.removeFile(full);
       vaultRepository.deleteNoteById(id);
     } else {
+      // Soft delete
+      vaultRepository._run("UPDATE notes SET is_deleted=1 WHERE id=?", [id]);
+    }
+  } else {
+    // Containers are always hard deleted
+    if (relPath) {
+      const full = `${vaultPath}/${relPath}`;
       await fileSystem.removeDirectory(full);
       vaultRepository.deleteContainerById(id);
     }

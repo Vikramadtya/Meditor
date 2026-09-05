@@ -53,12 +53,14 @@ export async function getFolderContentsCommand(vaultPath, relPath, log) {
       } else if (e.entry.endsWith(".md")) {
         const name = e.entry.replace(/\.md$/, "");
         const cached = vaultRepository.getNoteByPath(childRelPath);
-        results.push({
-          id: cached ? cached.id : childRelPath,
-          name,
-          type: "note",
-          path: childRelPath,
-        });
+        if (!cached || cached.is_deleted !== 1) {
+          results.push({
+            id: cached ? cached.id : childRelPath,
+            name,
+            type: "note",
+            path: childRelPath,
+          });
+        }
       }
     }
 

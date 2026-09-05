@@ -175,7 +175,7 @@ class VaultService {
     return noteMeta;
   }
 
-  async deleteItem(type, id, relPath, hard = true) {
+  async deleteItem(type, id, relPath, hard = false) {
     await deleteItemCommand(this.vaultPath, type, id, relPath, hard);
     await this.saveVault();
     if (relPath) {
