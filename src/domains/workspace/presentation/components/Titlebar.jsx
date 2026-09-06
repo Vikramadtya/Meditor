@@ -12,12 +12,13 @@ import { selectShowDashboard } from "../../../vault/store/vault.selectors";
  * @returns {React.ReactElement} The rendered Titlebar component.
  */
 export default function Titlebar() {
-  const { fileName, markdown, isSidebarOpen, toggleSidebar } = useStore(
+  const { fileName, markdown, isSidebarOpen, toggleSidebar, workspaceMode } = useStore(
     useShallow((s) => ({
       fileName: s.fileName,
       markdown: s.markdown,
       isSidebarOpen: s.isSidebarOpen,
       toggleSidebar: s.toggleSidebar,
+      workspaceMode: s.workspaceMode,
     })),
   );
   const isDirty = useStore(selectIsDirty);
@@ -73,7 +74,7 @@ export default function Titlebar() {
             )}
           </button>
 
-          {!showDashboard && (
+          {(!showDashboard && workspaceMode !== "none") && (
             <>
               <FileText size={14} />
               <span>{fileName}</span>
@@ -103,7 +104,7 @@ export default function Titlebar() {
           </span>
         </div>
 
-        {!showDashboard && (
+        {(!showDashboard && workspaceMode !== "none") && (
           <div
             style={{
               fontSize: "11px",

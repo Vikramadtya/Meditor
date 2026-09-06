@@ -8,18 +8,17 @@ import {
   Plus,
   FilePlus,
   FolderPlus,
-  Trash2,
 } from "lucide-react";
 import { useStore } from "../../../../../../core/store/index";
 import { vaultService } from "../../../../application/VaultService";
 import VaultNode from "./VaultNode";
+
 export default function VaultGroupNode({ group }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(group.name);
-  const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal } =
+  
+  const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal, openConfirmDeleteModal, openContextMenu } =
     useStore(
       useShallow((s) => ({
         setActiveVaultItem: s.setActiveVaultItem,
@@ -29,11 +28,14 @@ export default function VaultGroupNode({ group }) {
         openContextMenu: s.openContextMenu,
       })),
     );
+    
   const isActive = activeVaultItem && activeVaultItem.id === group.id;
+  
   const loadChildren = async () => {
     const res = await vaultService.getFolderContents(group.path);
     setChildren(res);
   };
+  
   useEffect(() => {
     if (expanded) loadChildren();
     const unsub = vaultService.subscribe((changedPath) => {
@@ -46,27 +48,29 @@ export default function VaultGroupNode({ group }) {
 
   return (
     <div
-      
+      style={{
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div
         draggable={true}
         onDragStart={(e) => {
           e.stopPropagation();
           e.dataTransfer.setData("application/meditor-item", JSON.stringify(group));
         }}
         onDragOver={(e) => {
-          if (!true) return; // only containers can be dropped into
           e.preventDefault();
           e.stopPropagation();
           e.currentTarget.style.backgroundColor = "var(--bg-active)";
         }}
         onDragLeave={(e) => {
-          if (!true) return;
-          e.currentTarget.style.backgroundColor = isActive ? "var(--bg-active)" : "transparent";
+          e.currentTarget.style.backgroundColor = "transparent";
         }}
         onDrop={async (e) => {
-          if (!true) return;
           e.preventDefault();
           e.stopPropagation();
-          e.currentTarget.style.backgroundColor = isActive ? "var(--bg-active)" : "transparent";
+          e.currentTarget.style.backgroundColor = "transparent";
           try {
             const data = JSON.parse(e.dataTransfer.getData("application/meditor-item"));
             if (data && data.path !== group.path && !data.path.startsWith(group.path + "/")) {
@@ -78,15 +82,13 @@ export default function VaultGroupNode({ group }) {
             toast.error("Move failed");
           }
         }}
-        style={{
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
-      <div
         onClick={() => {
           setActiveVaultItem(group);
           setExpanded(true);
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          openContextMenu(group, e.clientX, e.clientY);
         }}
         style={{
           display: "flex",
@@ -138,21 +140,6 @@ export default function VaultGroupNode({ group }) {
           }}
         >
           <Plus size={14} />
-        </div>
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            openConfirmDeleteModal(group);
-          }}
-          style={{
-            opacity: hovered ? 1 : 0,
-            display: "flex",
-            alignItems: "center",
-            marginLeft: "4px",
-            color: "#ff5252",
-          }}
-        >
-          <Trash2 size={13} />
         </div>
       </div>
 
