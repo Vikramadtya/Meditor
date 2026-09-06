@@ -110,26 +110,51 @@ export class ErrorBoundary extends React.Component {
               {this.state.errorInfo && this.state.errorInfo.componentStack}
             </div>
 
-            <button
-              onClick={this.handleReload}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "8px",
-                padding: "10px 16px",
-                background: "var(--accent)",
-                color: "white",
-                border: "none",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontWeight: "500",
-                marginTop: "1rem",
-              }}
-            >
-              <RefreshCw size={16} />
-              Reload Application
-            </button>
+            <div style={{ display: "flex", gap: "12px", marginTop: "1rem" }}>
+              <button
+                onClick={this.handleReload}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "10px 16px",
+                  background: "var(--accent)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                }}
+              >
+                <RefreshCw size={16} />
+                Reload Application
+              </button>
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  window.location.reload();
+                }}
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "10px 16px",
+                  background: "transparent",
+                  color: "#f87171",
+                  border: "1px solid #f87171",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                }}
+              >
+                <AlertOctagon size={16} />
+                Clear Data & Reload
+              </button>
+            </div>
           </div>
         </div>
       );
