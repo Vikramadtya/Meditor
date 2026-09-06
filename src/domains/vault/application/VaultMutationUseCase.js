@@ -19,7 +19,10 @@ export async function createContainerCommand(vaultPath, parentRelPath, name) {
     name,
     metadata: meta,
   });
-  vaultRepository.logAuditAction("CREATE_COLLECTION", `Created collection "${name}"`);
+  vaultRepository.logAuditAction(
+    "CREATE_COLLECTION",
+    `Created collection "${name}"`,
+  );
   return meta;
 }
 
@@ -50,15 +53,41 @@ export async function deleteItemCommand(
   hard = false,
 ) {
   if (type === "note") {
-    if (hard && relPath) {
+    if (hard) {
+      if (relPath) {
+        const full = `${vaultPath}/${relPath}`;
+        await fileSystem.removeFile(full).catch(() => {});
+      } else {
+        // Deleting from trash where relPath is unknown or irrelevant
+        const trashFull = `${vaultPath}/.meditor/trash/${id}.md`;
+        await fileSystem.removeFile(trashFull).catch(() => {});
+      }
+      vaultRepository.deleteNoteById(id);
+      vaultRepository.logAuditAction("DELETE_NOTE", `Hard deleted note ${id}`);
+    } else if (!hard && relPath) {
       const full = `${vaultPath}/${relPath}`;
       await fileSystem.removeFile(full);
       vaultRepository.deleteNoteById(id);
-      vaultRepository.logAuditAction("DELETE_NOTE", `Deleted note at ${relPath}`);
+      vaultRepository.logAuditAction(
+        "DELETE_NOTE",
+        `Deleted note at ${relPath}`,
+      );
     } else {
-      // Soft delete
+      // Soft delete (move to trash folder)
+      try {
+        const originalFull = `${vaultPath}/${relPath}`;
+        const trashDir = `${vaultPath}/.meditor/trash`;
+        await fileSystem.createDirectory(trashDir).catch(() => {});
+        const trashFull = `${trashDir}/${id}.md`;
+        await window.Neutralino.filesystem.move(originalFull, trashFull);
+      } catch (err) {
+        console.warn("Could not move file to trash physically", err);
+      }
       vaultRepository._run("UPDATE notes SET is_deleted=1 WHERE id=?", [id]);
-      vaultRepository.logAuditAction("SOFT_DELETE_NOTE", `Soft deleted note ${id}`);
+      vaultRepository.logAuditAction(
+        "SOFT_DELETE_NOTE",
+        `Moved note to trash: ${relPath}`,
+      );
     }
   } else {
     // Containers are always hard deleted
@@ -66,7 +95,10 @@ export async function deleteItemCommand(
       const full = `${vaultPath}/${relPath}`;
       await fileSystem.removeDirectory(full);
       vaultRepository.deleteContainerById(id);
-      vaultRepository.logAuditAction("DELETE_COLLECTION", `Deleted collection at ${relPath}`);
+      vaultRepository.logAuditAction(
+        "DELETE_COLLECTION",
+        `Deleted collection at ${relPath}`,
+      );
     }
   }
 }
@@ -99,7 +131,10 @@ export async function renameItemCommand(
       newRel,
       id,
     ]);
-    vaultRepository.logAuditAction("RENAME_NOTE", `Renamed note to "${newName}"`);
+    vaultRepository.logAuditAction(
+      "RENAME_NOTE",
+      `Renamed note to "${newName}"`,
+    );
   } else {
     // If we rename a container, we update its name and path
     vaultRepository._run("UPDATE containers SET name=?, path=? WHERE id=?", [
@@ -107,7 +142,10 @@ export async function renameItemCommand(
       newRel,
       id,
     ]);
-    vaultRepository.logAuditAction("RENAME_COLLECTION", `Renamed collection to "${newName}"`);
+    vaultRepository.logAuditAction(
+      "RENAME_COLLECTION",
+      `Renamed collection to "${newName}"`,
+    );
     // WARNING: SQLite does not easily cascade paths for nested items in a tree unless we query them.
     // However, since we read the filesystem for hierarchy, the next refresh will fix the paths.
     // BUT we should update nested paths in SQLite too!
@@ -115,21 +153,37 @@ export async function renameItemCommand(
   }
 }
 
-export async function moveItemCommand(vaultPath, type, id, oldRelPath, newParentRelPath) {
+export async function moveItemCommand(
+  vaultPath,
+  type,
+  id,
+  oldRelPath,
+  newParentRelPath,
+) {
   if (!oldRelPath) throw new Error("oldRelPath is required");
   const oldFull = `${vaultPath}/${oldRelPath}`;
-  
+
   const fileName = oldRelPath.split("/").pop();
-  const newRel = newParentRelPath === "notes" ? fileName : `${newParentRelPath}/${fileName}`;
+  const newRel =
+    newParentRelPath === "notes" ? fileName : `${newParentRelPath}/${fileName}`;
   const newFull = `${vaultPath}/${newRel}`;
 
   await window.Neutralino.filesystem.move(oldFull, newFull);
 
   if (type === "note") {
     vaultRepository._run("UPDATE notes SET path=? WHERE id=?", [newRel, id]);
-    vaultRepository.logAuditAction("MOVE_NOTE", `Moved note "${fileName}" to ${newParentRelPath}`);
+    vaultRepository.logAuditAction(
+      "MOVE_NOTE",
+      `Moved note "${fileName}" to ${newParentRelPath}`,
+    );
   } else {
-    vaultRepository._run("UPDATE containers SET path=? WHERE id=?", [newRel, id]);
-    vaultRepository.logAuditAction("MOVE_COLLECTION", `Moved collection "${fileName}" to ${newParentRelPath}`);
+    vaultRepository._run("UPDATE containers SET path=? WHERE id=?", [
+      newRel,
+      id,
+    ]);
+    vaultRepository.logAuditAction(
+      "MOVE_COLLECTION",
+      `Moved collection "${fileName}" to ${newParentRelPath}`,
+    );
   }
 }

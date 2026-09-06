@@ -43,8 +43,12 @@ export default function ConfirmDeleteModal() {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await vaultService.deleteItem(item.type, item.id, item.path, true);
-      toast.success(`Deleted "${item.name}"`);
+      await vaultService.deleteItem(item.type, item.id, item.path, isContainer);
+      toast.success(
+        isContainer
+          ? `Deleted "${item.name}"`
+          : `Moved "${item.name}" to Trash`,
+      );
       reloadVaultHierarchy();
       close();
     } catch (err) {
@@ -251,7 +255,11 @@ export default function ConfirmDeleteModal() {
             }}
           >
             <Trash2 size={14} />
-            {isDeleting ? "Deleting..." : "Permanently Delete"}
+            {isDeleting
+              ? "Processing..."
+              : isContainer
+                ? "Permanently Delete"
+                : "Move to Trash"}
           </button>
         </div>
       </div>

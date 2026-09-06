@@ -239,6 +239,22 @@ class VaultService {
   }
 
   async restoreNote(id) {
+    const note = vaultRepository.getNoteById(id);
+    if (note) {
+      try {
+        const trashFull = `${this.vaultPath}/.meditor/trash/${id}.md`;
+        const originalFull = `${this.vaultPath}/${note.path}`;
+        // Ensure parent directory exists
+        const parentDir = originalFull.substring(
+          0,
+          originalFull.lastIndexOf("/"),
+        );
+        await fileSystem.createDirectory(parentDir).catch(() => {});
+        await window.Neutralino.filesystem.move(trashFull, originalFull);
+      } catch (err) {
+        this._log.warn("Could not restore physical file from trash", err);
+      }
+    }
     vaultRepository.restoreNoteById(id);
     vaultRepository.logAuditAction(
       "RESTORE_NOTE",
