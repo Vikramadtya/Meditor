@@ -2,6 +2,7 @@ import { useShallow } from "zustand/react/shallow";
 import { reloadVaultHierarchy } from "../../../../core/store/actions";
 import React, { useState, useEffect } from "react";
 import { X, Trash2, RefreshCw } from "lucide-react";
+import toast from "react-hot-toast";
 import { useStore } from "../../../../core/store/index";
 import { vaultService } from "../../application/VaultService";
 import { iconBtnStyle } from "../../../settings/presentation/SettingsStyles";
@@ -30,6 +31,7 @@ export default function TrashModal() {
     await vaultService.restoreNote(id);
     setDeletedNotes(vaultService.getDeletedNotes());
     reloadVaultHierarchy();
+    toast.success("Note restored");
   };
   const handleHardDelete = async (id) => {
     if (
@@ -37,8 +39,9 @@ export default function TrashModal() {
         "Are you sure you want to permanently delete this note? This cannot be undone.",
       )
     ) {
-      await vaultService.deleteItem("note", id, true);
+      await vaultService.deleteItem("note", id, null, true);
       setDeletedNotes(vaultService.getDeletedNotes());
+      toast.success("Permanently deleted");
     }
   };
   return (

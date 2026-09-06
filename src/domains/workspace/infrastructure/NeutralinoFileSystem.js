@@ -5,6 +5,7 @@
  */
 
 import { Logger } from "../../../core/infrastructure/Logger";
+import { useStore } from "../../../core/store/index";
 import {
   FileNotFoundError,
   FileWriteError,
@@ -289,6 +290,38 @@ class NeutralinoFileSystem {
   }
 
   /** @param {string} dirPath */
+
+  async searchInFiles(folder, query) {
+    if (!query && folder) {
+      query = folder;
+      folder = null;
+    }
+    if (!query) return [];
+
+    // We get the workspaceRoot from the store
+    const state = useStore.getState();
+    const rootPath = state.workspaceRoot || state.currentFolder;
+    if (!rootPath) return [];
+
+    const files = await this.readDirectoryRecursive(rootPath);
+    const results = [];
+    const qLower = query.toLowerCase();
+
+    for (const filePath of files) {
+      if (
+        filePath.includes("/.meditor/") ||
+        filePath.includes("/node_modules/")
+      )
+        continue;
+      try {
+        const content = await this.readFile(filePath);
+        if (content.toLowerCase().includes(qLower)) {
+          results.push({ filePath, name: filePath.split("/").pop() });
+        }
+      } catch (err) {}
+    }
+    return results;
+  }
 
   clearDirectoryCache(dirPath) {
     this._directoryCache.delete(dirPath);

@@ -1,32 +1,16 @@
 import { useEffect } from "react";
-import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../../store/index";
 import { saveActiveFile } from "../../store/actions";
 
-/**
- * Global keyboard shortcut handler.
- * Split into editor shortcuts and vault shortcuts.
- *
- * IMPORTANT: We use { capture: true } so the listener fires on the capture
- * phase — before CodeMirror or any other focused element can consume the event.
- *
- * @returns {void}
- */
 export function useKeyboardShortcuts() {
-  const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen } = useStore(
-    useShallow((s) => ({
-      toggleMode: s.toggleMode,
-      setCmdPaletteOpen: s.setCmdPaletteOpen,
-      setGlobalSearchOpen: s.setGlobalSearchOpen,
-    })),
-  );
-
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!(e.metaKey || e.ctrlKey)) return;
 
+      const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen, isEditMode } =
+        useStore.getState();
+
       switch (e.key.toLowerCase()) {
-        // --- Editor Shortcuts ---
         case "s":
           e.preventDefault();
           e.stopPropagation();
@@ -42,30 +26,23 @@ export function useKeyboardShortcuts() {
             e.preventDefault();
             e.stopPropagation();
             saveActiveFile();
-            const { isEditMode } = useStore.getState();
             if (isEditMode) {
               toggleMode();
             }
           }
           break;
-
-        // --- Vault & Global Shortcuts ---
         case "k":
           e.preventDefault();
           e.stopPropagation();
           setCmdPaletteOpen(true);
           break;
-        case "f":
+        case "o":
           if (e.shiftKey) {
             e.preventDefault();
             e.stopPropagation();
             setGlobalSearchOpen(true);
           }
           break;
-
-        /* ── macOS Native Shortcut Fallbacks ──
-           Neutralino on macOS doesn't have an Edit menu, so standard WebView
-           shortcuts (Cmd+C, V, X) are often swallowed. We manually trigger them. */
         case "c":
           document.execCommand("copy");
           break;
@@ -93,5 +70,5 @@ export function useKeyboardShortcuts() {
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     return () =>
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
-  }, [toggleMode, setCmdPaletteOpen, setGlobalSearchOpen]);
+  }, []);
 }

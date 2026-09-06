@@ -157,6 +157,16 @@ class SqliteVaultRepository {
     this._run("DELETE FROM notes WHERE id=?", [id]);
   }
 
+  findDeletedNotes() {
+    return this._queryAll(
+      "SELECT * FROM notes WHERE is_deleted=1 ORDER BY updated_at DESC",
+    );
+  }
+
+  restoreNoteById(id) {
+    this._run("UPDATE notes SET is_deleted=0 WHERE id=?", [id]);
+  }
+
   // Container Ops
   upsertContainer(container) {
     const existing = this._queryAll("SELECT id FROM containers WHERE id=?", [
@@ -272,7 +282,7 @@ class SqliteVaultRepository {
       [now],
     );
   }
-  
+
   // ─── Audit Log ───────────────────────────────────────────────────────────
 
   logAuditAction(action, details = "") {
@@ -282,7 +292,7 @@ class SqliteVaultRepository {
     try {
       this._run(
         "INSERT INTO audit_log (id, action, details, timestamp) VALUES (?, ?, ?, ?)",
-        [id, action, details, timestamp]
+        [id, action, details, timestamp],
       );
     } catch (e) {
       this._log.warn("Failed to log audit action", e);
@@ -294,7 +304,7 @@ class SqliteVaultRepository {
     try {
       return this._queryAll(
         "SELECT * FROM audit_log ORDER BY timestamp DESC LIMIT ?",
-        [limit]
+        [limit],
       );
     } catch (e) {
       return [];

@@ -1,5 +1,6 @@
 import { useStore } from "../../../core/store/index";
 import { openFile } from "../../editor/store/editorActions";
+import { vaultRepository } from "../infrastructure/SqliteVaultRepository";
 import { vaultService } from "../application/VaultService";
 import { Logger } from "../../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
@@ -28,6 +29,7 @@ export const openNoteFromVault = async (note) => {
     return;
   }
   await openFile(fullPath, note.name, note);
+  vaultRepository.logAuditAction("OPEN_NOTE", `Opened note "${note.name}"`);
   useStore.setState({ activeVaultItem: note });
 };
 

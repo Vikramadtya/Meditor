@@ -1,6 +1,7 @@
 import { fileSystem } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { vaultRepository } from "../infrastructure/SqliteVaultRepository";
 import { Logger } from "../../../core/infrastructure/Logger";
+import { useStore } from "../../../core/store/index";
 
 import { syncVaultCommand } from "./VaultSyncUseCase";
 import { getFolderContentsCommand } from "./VaultQueryUseCase";
@@ -8,7 +9,8 @@ import {
   createContainerCommand,
   createNoteCommand,
   deleteItemCommand,
-  renameItemCommand, moveItemCommand,
+  renameItemCommand,
+  moveItemCommand,
 } from "./VaultMutationUseCase";
 
 class VaultService {
@@ -119,6 +121,10 @@ class VaultService {
     this.vaultPath = folderPath;
 
     this._log.info(`Vault loaded at ${folderPath}`);
+    vaultRepository.logAuditAction(
+      "OPEN_VAULT",
+      `Opened vault at ${folderPath}`,
+    );
     this.syncVault().catch((e) => this._log.error("Sync failed", e));
     return true;
   }
@@ -144,6 +150,7 @@ class VaultService {
   async syncVault() {
     if (!this.vaultPath || this.isSyncing) return;
     this.isSyncing = true;
+    useStore.setState({ isVaultSyncing: true });
     try {
       await syncVaultCommand(this.vaultPath, this._log);
       await this.saveVault();
@@ -151,6 +158,8 @@ class VaultService {
       this._log.error("Error during syncVault", e);
     } finally {
       this.isSyncing = false;
+      const { useStore } = require("../../../core/store/index.js");
+      useStore.setState({ isVaultSyncing: false });
     }
   }
 
@@ -206,18 +215,39 @@ class VaultService {
     }
   }
 
-  
   async moveItem(type, id, oldRelPath, newParentRelPath) {
     this._log.info(`Moving ${type} ${oldRelPath} to ${newParentRelPath}`);
-    await moveItemCommand(this.vaultPath, type, id, oldRelPath, newParentRelPath);
+    await moveItemCommand(
+      this.vaultPath,
+      type,
+      id,
+      oldRelPath,
+      newParentRelPath,
+    );
     await this.saveVault();
     // Re-sync vault because moving a folder changes paths of all its children
-    if (type === 'container') {
+    if (type === "container") {
       await this.syncVault();
     }
     const oldParent = oldRelPath.substring(0, oldRelPath.lastIndexOf("/"));
     this.notify(oldParent);
     this.notify(newParentRelPath);
+  }
+
+  getDeletedNotes() {
+    return vaultRepository.findDeletedNotes();
+  }
+
+  async restoreNote(id) {
+    vaultRepository.restoreNoteById(id);
+    vaultRepository.logAuditAction(
+      "RESTORE_NOTE",
+      `Restored note ${id} from trash`,
+    );
+    await this.saveVault();
+
+    // Notify the UI that the hierarchy probably changed
+    this.notify("notes");
   }
 
   getNotePath(noteId) {
