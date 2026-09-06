@@ -25,18 +25,10 @@ import { useWikilinks } from "../hooks/useWikilinks";
  */
 const MarkdownPreview = forwardRef(
   ({ onScroll, className, htmlContent, frontmatter }, ref) => {
-    const { theme } = useStore(
+    const { theme, currentFolder, currentFilePath, fileName } = useStore(
       useShallow((s) => ({
         theme: s.theme,
-      })),
-    );
-    const { currentFolder } = useStore(
-      useShallow((s) => ({
         currentFolder: s.currentFolder,
-      })),
-    );
-    const { currentFilePath, fileName } = useStore(
-      useShallow((s) => ({
         currentFilePath: s.currentFilePath,
         fileName: s.fileName,
       })),
@@ -54,14 +46,19 @@ const MarkdownPreview = forwardRef(
 
         // Strip .md
         const logicalName = fileName.replace(".md", "");
-        const links = await (async () => {
-          const state = useStore.getState();
-          return searchService.getBacklinks(
-            logicalName,
-            state.workspaceMode,
-            state.workspaceRoot || state.currentFolder,
-          );
-        })();
+        let links = [];
+        try {
+          links = await (async () => {
+            const state = useStore.getState();
+            return searchService.getBacklinks(
+              logicalName,
+              state.workspaceMode,
+              state.workspaceRoot || state.currentFolder,
+            );
+          })();
+        } catch (err) {
+          console.error(err);
+        }
         if (isMounted) {
           setBacklinks(links);
         }
@@ -127,7 +124,7 @@ const MarkdownPreview = forwardRef(
             >
               {backlinks.map((bl, i) => (
                 <div
-                  key={i}
+                  key={bl.name || i}
                   className="wikilink-card"
                   onClick={() => openNoteByName(bl.name)}
                   style={{

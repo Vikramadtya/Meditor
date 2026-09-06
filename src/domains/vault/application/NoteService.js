@@ -16,6 +16,10 @@ class NoteService {
   /** @param {string} noteId @returns {Promise<void>} */
   async toggleFavorite(noteId) {
     vaultRepository.toggleFavorite(noteId);
+    vaultRepository.logAuditAction(
+      "TOGGLE_FAVORITE",
+      `Toggled favorite for note ${noteId}`,
+    );
     await vaultService.save();
     this._log.debug(`Toggled favorite for note ${noteId}`);
   }
@@ -36,6 +40,10 @@ class NoteService {
    */
   async updateMeta(noteId, meta) {
     vaultRepository.updateNoteMeta(noteId, meta);
+    vaultRepository.logAuditAction(
+      "UPDATE_META",
+      `Updated metadata for note ${noteId}`,
+    );
     await vaultService.save();
     this._log.info(`Updated metadata for note ${noteId}`);
   }

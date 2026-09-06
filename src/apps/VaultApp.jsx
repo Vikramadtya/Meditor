@@ -1,10 +1,10 @@
 import { useShallow } from "zustand/react/shallow";
 import React from "react";
 import { useStore } from "../core/store/index";
+import { lazy, Suspense } from "react";
 const AgendaPage = lazy(
   () => import("../domains/vault/presentation/components/vault/AgendaPage"),
 );
-import { lazy, Suspense } from "react";
 const GlobalDashboard = lazy(
   () =>
     import("../domains/vault/presentation/components/vault/GlobalDashboard"),

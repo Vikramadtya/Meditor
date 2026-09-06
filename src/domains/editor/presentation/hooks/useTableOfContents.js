@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../../../../core/store/index";
 import { searchService } from "../../application/SearchService";
 

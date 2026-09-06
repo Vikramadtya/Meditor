@@ -124,7 +124,7 @@ export default function GlobalSearchModal() {
               );
               return (
                 <div
-                  key={i}
+                  key={res.filePath || i}
                   className="cmd-palette-item"
                   onClick={() => handleResultClick(res.filePath)}
                   style={{

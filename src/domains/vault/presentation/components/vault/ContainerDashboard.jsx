@@ -19,9 +19,20 @@ export default function ContainerDashboard() {
   const [viewMode, setViewMode] = useState("grid"); // 'grid' | 'toc'
 
   useEffect(() => {
+    let isMounted = true;
     if (activeVaultItem && activeVaultItem.type === "container") {
-      vaultService.getFolderContents(activeVaultItem.path).then(setChildren);
+      vaultService
+        .getFolderContents(activeVaultItem.path)
+        .then((c) => {
+          if (isMounted) setChildren(c);
+        })
+        .catch((err) => {
+          if (isMounted) setChildren([]);
+        });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [activeVaultItem]);
   if (!activeVaultItem) return null;
   return (

@@ -1,6 +1,7 @@
 import { useStore } from "../../../core/store/index";
 import { loadWorkspace } from "../../workspace/store/workspaceActions";
 import { vaultService } from "../../vault/application/VaultService";
+import { vaultRepository } from "../../vault/infrastructure/SqliteVaultRepository";
 import { fileSystem } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { Logger } from "../../../core/infrastructure/Logger";
 import toast from "react-hot-toast";
@@ -98,6 +99,16 @@ export const saveActiveFile = async () => {
 
     await fileSystem.writeFile(savePath, fm + content);
     markSaved(savePath, content);
+    if (workspaceMode === "vault" && activeTab?.vaultItem?.id) {
+      vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
+        Date.now(),
+        activeTab.vaultItem.id,
+      ]);
+      vaultRepository.logAuditAction(
+        "Update",
+        `Saved note "${activeTab.vaultItem.name}"`,
+      );
+    }
 
     if (workspaceMode === "folder" && currentFolder) {
       fileSystem.clearDirectoryCache(currentFolder);
@@ -127,6 +138,21 @@ export const autoSaveFile = async () => {
       : markdown;
     await fileSystem.writeFile(currentFilePath, fm + content);
     markSaved(currentFilePath, content);
+    if (
+      useStore.getState().workspaceMode === "vault" &&
+      activeTab?.vaultItem?.id
+    ) {
+      vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
+        Date.now(),
+        activeTab.vaultItem.id,
+      ]);
+      // Optional: audit log for autosave, maybe too noisy? We'll log it as requested: "every action is stored in audit log"
+      vaultRepository.logAuditAction(
+        "Update",
+        `Auto-saved note "${activeTab.vaultItem.name}"`,
+      );
+      toast.success("Auto-saved note", { icon: "💾", duration: 1500 });
+    }
     log.info(`Auto-saved: ${currentFilePath}`);
   } catch (err) {
     log.error("Auto-save failed", err);

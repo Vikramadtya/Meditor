@@ -174,7 +174,13 @@ function VaultNoteActions() {
   const handleToggleFavorite = async () => {
     if (!activeVaultItem?.id) return;
     await noteService.toggleFavorite(activeVaultItem.id);
-    setIsFavorite((prev) => !prev);
+    setIsFavorite((prev) => {
+      const next = !prev;
+      toast.success(next ? "Added to Favorites" : "Removed from Favorites", {
+        icon: next ? "⭐" : undefined,
+      });
+      return next;
+    });
   };
   return (
     <>

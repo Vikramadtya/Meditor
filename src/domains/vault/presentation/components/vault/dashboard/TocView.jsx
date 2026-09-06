@@ -13,9 +13,20 @@ export function TocNode({ item, level = 0 }) {
   const [children, setChildren] = useState(null);
   const isNote = item.type === "note";
   useEffect(() => {
+    let isMounted = true;
     if (!isNote) {
-      vaultService.getFolderContents(item.path).then(setChildren);
+      vaultService
+        .getFolderContents(item.path)
+        .then((c) => {
+          if (isMounted) setChildren(c);
+        })
+        .catch((err) => {
+          if (isMounted) setChildren([]);
+        });
     }
+    return () => {
+      isMounted = false;
+    };
   }, [item.path, isNote]);
   return (
     <div

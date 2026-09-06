@@ -5,16 +5,14 @@ const logger = Logger.forContext("App");
 
 let mermaidRenderQueue = Promise.resolve();
 const mermaidCache = new Map();
+mermaid.initialize({ startOnLoad: false, theme: "default" });
 
 export function useMermaidRenderer(proseRef, htmlContent, theme) {
   const effectIdRef = useRef(0);
 
   useLayoutEffect(() => {
     if (!proseRef.current) return;
-    mermaid.initialize({
-      startOnLoad: false,
-      theme: theme === "dark" ? "dark" : "default",
-    });
+    // moved outside useLayoutEffect
 
     const mermaidNodes = proseRef.current.querySelectorAll(
       "code.language-mermaid",
