@@ -1,5 +1,7 @@
 import { useEffect } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { useStore } from "../../store/index";
+import { saveActiveFile } from "../../store/actions";
 
 /**
  * Global keyboard shortcut handler.
@@ -11,8 +13,13 @@ import { useStore } from "../../store/index";
  * @returns {void}
  */
 export function useKeyboardShortcuts() {
-  const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen, saveActiveFile } =
-    useStore();
+  const { toggleMode, setCmdPaletteOpen, setGlobalSearchOpen } = useStore(
+    useShallow((s) => ({
+      toggleMode: s.toggleMode,
+      setCmdPaletteOpen: s.setCmdPaletteOpen,
+      setGlobalSearchOpen: s.setGlobalSearchOpen,
+    })),
+  );
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -86,5 +93,5 @@ export function useKeyboardShortcuts() {
     window.addEventListener("keydown", handleKeyDown, { capture: true });
     return () =>
       window.removeEventListener("keydown", handleKeyDown, { capture: true });
-  }, [toggleMode, setCmdPaletteOpen, setGlobalSearchOpen, saveActiveFile]);
+  }, [toggleMode, setCmdPaletteOpen, setGlobalSearchOpen]);
 }
