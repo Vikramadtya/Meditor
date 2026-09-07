@@ -21,6 +21,8 @@ export default function TrashModal() {
     })),
   );
   const [deletedNotes, setDeletedNotes] = useState([]);
+  const [confirmId, setConfirmId] = useState(null);
+  const [isEmptying, setIsEmptying] = useState(false);
   useEffect(() => {
     if (isTrashModalOpen) {
       setDeletedNotes(vaultService.getDeletedNotes());
@@ -34,15 +36,29 @@ export default function TrashModal() {
     toast.success("Note restored");
   };
   const handleHardDelete = async (id) => {
-    if (
-      confirm(
-        "Are you sure you want to permanently delete this note? This cannot be undone.",
-      )
-    ) {
-      await vaultService.deleteItem("note", id, null, true);
-      setDeletedNotes(vaultService.getDeletedNotes());
-      toast.success("Permanently deleted");
+    if (confirmId !== id) {
+      setConfirmId(id);
+      return;
     }
+    await vaultService.deleteItem("note", id, null, true);
+    setDeletedNotes(vaultService.getDeletedNotes());
+    setConfirmId(null);
+    toast.success("Permanently deleted");
+  };
+
+  const handleEmptyTrash = async () => {
+    if (confirmId !== "ALL") {
+      setConfirmId("ALL");
+      return;
+    }
+    setIsEmptying(true);
+    for (const n of deletedNotes) {
+      await vaultService.deleteItem("note", n.id, null, true);
+    }
+    setDeletedNotes(vaultService.getDeletedNotes());
+    setConfirmId(null);
+    setIsEmptying(false);
+    toast.success("Trash emptied");
   };
   return (
     <div
@@ -66,9 +82,36 @@ export default function TrashModal() {
           }}
         >
           <h2>Trash Bin</h2>
-          <button onClick={() => setTrashModalOpen(false)} style={iconBtnStyle}>
-            <X size={18} />
-          </button>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            {deletedNotes.length > 0 && (
+              <button
+                onClick={handleEmptyTrash}
+                disabled={isEmptying}
+                style={{
+                  padding: "4px 10px",
+                  background:
+                    confirmId === "ALL" ? "#ef4444" : "var(--bg-secondary)",
+                  color: confirmId === "ALL" ? "white" : "var(--text-primary)",
+                  border: "1px solid var(--glass-border)",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                {isEmptying
+                  ? "Emptying..."
+                  : confirmId === "ALL"
+                    ? "Click again to confirm"
+                    : "Empty Trash"}
+              </button>
+            )}
+            <button
+              onClick={() => setTrashModalOpen(false)}
+              style={iconBtnStyle}
+            >
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         {deletedNotes.length === 0 ? (
@@ -139,11 +182,19 @@ export default function TrashModal() {
                     onClick={() => handleHardDelete(n.id)}
                     style={{
                       ...iconBtnStyle,
-                      color: "var(--error, #ff5252)",
+                      color: "white",
+                      background:
+                        confirmId === n.id ? "#ef4444" : "transparent",
+                      padding: confirmId === n.id ? "4px 8px" : "8px",
+                      borderRadius: "4px",
                     }}
                     title="Permanently Delete"
                   >
-                    <Trash2 size={16} />
+                    {confirmId === n.id ? (
+                      <span style={{ fontSize: "12px" }}>Confirm</span>
+                    ) : (
+                      <Trash2 size={16} color="var(--error, #ff5252)" />
+                    )}
                   </button>
                 </div>
               </div>

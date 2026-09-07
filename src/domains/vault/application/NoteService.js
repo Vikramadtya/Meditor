@@ -20,7 +20,7 @@ class NoteService {
       "TOGGLE_FAVORITE",
       `Toggled favorite for note ${noteId}`,
     );
-    await vaultService.save();
+    await vaultService.saveVault();
     this._log.debug(`Toggled favorite for note ${noteId}`);
   }
 
@@ -44,7 +44,7 @@ class NoteService {
       "UPDATE_META",
       `Updated metadata for note ${noteId}`,
     );
-    await vaultService.save();
+    await vaultService.saveVault();
     this._log.info(`Updated metadata for note ${noteId}`);
   }
 

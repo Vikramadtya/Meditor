@@ -60,30 +60,35 @@ export default function VaultNode({ item, level }) {
     setIsEditing(false);
   };
 
+  const itemPathRef = useRef(item.path);
+  useEffect(() => {
+    itemPathRef.current = item.path;
+  }, [item.path]);
+
+  const renameItemId = useStore((s) => s.renameItemId);
+  useEffect(() => {
+    if (renameItemId === item.id) {
+      setIsEditing(true);
+      setEditName(item.name);
+      useStore.setState({ renameItemId: null });
+    }
+  }, [renameItemId, item.id, item.name]);
+
   const loadChildren = async () => {
     if (isNote) return;
-    const res = await vaultService.getFolderContents(item.path);
+    const res = await vaultService.getFolderContents(itemPathRef.current);
     setChildren(res);
   };
+
   useEffect(() => {
-    const handleRename = (e) => {
-      if (e.detail === item.id) {
-        setIsEditing(true);
-        setEditName(item.name);
-      }
-    };
-    window.addEventListener("MEDITOR_RENAME", handleRename);
     if (expanded && !isNote) loadChildren();
     const unsub = vaultService.subscribe((changedPath) => {
-      if (!changedPath || changedPath === item.path) {
+      if (!changedPath || changedPath === itemPathRef.current) {
         if (expanded && !isNote) loadChildren();
       }
     });
-    return () => {
-      unsub();
-      window.removeEventListener("MEDITOR_RENAME", handleRename);
-    };
-  }, [expanded, item.path, isNote, item.id, item.name]);
+    return () => unsub();
+  }, [expanded, isNote]);
   let Icon = FileText;
   if (!isNote) {
     Icon = expanded ? Circle : CircleDashed;

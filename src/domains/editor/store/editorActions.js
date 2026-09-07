@@ -77,19 +77,21 @@ export const openFile = async (
 
 export const saveActiveFile = async () => {
   try {
+    const state = useStore.getState();
     const {
       currentFilePath,
       markdown,
       workspaceMode,
       currentFolder,
       markSaved,
-    } = useStore.getState();
+      activeTabId,
+      tabs,
+    } = state;
     const { useSettingsStore } =
       await import("../../settings/application/settingsStore");
     const { editorConfig } = useSettingsStore.getState();
 
-    const state = useStore.getState();
-    const activeTab = state.tabs.find((t) => t.id === state.activeTabId);
+    const activeTab = tabs.find((t) => t.id === activeTabId);
     const fm = activeTab?.frontmatterRaw || "";
     let content = markdown;
     let savePath = currentFilePath;
@@ -99,15 +101,18 @@ export const saveActiveFile = async () => {
 
     await fileSystem.writeFile(savePath, fm + content);
     markSaved(savePath, content);
+
     if (workspaceMode === "vault" && activeTab?.vaultItem?.id) {
-      vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
-        Date.now(),
-        activeTab.vaultItem.id,
-      ]);
-      vaultRepository.logAuditAction(
-        "Update",
-        `Saved note "${activeTab.vaultItem.name}"`,
-      );
+      if (vaultRepository.db) {
+        vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
+          Date.now(),
+          activeTab.vaultItem.id,
+        ]);
+        vaultRepository.logAuditAction(
+          "Update",
+          `Saved note "${activeTab.vaultItem.name}"`,
+        );
+      }
     }
 
     if (workspaceMode === "folder" && currentFolder) {
@@ -123,34 +128,39 @@ export const saveActiveFile = async () => {
 };
 
 export const autoSaveFile = async () => {
-  const { currentFilePath, markdown, markSaved } = useStore.getState();
+  const state = useStore.getState();
+  const {
+    currentFilePath,
+    markdown,
+    markSaved,
+    workspaceMode,
+    tabs,
+    activeTabId,
+  } = state;
   if (!currentFilePath) return;
   try {
     const { useSettingsStore } =
       await import("../../settings/application/settingsStore");
     const { editorConfig } = useSettingsStore.getState();
-    const activeTab = useStore
-      .getState()
-      .tabs.find((t) => t.id === useStore.getState().activeTabId);
+    const activeTab = tabs.find((t) => t.id === activeTabId);
     const fm = activeTab?.frontmatterRaw || "";
     let content = editorConfig?.autoFormatOnSave
       ? await formatMarkdown(markdown)
       : markdown;
     await fileSystem.writeFile(currentFilePath, fm + content);
     markSaved(currentFilePath, content);
-    if (
-      useStore.getState().workspaceMode === "vault" &&
-      activeTab?.vaultItem?.id
-    ) {
-      vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
-        Date.now(),
-        activeTab.vaultItem.id,
-      ]);
-      // Optional: audit log for autosave, maybe too noisy? We'll log it as requested: "every action is stored in audit log"
-      vaultRepository.logAuditAction(
-        "Update",
-        `Auto-saved note "${activeTab.vaultItem.name}"`,
-      );
+
+    if (workspaceMode === "vault" && activeTab?.vaultItem?.id) {
+      if (vaultRepository.db) {
+        vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
+          Date.now(),
+          activeTab.vaultItem.id,
+        ]);
+        vaultRepository.logAuditAction(
+          "Update",
+          `Auto-saved note "${activeTab.vaultItem.name}"`,
+        );
+      }
       toast.success("Auto-saved note", { icon: "💾", duration: 1500 });
     }
     log.info(`Auto-saved: ${currentFilePath}`);
@@ -191,7 +201,7 @@ export const openFileFromSidebar = async (file) => {
   if (file.type === "DIRECTORY") {
     let newFolder = currentFolder;
     if (file.entry === "..") {
-      const parts = currentFolder.split(/[/[\s\S]]/);
+      const parts = currentFolder.replace(/\\/g, "/").split("/");
       if (parts.length > 1) {
         parts.pop();
         newFolder = parts.join("/") || "/";

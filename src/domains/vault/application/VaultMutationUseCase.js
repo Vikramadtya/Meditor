@@ -53,41 +53,53 @@ export async function deleteItemCommand(
   hard = false,
 ) {
   if (type === "note") {
-    if (hard) {
-      if (relPath) {
-        const full = `${vaultPath}/${relPath}`;
-        await fileSystem.removeFile(full).catch(() => {});
-      } else {
-        // Deleting from trash where relPath is unknown or irrelevant
-        const trashFull = `${vaultPath}/.meditor/trash/${id}.md`;
-        await fileSystem.removeFile(trashFull).catch(() => {});
-      }
-      vaultRepository.deleteNoteById(id);
-      vaultRepository.logAuditAction("DELETE_NOTE", `Hard deleted note ${id}`);
-    } else if (!hard && relPath) {
-      const full = `${vaultPath}/${relPath}`;
-      await fileSystem.removeFile(full);
-      vaultRepository.deleteNoteById(id);
-      vaultRepository.logAuditAction(
-        "DELETE_NOTE",
-        `Deleted note at ${relPath}`,
-      );
-    } else {
-      // Soft delete (move to trash folder)
+    if (!hard && relPath) {
+      // Soft delete (move to .trash folder)
       try {
         const originalFull = `${vaultPath}/${relPath}`;
-        const trashDir = `${vaultPath}/.meditor/trash`;
+        const trashDir = `${vaultPath}/.trash`;
         await fileSystem.createDirectory(trashDir).catch(() => {});
         const trashFull = `${trashDir}/${id}.md`;
         await window.Neutralino.filesystem.move(originalFull, trashFull);
       } catch (err) {
-        console.warn("Could not move file to trash physically", err);
+        log.error("Could not move file to trash physically", err);
       }
       vaultRepository._run("UPDATE notes SET is_deleted=1 WHERE id=?", [id]);
       vaultRepository.logAuditAction(
         "SOFT_DELETE_NOTE",
         `Moved note to trash: ${relPath}`,
       );
+    } else if (hard) {
+      // Hard delete
+      let contentToDelete = null;
+      if (relPath) {
+        const full = `${vaultPath}/${relPath}`;
+        try {
+          contentToDelete = await fileSystem.readFile(full);
+          await fileSystem.removeFile(full);
+        } catch (e) {}
+      } else {
+        // Deleting from trash where relPath is unknown/irrelevant
+        const trashFull = `${vaultPath}/.trash/${id}.md`;
+        try {
+          contentToDelete = await fileSystem.readFile(trashFull);
+          await fileSystem.removeFile(trashFull);
+        } catch (e) {}
+      }
+
+      // Cleanup assets if any
+      if (contentToDelete) {
+        const assetRegex = /\]\((?:\.\/)?\.meditor\/assets\/([^)]+)\)/g;
+        let match;
+        while ((match = assetRegex.exec(contentToDelete)) !== null) {
+          const assetName = match[1];
+          const assetPath = `${vaultPath}/.meditor/assets/${assetName}`;
+          await fileSystem.removeFile(assetPath).catch(() => {});
+        }
+      }
+
+      vaultRepository.deleteNoteById(id);
+      vaultRepository.logAuditAction("DELETE_NOTE", `Hard deleted note ${id}`);
     }
   } else {
     // Containers are always hard deleted

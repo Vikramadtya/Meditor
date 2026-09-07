@@ -4,6 +4,7 @@ import {
   openWorkspaceDialog,
 } from "../../../../core/store/actions.js";
 import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
 import {
   Eye,
   Edit3,

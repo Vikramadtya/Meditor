@@ -57,7 +57,7 @@ const MarkdownPreview = forwardRef(
             );
           })();
         } catch (err) {
-          console.error(err);
+          log.error("Failed to fetch backlinks", err);
         }
         if (isMounted) {
           setBacklinks(links);

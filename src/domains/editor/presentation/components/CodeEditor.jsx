@@ -25,7 +25,7 @@ import { useStore } from "../../../../core/store/index";
 import { useSettingsStore } from "../../../settings/application/settingsStore";
 import { useDragAndDrop } from "../hooks/useDragAndDrop";
 import { Logger } from "../../../../core/infrastructure/Logger";
-const logger = Logger.forContext("App");
+const logger = Logger.forContext("CodeEditor");
 import BubbleMenu from "./BubbleMenu";
 import { slashCommands } from "../../application/slashCommands";
 
@@ -53,6 +53,17 @@ export default function CodeEditor({ theme, height, minHeight }) {
   );
   const { mdConfig } = useSettingsStore();
   const editorViewRef = useRef(null);
+  const bubbleMenuTimerRef = useRef(null);
+  const markdownRef = useRef(markdown);
+  useEffect(() => {
+    markdownRef.current = markdown;
+  }, [markdown]);
+
+  useEffect(() => {
+    return () => {
+      if (bubbleMenuTimerRef.current) clearTimeout(bubbleMenuTimerRef.current);
+    };
+  }, []);
 
   // Bubble Menu State
   const [bubbleMenu, setBubbleMenu] = useState({
@@ -69,9 +80,9 @@ export default function CodeEditor({ theme, height, minHeight }) {
   );
 
   // Prettier Formatting Command
-  const formatDocument = useCallback(() => {
+  const formatDocument = useCallback(async () => {
     try {
-      const formatted = prettier.format(markdown, {
+      const formatted = await prettier.format(markdownRef.current, {
         parser: "markdown",
         plugins: [prettierMarkdown],
         proseWrap: "always",
@@ -82,7 +93,7 @@ export default function CodeEditor({ theme, height, minHeight }) {
       toast.error("Formatting failed");
       logger.error("Prettier error", e);
     }
-  }, [markdown, setMarkdown]);
+  }, [setMarkdown]);
   const handleFormat = useCallback((prefix, suffix) => {
     if (!editorViewRef.current) return;
     const view = editorViewRef.current;
@@ -135,7 +146,9 @@ export default function CodeEditor({ theme, height, minHeight }) {
             editorViewRef.current = view;
 
             // We use setTimeout to let the DOM settle so coordsAtPos gives correct values
-            setTimeout(() => {
+            if (bubbleMenuTimerRef.current)
+              clearTimeout(bubbleMenuTimerRef.current);
+            bubbleMenuTimerRef.current = setTimeout(() => {
               const startCoords = view.coordsAtPos(selection.from);
               const endCoords = view.coordsAtPos(selection.to);
               if (startCoords && endCoords) {

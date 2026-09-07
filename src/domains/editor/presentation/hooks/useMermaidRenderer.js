@@ -1,18 +1,27 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import mermaid from "mermaid";
 import { Logger } from "../../../../core/infrastructure/Logger";
-const logger = Logger.forContext("App");
+const logger = Logger.forContext("MermaidRenderer");
 
 let mermaidRenderQueue = Promise.resolve();
 const mermaidCache = new Map();
+const MAX_CACHE_SIZE = 100;
+
+function setCache(key, value) {
+  if (mermaidCache.size >= MAX_CACHE_SIZE) {
+    const firstKey = mermaidCache.keys().next().value;
+    mermaidCache.delete(firstKey);
+  }
+  mermaidCache.set(key, value);
+}
 mermaid.initialize({ startOnLoad: false, theme: "default" });
 
 export function useMermaidRenderer(proseRef, htmlContent, theme) {
   const effectIdRef = useRef(0);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!proseRef.current) return;
-    // moved outside useLayoutEffect
+    // moved outside useEffect
 
     const mermaidNodes = proseRef.current.querySelectorAll(
       "code.language-mermaid",
@@ -75,11 +84,11 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
               div.className = "mermaid-diagram";
               if (svg) {
                 div.innerHTML = svg;
-                mermaidCache.set(rawText, svg);
+                setCache(rawText, svg);
               } else if (error) {
                 const errorStr = `Mermaid Error:\n${error}`;
                 div.innerHTML = `<pre style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; overflow-x: auto;">${errorStr}</pre>`;
-                mermaidCache.set(rawText, errorStr);
+                setCache(rawText, errorStr);
               }
               parent.replaceWith(div);
             }

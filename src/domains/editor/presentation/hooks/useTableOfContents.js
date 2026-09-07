@@ -12,7 +12,17 @@ export function useTableOfContents() {
     activeVaultItem,
     workspaceMode,
     setTagModalOpen,
-  } = useStore();
+  } = useStore(
+    useShallow((s) => ({
+      isTocOpen: s.isTocOpen,
+      markdown: s.markdown,
+      currentFilePath: s.currentFilePath,
+      fileName: s.fileName,
+      activeVaultItem: s.activeVaultItem,
+      workspaceMode: s.workspaceMode,
+      setTagModalOpen: s.setTagModalOpen,
+    })),
+  );
 
   const [activeTab, setActiveTab] = useState("outline"); // "outline" or "stats"
   const [backlinks, setBacklinks] = useState([]);

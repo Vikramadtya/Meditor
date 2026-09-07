@@ -1,6 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import { openFile } from "../../../../core/store/actions";
 import { Logger } from "../../../../core/infrastructure/Logger";
+const log = Logger.forContext("GlobalSearchModal");
 import React, { useState, useEffect } from "react";
 import { Search, FileText } from "lucide-react";
 import { useStore } from "../../../../core/store/index";
@@ -50,7 +51,7 @@ export default function GlobalSearchModal() {
         );
         setResults(matches);
       } catch (err) {
-        Logger.error("Search failed:", err);
+        log.error("Search failed:", err);
       } finally {
         setIsSearching(false);
       }

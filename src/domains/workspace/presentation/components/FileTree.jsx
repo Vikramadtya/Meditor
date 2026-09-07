@@ -24,7 +24,7 @@ export function FileTree({ files }) {
         const isBack = file.entry === "..";
         return (
           <div
-            key={i}
+            key={file.entry}
             className="file-item"
             onClick={() => openFileFromSidebar(file)}
           >

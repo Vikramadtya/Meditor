@@ -210,7 +210,7 @@ class SqliteVaultRepository {
   }
 
   // Dashboard queries
-  getAgendaNotes() {
+  getSRSNotes() {
     const now = Date.now();
     return this._queryAll(
       "SELECT * FROM notes WHERE is_deleted=0 AND (flashcard_question != '' OR tags LIKE '%#srs%') AND srs_next_review <= ? ORDER BY srs_next_review ASC",

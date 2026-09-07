@@ -37,23 +37,30 @@ export default function GitHistoryModal({ isOpen, onClose }) {
   const [previewContent, setPreviewContent] = useState("");
   const repoPath = useStore(selectRepoPath);
   useEffect(() => {
+    let isMounted = true;
+    const loadHistory = async () => {
+      setLoading(true);
+      try {
+        const relPath = currentFilePath.replace(repoPath + "/", "");
+        const log = await gitService.getFileHistory(repoPath, relPath);
+        if (isMounted) {
+          setHistory(log);
+          setSelectedCommit(null);
+          setPreviewContent("");
+        }
+      } catch (e) {
+        if (isMounted) setHistory([]);
+      }
+      if (isMounted) setLoading(false);
+    };
+
     if (isOpen && currentFilePath && repoPath) {
       loadHistory();
     }
-  }, [isOpen, currentFilePath]);
-  const loadHistory = async () => {
-    setLoading(true);
-    try {
-      const relPath = currentFilePath.replace(repoPath + "/", "");
-      const log = await gitService.getFileHistory(repoPath, relPath);
-      setHistory(log);
-      setSelectedCommit(null);
-      setPreviewContent("");
-    } catch (e) {
-      setHistory([]);
-    }
-    setLoading(false);
-  };
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, currentFilePath, repoPath]);
   const handleSelectCommit = async (commit) => {
     setSelectedCommit(commit);
     try {

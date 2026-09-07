@@ -1,5 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import DOMPurify from "dompurify";
+
+DOMPurify.addHook("afterSanitizeAttributes", function (node) {
+  if (node.tagName === "INPUT" && node.type === "checkbox") {
+    if (node.hasAttribute("checked")) {
+      node.setAttribute("checked", "checked");
+    }
+  }
+  if (node.tagName === "A") {
+    const href = node.getAttribute("href");
+    if (
+      href &&
+      !href.startsWith("http") &&
+      !href.startsWith("https") &&
+      !href.startsWith("mailto") &&
+      !href.startsWith("#")
+    ) {
+      node.setAttribute("data-wikilink", href);
+      node.removeAttribute("href");
+      node.style.cursor = "pointer";
+      node.style.color = "var(--color-primary)";
+      node.style.textDecoration = "underline";
+    }
+  }
+});
 import { useStore } from "../../../../core/store/index";
 import { Logger } from "../../../../core/infrastructure/Logger";
 import { getMarkdownInstance } from "../../application/MarkdownParser";
@@ -97,31 +121,6 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
         }
 
         if (isCancelled) return;
-
-        // Custom DOMPurify hooks
-        DOMPurify.addHook("afterSanitizeAttributes", function (node) {
-          if (node.tagName === "INPUT" && node.type === "checkbox") {
-            if (node.hasAttribute("checked")) {
-              node.setAttribute("checked", "checked");
-            }
-          }
-          if (node.tagName === "A") {
-            const href = node.getAttribute("href");
-            if (
-              href &&
-              !href.startsWith("http") &&
-              !href.startsWith("https") &&
-              !href.startsWith("mailto") &&
-              !href.startsWith("#")
-            ) {
-              node.setAttribute("data-wikilink", href);
-              node.removeAttribute("href");
-              node.style.cursor = "pointer";
-              node.style.color = "var(--color-primary)";
-              node.style.textDecoration = "underline";
-            }
-          }
-        });
 
         const safeHtml = DOMPurify.sanitize(rawHtml, {
           ADD_TAGS: ["input"],

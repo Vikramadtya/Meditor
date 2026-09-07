@@ -40,6 +40,7 @@ class VaultService {
 
   async init(sqlPromise) {
     this._sqlPromise = sqlPromise;
+    return this._sqlPromise;
   }
 
   async _getSqlModule() {
@@ -85,50 +86,56 @@ class VaultService {
   }
 
   async loadVault(folderPath) {
-    const SQL = await this._getSqlModule();
-
+    if (this._isLoading) return;
+    this._isLoading = true;
     try {
-      const notesPath = `${folderPath}/notes`;
-      await window.Neutralino.filesystem.getStats(notesPath);
-    } catch (e) {
-      await window.Neutralino.filesystem
-        .createDirectory(`${folderPath}/notes`)
-        .catch(() => {});
-    }
+      const SQL = await this._getSqlModule();
 
-    let buffer;
-    try {
-      buffer = await fileSystem.readBinaryFile(
-        `${folderPath}/.meditor/vault.sqlite`,
-      );
-    } catch (e) {
       try {
-        buffer = await fileSystem.readBinaryFile(`${folderPath}/vault.db`); // legacy fallback
-      } catch (err) {
-        this._log.warn("No existing vault DB found, creating new.");
-        const newDb = new SQL.Database();
-        buffer = newDb.export();
+        const notesPath = `${folderPath}/notes`;
+        await window.Neutralino.filesystem.getStats(notesPath);
+      } catch (e) {
         await window.Neutralino.filesystem
-          .createDirectory(`${folderPath}/.meditor`)
+          .createDirectory(`${folderPath}/notes`)
           .catch(() => {});
-        await fileSystem.writeBinaryFile(
-          `${folderPath}/.meditor/vault.sqlite`,
-          buffer,
-        );
       }
+
+      let buffer;
+      try {
+        buffer = await fileSystem.readBinaryFile(
+          `${folderPath}/.meditor/vault.sqlite`,
+        );
+      } catch (e) {
+        try {
+          buffer = await fileSystem.readBinaryFile(`${folderPath}/vault.db`); // legacy fallback
+        } catch (err) {
+          this._log.warn("No existing vault DB found, creating new.");
+          const newDb = new SQL.Database();
+          buffer = newDb.export();
+          await window.Neutralino.filesystem
+            .createDirectory(`${folderPath}/.meditor`)
+            .catch(() => {});
+          await fileSystem.writeBinaryFile(
+            `${folderPath}/.meditor/vault.sqlite`,
+            buffer,
+          );
+        }
+      }
+
+      this.db = new SQL.Database(new Uint8Array(buffer));
+      vaultRepository.attach(this.db);
+      this.vaultPath = folderPath;
+
+      this._log.info(`Vault loaded at ${folderPath}`);
+      vaultRepository.logAuditAction(
+        "OPEN_VAULT",
+        `Opened vault at ${folderPath}`,
+      );
+      this.syncVault().catch((e) => this._log.error("Sync failed", e));
+      return true;
+    } finally {
+      this._isLoading = false;
     }
-
-    this.db = new SQL.Database(new Uint8Array(buffer));
-    vaultRepository.attach(this.db);
-    this.vaultPath = folderPath;
-
-    this._log.info(`Vault loaded at ${folderPath}`);
-    vaultRepository.logAuditAction(
-      "OPEN_VAULT",
-      `Opened vault at ${folderPath}`,
-    );
-    this.syncVault().catch((e) => this._log.error("Sync failed", e));
-    return true;
   }
 
   async saveVault() {
@@ -160,7 +167,6 @@ class VaultService {
       this._log.error("Error during syncVault", e);
     } finally {
       this.isSyncing = false;
-      const { useStore } = require("../../../core/store/index.js");
       useStore.setState({ isVaultSyncing: false });
     }
   }
@@ -244,7 +250,7 @@ class VaultService {
     const note = vaultRepository.getNoteById(id);
     if (note) {
       try {
-        const trashFull = `${this.vaultPath}/.meditor/trash/${id}.md`;
+        const trashFull = `${this.vaultPath}/.trash/${id}.md`;
         const originalFull = `${this.vaultPath}/${note.path}`;
         // Ensure parent directory exists
         const parentDir = originalFull.substring(
@@ -268,9 +274,13 @@ class VaultService {
     this.notify("notes");
   }
 
+  /**
+   * Synchronously returns the absolute path for a note.
+   */
   getNotePath(noteId) {
+    if (!this.vaultPath) return null;
     const n = vaultRepository.getNoteById(noteId);
-    if (n && n.path && this.vaultPath) {
+    if (n && n.path) {
       return `${this.vaultPath}/${n.path}`;
     }
     return null;
