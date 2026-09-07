@@ -43,6 +43,7 @@ export const createVaultDialog = async () => {
       const isExisting = await fileSystem.exists(`${folder}/.meditor`);
       if (!isExisting) {
         await fileSystem.createDirectory(`${folder}/.meditor`);
+        await fileSystem.createDirectory(`${folder}/notes`).catch(() => {});
       }
       await loadWorkspace(folder);
       if (isExisting) {

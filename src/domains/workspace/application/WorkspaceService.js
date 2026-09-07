@@ -33,21 +33,28 @@ class WorkspaceService {
    * @returns {Promise<{ mode: 'vault'|'folder', files: Array, hierarchy: Array }>}
    */
   async loadWorkspace(folderPath) {
-    // Try to load as vault first (reads vault.db from disk)
-    try {
-      const loaded = await vaultService.loadVault(folderPath);
-      if (loaded) {
-        const hierarchy = await vaultService.getFolderContents("notes");
-        this._log.info(
-          `Opened vault at ${folderPath} — ${hierarchy.length} groups`,
+    // Determine if it is actually a vault
+    const hasMeditorDir = await fileSystem.exists(`${folderPath}/.meditor`);
+    const hasLegacyDb = await fileSystem.exists(`${folderPath}/vault.db`);
+    const isVault = hasMeditorDir || hasLegacyDb;
+
+    if (isVault) {
+      // Try to load as vault first (reads vault.db from disk)
+      try {
+        const loaded = await vaultService.loadVault(folderPath);
+        if (loaded) {
+          const hierarchy = await vaultService.getFolderContents("notes");
+          this._log.info(
+            `Opened vault at ${folderPath} — ${hierarchy.length} groups`,
+          );
+          return { mode: "vault", files: [], hierarchy };
+        }
+      } catch (e) {
+        this._log.debug(
+          "Folder is not a valid vault, falling back to folder mode",
+          e,
         );
-        return { mode: "vault", files: [], hierarchy };
       }
-    } catch (e) {
-      this._log.debug(
-        "Folder is not a valid vault, falling back to folder mode",
-        e,
-      );
     }
 
     // Folder mode fallback

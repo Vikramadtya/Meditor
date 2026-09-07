@@ -91,7 +91,9 @@ class VaultService {
       const notesPath = `${folderPath}/notes`;
       await window.Neutralino.filesystem.getStats(notesPath);
     } catch (e) {
-      throw new Error("Invalid vault: missing 'notes' directory.");
+      await window.Neutralino.filesystem
+        .createDirectory(`${folderPath}/notes`)
+        .catch(() => {});
     }
 
     let buffer;
