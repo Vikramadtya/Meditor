@@ -10,6 +10,7 @@ import CustomRulesTab from "./CustomRulesTab";
 import EditorTab from "./EditorTab";
 import SystemTab from "./SystemTab";
 import HelpTab from "./HelpTab";
+import AiSettingsTab from "../../ai/presentation/AiSettingsTab";
 
 /**
  * Main modal component for application settings.
@@ -97,6 +98,7 @@ export default function SettingsModal() {
             {activeTab === "rules" && <CustomRulesTab />}
             {activeTab === "system" && <SystemTab />}
             {activeTab === "help" && <HelpTab />}
+            {activeTab === "ai" && <AiSettingsTab />}
           </div>
         </div>
       </div>

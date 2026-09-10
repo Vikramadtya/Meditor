@@ -44,6 +44,7 @@ export const useStore = create(
     immer((set, get) => ({
       // ── Compose slices ──────────────────────────────────────────────────
       ...createEditorSlice(set, get),
+      ...createAiSlice(set, get),
       ...createUISlice(set, get),
       ...createVaultSlice(set, get),
     })),

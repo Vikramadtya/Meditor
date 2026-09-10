@@ -3,6 +3,7 @@ import { useStore } from "../core/store/index";
 import { selectShowDashboard } from "../domains/vault/store/vault.selectors";
 
 import Sidebar from "../domains/workspace/presentation/components/Sidebar";
+import AiChatSidebar from "../domains/ai/presentation/AiChatSidebar";
 import VaultApp from "../apps/VaultApp";
 import { lazy, Suspense } from "react";
 const EditorApp = lazy(() => import("../apps/EditorApp"));
@@ -16,7 +17,9 @@ export default function WorkspaceRouter() {
   const showDashboard = useStore(selectShowDashboard);
 
   return (
-    <>
+    <div
+      style={{ display: "flex", flex: 1, width: "100%", overflow: "hidden" }}
+    >
       <Sidebar />
       {workspaceMode === "vault" && showDashboard ? (
         <VaultApp />
@@ -27,6 +30,7 @@ export default function WorkspaceRouter() {
           <EditorApp />
         </Suspense>
       )}
-    </>
+      <AiChatSidebar />
+    </div>
   );
 }

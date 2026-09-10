@@ -81,6 +81,18 @@ export const useSettingsStore = create(
           typography: { ...state.typography, ...patch },
         })),
 
+      // ── AI & RAG ──────────────────────────────────────────────
+      aiConfig: {
+        enabled: false,
+        llmUrl: "http://localhost:11434/v1/chat/completions",
+        modelName: "llama3",
+        apiKey: "",
+        systemPrompt:
+          "You are Meditor AI, a helpful assistant. Use the provided context to answer the user's questions accurately.",
+      },
+      setAiConfig: (patch) =>
+        set((state) => ({ aiConfig: { ...state.aiConfig, ...patch } })),
+
       // ── System / Storage ───────────────────────────────────────
       cacheLocation: "/tmp/meditor_cache",
       setCacheLocation: (location) => set({ cacheLocation: location }),

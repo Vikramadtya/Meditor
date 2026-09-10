@@ -75,6 +75,8 @@ export const openFile = async (
   }
 };
 
+import { ragService } from "../../ai/application/RagService";
+
 export const saveActiveFile = async () => {
   try {
     const state = useStore.getState();
@@ -113,6 +115,16 @@ export const saveActiveFile = async () => {
           `Saved note "${activeTab.vaultItem.name}"`,
         );
       }
+    }
+
+    // RAG indexing - isolated, non-blocking
+    if (
+      useSettingsStore.getState().aiConfig?.enabled &&
+      activeTab?.vaultItem?.id
+    ) {
+      ragService
+        .indexNote(activeTab.vaultItem.id, fm + content)
+        .catch((err) => console.error("RAG indexing failed", err));
     }
 
     if (workspaceMode === "folder" && currentFolder) {
@@ -162,6 +174,17 @@ export const autoSaveFile = async () => {
         );
       }
       toast.success("Auto-saved note", { icon: "💾", duration: 1500 });
+    }
+
+    // RAG indexing
+    if (
+      workspaceMode === "vault" &&
+      activeTab?.vaultItem?.id &&
+      useSettingsStore.getState().aiConfig?.enabled
+    ) {
+      ragService
+        .indexNote(activeTab.vaultItem.id, fm + content)
+        .catch((err) => console.error("RAG indexing failed", err));
     }
     log.info(`Auto-saved: ${currentFilePath}`);
   } catch (err) {

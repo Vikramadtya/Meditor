@@ -61,6 +61,16 @@ class VaultService {
 
     this.db = new SQL.Database();
     vaultRepository.attach(this.db);
+
+    // Ensure the note_chunks table exists for RAG
+    this.db.run(`CREATE TABLE IF NOT EXISTS note_chunks (
+      id TEXT PRIMARY KEY,
+      note_id TEXT NOT NULL,
+      chunk_index INTEGER,
+      content TEXT,
+      embedding TEXT
+    )`);
+
     this.vaultPath = folderPath;
 
     let rootMeta = {};
