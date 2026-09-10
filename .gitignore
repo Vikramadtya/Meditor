@@ -26,3 +26,5 @@ build/
 
 neutralinojs.log.tmp/
 .tmp
+
+.trash/
