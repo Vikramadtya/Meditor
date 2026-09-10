@@ -44,6 +44,25 @@ export function useKeyboardShortcuts() {
           }
           break;
 
+        case "c":
+          document.execCommand("copy");
+          break;
+        case "x":
+          document.execCommand("cut");
+          break;
+        case "v":
+          document.execCommand("paste");
+          break;
+        case "a":
+          document.execCommand("selectAll");
+          break;
+        case "z":
+          if (e.shiftKey) {
+            document.execCommand("redo");
+          } else {
+            document.execCommand("undo");
+          }
+          break;
         default:
           break;
       }
