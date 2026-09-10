@@ -22,6 +22,7 @@ import {
   createEditorSlice,
   WELCOME_MD,
 } from "../../domains/editor/store/editorSlice.js";
+import { createAiSlice } from "../../domains/ai/store/aiSlice";
 import { createUISlice } from "../ui/store/uiSlice";
 import { createVaultSlice } from "../../domains/vault/store/vaultSlice";
 
