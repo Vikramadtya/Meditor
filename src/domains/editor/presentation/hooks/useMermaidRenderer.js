@@ -7,34 +7,41 @@ let pendingMermaidRun = false;
 
 export function useMermaidRenderer(proseRef, htmlContent, theme) {
   useEffect(() => {
-    if (!proseRef.current) return;
-
     mermaid.initialize({
       startOnLoad: false,
       theme: theme === "dark" ? "dark" : "default",
       securityLevel: "loose",
     });
 
-    const mermaidNodes = proseRef.current.querySelectorAll(
-      "code.language-mermaid",
-    );
-    if (mermaidNodes.length === 0) return;
+    if (!proseRef.current) return;
 
-    const targetNodes = [];
-    mermaidNodes.forEach((node, i) => {
-      const parent = node.parentElement;
-      if (parent && parent.tagName === "PRE") {
-        const wrapper = document.createElement("div");
-        wrapper.className = "mermaid";
-        // Unescape text content for mermaid
-        wrapper.textContent = node.textContent;
-        parent.replaceWith(wrapper);
-        targetNodes.push(wrapper);
-      }
-    });
+    const processMermaid = async () => {
+      if (!proseRef.current) return;
 
-    if (targetNodes.length > 0) {
-      const runMermaid = async () => {
+      const mermaidNodes = proseRef.current.querySelectorAll(
+        "code.language-mermaid",
+      );
+      if (mermaidNodes.length === 0) return;
+
+      const targetNodes = [];
+      mermaidNodes.forEach((node, i) => {
+        const parent = node.parentElement;
+        if (parent && parent.tagName === "PRE") {
+          if (parent.hasAttribute("data-mermaid-processed")) return;
+          parent.setAttribute("data-mermaid-processed", "true");
+
+          const wrapper = document.createElement("div");
+          wrapper.className = "mermaid";
+          wrapper.textContent = node.textContent;
+
+          parent.style.display = "none";
+          parent.parentNode.insertBefore(wrapper, parent);
+
+          targetNodes.push(wrapper);
+        }
+      });
+
+      if (targetNodes.length > 0) {
         if (isMermaidRunning) {
           pendingMermaidRun = true;
           return;
@@ -42,7 +49,7 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
         isMermaidRunning = true;
         try {
           const nodesToProcess = Array.from(
-            document.querySelectorAll(".mermaid"),
+            proseRef.current.querySelectorAll(".mermaid"),
           );
           for (let i = 0; i < nodesToProcess.length; i++) {
             const node = nodesToProcess[i];
@@ -58,13 +65,10 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
               logger.error("Error running mermaid for a single node:", err);
 
               let userFriendlyError = "Unknown syntax error";
-              if (err.str) {
-                userFriendlyError = err.str;
-              } else if (err.message) {
-                userFriendlyError = err.message;
-              } else if (typeof err === "string") {
-                userFriendlyError = err;
-              } else {
+              if (err.str) userFriendlyError = err.str;
+              else if (err.message) userFriendlyError = err.message;
+              else if (typeof err === "string") userFriendlyError = err;
+              else {
                 try {
                   userFriendlyError = JSON.stringify(err);
                 } catch (e) {
@@ -84,11 +88,33 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
           isMermaidRunning = false;
           if (pendingMermaidRun) {
             pendingMermaidRun = false;
-            runMermaid();
+            processMermaid();
           }
         }
-      };
-      runMermaid();
-    }
+      }
+    };
+
+    // Run initially
+    processMermaid();
+
+    // Watch for any changes in the DOM that might restore the PRE tags
+    const observer = new MutationObserver((mutations) => {
+      let shouldProcess = false;
+      for (let m of mutations) {
+        if (m.addedNodes.length > 0) {
+          shouldProcess = true;
+          break;
+        }
+      }
+      if (shouldProcess) {
+        processMermaid();
+      }
+    });
+
+    observer.observe(proseRef.current, { childList: true, subtree: true });
+
+    return () => {
+      observer.disconnect();
+    };
   }, [htmlContent, theme]);
 }

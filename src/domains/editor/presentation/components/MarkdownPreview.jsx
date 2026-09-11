@@ -85,14 +85,19 @@ const MarkdownPreview = forwardRef(
         }}
       >
         <FrontmatterBlock data={frontmatter} />
+
+        {/* Isolate dangerouslySetInnerHTML to prevent React from resetting mutated DOM (e.g. mermaid) when styles change */}
         <div
-          dangerouslySetInnerHTML={{
-            __html: htmlContent,
-          }}
           style={{
             paddingBottom: backlinks.length > 0 ? "40px" : "10px",
           }}
-        />
+        >
+          <div
+            dangerouslySetInnerHTML={{
+              __html: htmlContent,
+            }}
+          />
+        </div>
 
         {backlinks.length > 0 && (
           <div
