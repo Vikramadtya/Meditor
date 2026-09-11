@@ -127,8 +127,6 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
           ADD_ATTR: ["type", "checked", "disabled", "data-wikilink"],
         });
 
-        DOMPurify.removeHook("afterSanitizeAttributes");
-
         if (!isCancelled) {
           setHtmlContent(safeHtml);
           setToc(newToc);
