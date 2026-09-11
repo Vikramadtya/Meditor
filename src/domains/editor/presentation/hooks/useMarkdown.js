@@ -2,26 +2,30 @@ import { useState, useEffect, useRef } from "react";
 import DOMPurify from "dompurify";
 
 DOMPurify.addHook("afterSanitizeAttributes", function (node) {
-  if (node.tagName === "INPUT" && node.type === "checkbox") {
-    if (node.hasAttribute("checked")) {
-      node.setAttribute("checked", "checked");
+  try {
+    if (node.tagName === "INPUT" && node.type === "checkbox") {
+      if (node.hasAttribute("checked")) {
+        node.setAttribute("checked", "checked");
+      }
     }
-  }
-  if (node.tagName === "A") {
-    const href = node.getAttribute("href");
-    if (
-      href &&
-      !href.startsWith("http") &&
-      !href.startsWith("https") &&
-      !href.startsWith("mailto") &&
-      !href.startsWith("#")
-    ) {
-      node.setAttribute("data-wikilink", href);
-      node.removeAttribute("href");
-      node.style.cursor = "pointer";
-      node.style.color = "var(--color-primary)";
-      node.style.textDecoration = "underline";
+    if (node.tagName === "A") {
+      const href = node.getAttribute("href");
+      if (
+        href &&
+        !href.startsWith("http") &&
+        !href.startsWith("https") &&
+        !href.startsWith("mailto") &&
+        !href.startsWith("#")
+      ) {
+        node.setAttribute("data-wikilink", href);
+        node.removeAttribute("href");
+        node.style.cursor = "pointer";
+        node.style.color = "var(--color-primary)";
+        node.style.textDecoration = "underline";
+      }
     }
+  } catch (e) {
+    console.error("DOMPurify Hook Error:", e);
   }
 });
 import { useStore } from "../../../../core/store/index";
