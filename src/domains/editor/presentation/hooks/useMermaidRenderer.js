@@ -51,7 +51,29 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
               await mermaid.run({ nodes: [node] });
             } catch (err) {
               logger.error("Error running mermaid for a single node:", err);
-              node.innerHTML = `<pre class="error-text" style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; overflow-x: auto;">Mermaid Error:\n${err.message || err}</pre>`;
+
+              // Extract the most readable error message
+              let userFriendlyError = "Unknown syntax error";
+              if (err.str) {
+                userFriendlyError = err.str;
+              } else if (err.message) {
+                userFriendlyError = err.message;
+              } else if (typeof err === "string") {
+                userFriendlyError = err;
+              } else {
+                try {
+                  userFriendlyError = JSON.stringify(err);
+                } catch (e) {
+                  userFriendlyError = "Crash in layout engine";
+                }
+              }
+
+              node.innerHTML = `
+                  <div class="error-text" style="background-color: #fef2f2; border: 1px solid #f87171; border-radius: 6px; padding: 12px; margin: 8px 0; font-family: var(--font-mono, monospace); font-size: 0.9em; color: #991b1b; overflow-x: auto;">
+                    <strong style="display: block; margin-bottom: 8px; color: #b91c1c;">🚨 Mermaid Syntax Error</strong>
+                    <pre style="margin: 0; white-space: pre-wrap; font-family: inherit;">${userFriendlyError}</pre>
+                  </div>
+                `;
             }
           }
         } finally {
