@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useStore } from "../../store/index";
 import { useSettingsStore } from "../../../domains/settings/application/settingsStore";
+import { autoSaveFile } from "../../../domains/editor/store/editorActions";
 import { fileSystem as fileService } from "../../../domains/workspace/infrastructure/NeutralinoFileSystem";
 import { Logger } from "../../infrastructure/Logger";
 
@@ -14,7 +15,7 @@ const logger = Logger.forContext("App");
  * @returns {void}
  */
 export function useSystemEffects() {
-  const { theme, markdown, autoSaveFile, currentFilePath } = useStore();
+  const { theme, markdown, currentFilePath } = useStore();
   const { typography, customRules, editorConfig } = useSettingsStore();
 
   // 1. Initialize Neutralino
@@ -63,5 +64,5 @@ export function useSystemEffects() {
     if (!currentFilePath || editorConfig.autoSaveMode !== "delay") return;
     const timer = setTimeout(() => autoSaveFile(), 2000);
     return () => clearTimeout(timer);
-  }, [markdown, currentFilePath, autoSaveFile, editorConfig.autoSaveMode]);
+  }, [markdown, currentFilePath, editorConfig.autoSaveMode]);
 }

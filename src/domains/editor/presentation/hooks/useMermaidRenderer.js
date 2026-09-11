@@ -41,16 +41,19 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
         }
         isMermaidRunning = true;
         try {
-          await mermaid.run({
-            querySelector: ".mermaid",
-          });
-        } catch (err) {
-          logger.error("Error running mermaid:", err);
-          document.querySelectorAll(".mermaid").forEach((node) => {
-            if (!node.querySelector("svg")) {
-              node.innerHTML = `<pre style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; overflow-x: auto;">Mermaid Error:\n${err.message || err}</pre>`;
+          const nodesToProcess = Array.from(
+            document.querySelectorAll(".mermaid"),
+          );
+          for (const node of nodesToProcess) {
+            if (node.querySelector("svg") || node.querySelector(".error-text"))
+              continue;
+            try {
+              await mermaid.run({ nodes: [node] });
+            } catch (err) {
+              logger.error("Error running mermaid for a single node:", err);
+              node.innerHTML = `<pre class="error-text" style="color: red; padding: 12px; border: 1px solid red; border-radius: 4px; overflow-x: auto;">Mermaid Error:\n${err.message || err}</pre>`;
             }
-          });
+          }
         } finally {
           isMermaidRunning = false;
           if (pendingMermaidRun) {
