@@ -265,8 +265,8 @@
 .prose img {
   max-width: 100%;
   border-radius: 8px;
-  margin: 1.5em auto;
-  display: block;
+  margin: 1.5em auto !important;
+  display: block !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
@@ -616,4 +616,17 @@ body[data-table="striped"] .prose tbody tr:nth-child(even) {
   margin-left: auto;
   opacity: 0.7;
   font-size: 11px;
+}
+
+/* Center Mermaid Diagrams */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5em 0;
+  width: 100%;
+}
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
 }
