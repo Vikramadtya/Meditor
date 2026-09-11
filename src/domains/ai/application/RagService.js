@@ -28,7 +28,10 @@ class RagService {
   }
 
   async indexNote(noteId, markdownContent) {
-    if (!markdownContent || !markdownContent.trim()) return;
+    if (!markdownContent || !markdownContent.trim()) {
+      vectorStore.addChunks(noteId, []);
+      return;
+    }
 
     const rawChunks = this._chunkText(markdownContent);
     const chunks = [];

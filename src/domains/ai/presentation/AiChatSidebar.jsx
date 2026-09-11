@@ -5,6 +5,7 @@ import { X, Send, Sparkles, Database, FileText } from "lucide-react";
 import { ragService } from "../application/RagService";
 import { vectorStore } from "../infrastructure/VectorStore";
 import toast from "react-hot-toast";
+import { openNoteFromVault } from "../../vault/store/vaultActions";
 
 export default function AiChatSidebar() {
   const {
@@ -15,7 +16,6 @@ export default function AiChatSidebar() {
     updateLastAiMessage,
     isAiGenerating,
     setAiGenerating,
-    openTab,
   } = useStore(
     useShallow((s) => ({
       isAiPanelOpen: s.isAiPanelOpen,
@@ -25,18 +25,19 @@ export default function AiChatSidebar() {
       updateLastAiMessage: s.updateLastAiMessage,
       isAiGenerating: s.isAiGenerating,
       setAiGenerating: s.setAiGenerating,
-      openTab: s.openTab,
     })),
   );
 
   const [input, setInput] = useState("");
+  const [vectorCount, setVectorCount] = useState(0);
   const endOfMessagesRef = useRef(null);
 
   useEffect(() => {
-    if (isAiPanelOpen && vectorStore.vectors.length === 0) {
-      vectorStore.loadVectors();
+    if (isAiPanelOpen) {
+      if (vectorStore.vectors.length === 0) vectorStore.loadVectors();
+      setVectorCount(vectorStore.vectors.length);
     }
-  }, [isAiPanelOpen]);
+  }, [isAiPanelOpen, isAiGenerating]);
 
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -81,12 +82,7 @@ export default function AiChatSidebar() {
   };
 
   const handleCitationClick = (note) => {
-    openTab({
-      id: note.path,
-      type: "note",
-      name: note.name,
-      vaultItem: note,
-    });
+    openNoteFromVault(note);
   };
 
   return (
