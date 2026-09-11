@@ -44,15 +44,19 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
           const nodesToProcess = Array.from(
             document.querySelectorAll(".mermaid"),
           );
-          for (const node of nodesToProcess) {
+          for (let i = 0; i < nodesToProcess.length; i++) {
+            const node = nodesToProcess[i];
             if (node.querySelector("svg") || node.querySelector(".error-text"))
               continue;
             try {
-              await mermaid.run({ nodes: [node] });
+              const id = `mermaid-diagram-${Date.now()}-${i}`;
+              const text = node.textContent;
+              node.innerHTML = "Rendering...";
+              const { svg } = await mermaid.render(id, text);
+              node.innerHTML = svg;
             } catch (err) {
               logger.error("Error running mermaid for a single node:", err);
 
-              // Extract the most readable error message
               let userFriendlyError = "Unknown syntax error";
               if (err.str) {
                 userFriendlyError = err.str;
