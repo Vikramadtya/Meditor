@@ -1,27 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Search,
-  Circle,
-  CircleDashed,
-  Calendar,
-  Network,
-  BarChart2,
-  ChevronRight,
-  ChevronDown,
-  Plus,
-  Trash2,
-  FileText,
-  RefreshCw,
-  Archive,
-  Settings,
-  Star,
-  CalendarDays,
-  BrainCircuit,
-  Tag,
-} from "lucide-react";
-import { useStore } from "../../../../../../core/store/index";
-import { noteService } from "../../../../application/NoteService";
-import { vaultService } from "../../../../application/VaultService";
+import { Search, Circle, CircleDashed, Calendar } from "lucide-react";
 
 /**
  * SidebarLink Component

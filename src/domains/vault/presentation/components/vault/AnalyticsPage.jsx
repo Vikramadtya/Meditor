@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import React, { useState, useEffect } from "react";
-import { ActivityCalendar } from "react-activity-calendar";
-import { BarChart2, Brain, FileText, Tag, Star, Zap } from "lucide-react";
+
+import { BarChart2, Tag, Star } from "lucide-react";
 import { subYears, eachDayOfInterval, format } from "date-fns";
 import { useStore } from "../../../../../core/store/index";
 import { vaultRepository } from "../../../infrastructure/SqliteVaultRepository";

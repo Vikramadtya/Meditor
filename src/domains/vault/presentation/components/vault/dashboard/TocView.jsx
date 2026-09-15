@@ -97,7 +97,7 @@ export function TocNode({ item, level = 0 }) {
     </div>
   );
 }
-export function TocView({ children }) {
+export function TocView({ items = [] }) {
   return (
     <div
       style={{
@@ -115,7 +115,7 @@ export function TocView({ children }) {
       >
         Table of Contents
       </h2>
-      {children.map((child) => (
+      {items.map((child) => (
         <TocNode key={child.id} item={child} level={0} />
       ))}
     </div>

@@ -14,7 +14,6 @@ import {
   Search,
   Settings,
   Columns,
-  Layers,
   Star,
   History,
 } from "lucide-react";

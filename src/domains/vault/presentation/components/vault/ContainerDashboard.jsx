@@ -1,5 +1,4 @@
 import { useShallow } from "zustand/react/shallow";
-import { openNoteFromVault } from "../../../../../core/store/actions";
 import React, { useState, useEffect } from "react";
 import { Folder, Book, LayoutGrid, List } from "lucide-react";
 import { GridCard } from "./dashboard/GridCard";
@@ -191,7 +190,7 @@ export default function ContainerDashboard() {
           ))}
         </div>
       ) : (
-        <TocView children={children} />
+        <TocView items={children} />
       )}
 
       {children.length === 0 && (

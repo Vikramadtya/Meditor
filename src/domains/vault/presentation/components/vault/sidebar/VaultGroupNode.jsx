@@ -2,13 +2,7 @@ import { useShallow } from "zustand/react/shallow";
 import { reloadVaultHierarchy } from "../../../../../../core/store/actions";
 import toast from "react-hot-toast";
 import React, { useState, useEffect } from "react";
-import {
-  ChevronRight,
-  ChevronDown,
-  Plus,
-  FilePlus,
-  FolderPlus,
-} from "lucide-react";
+import { ChevronRight, ChevronDown, Plus } from "lucide-react";
 import { useStore } from "../../../../../../core/store/index";
 import { vaultService } from "../../../../application/VaultService";
 import VaultNode from "./VaultNode";
@@ -17,25 +11,29 @@ export default function VaultGroupNode({ group }) {
   const [expanded, setExpanded] = useState(false);
   const [children, setChildren] = useState([]);
   const [hovered, setHovered] = useState(false);
-  
-  const { setActiveVaultItem, activeVaultItem, openCreateVaultItemModal, openConfirmDeleteModal, openContextMenu } =
-    useStore(
-      useShallow((s) => ({
-        setActiveVaultItem: s.setActiveVaultItem,
-        activeVaultItem: s.activeVaultItem,
-        openCreateVaultItemModal: s.openCreateVaultItemModal,
-        openConfirmDeleteModal: s.openConfirmDeleteModal,
-        openContextMenu: s.openContextMenu,
-      })),
-    );
-    
+
+  const {
+    setActiveVaultItem,
+    activeVaultItem,
+    openCreateVaultItemModal,
+    openContextMenu,
+  } = useStore(
+    useShallow((s) => ({
+      setActiveVaultItem: s.setActiveVaultItem,
+      activeVaultItem: s.activeVaultItem,
+      openCreateVaultItemModal: s.openCreateVaultItemModal,
+      openConfirmDeleteModal: s.openConfirmDeleteModal,
+      openContextMenu: s.openContextMenu,
+    })),
+  );
+
   const isActive = activeVaultItem && activeVaultItem.id === group.id;
-  
+
   const loadChildren = async () => {
     const res = await vaultService.getFolderContents(group.path);
     setChildren(res);
   };
-  
+
   useEffect(() => {
     if (expanded) loadChildren();
     const unsub = vaultService.subscribe((changedPath) => {
@@ -57,7 +55,10 @@ export default function VaultGroupNode({ group }) {
         draggable={true}
         onDragStart={(e) => {
           e.stopPropagation();
-          e.dataTransfer.setData("application/meditor-item", JSON.stringify(group));
+          e.dataTransfer.setData(
+            "application/meditor-item",
+            JSON.stringify(group),
+          );
         }}
         onDragOver={(e) => {
           e.preventDefault();
@@ -72,9 +73,20 @@ export default function VaultGroupNode({ group }) {
           e.stopPropagation();
           e.currentTarget.style.backgroundColor = "transparent";
           try {
-            const data = JSON.parse(e.dataTransfer.getData("application/meditor-item"));
-            if (data && data.path !== group.path && !data.path.startsWith(group.path + "/")) {
-              await vaultService.moveItem(data.type, data.id, data.path, group.path);
+            const data = JSON.parse(
+              e.dataTransfer.getData("application/meditor-item"),
+            );
+            if (
+              data &&
+              data.path !== group.path &&
+              !data.path.startsWith(group.path + "/")
+            ) {
+              await vaultService.moveItem(
+                data.type,
+                data.id,
+                data.path,
+                group.path,
+              );
               toast.success(`Moved "${data.name}"`);
               reloadVaultHierarchy();
             }

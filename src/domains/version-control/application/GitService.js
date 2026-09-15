@@ -6,7 +6,6 @@
 
 import { Logger } from "../../../core/infrastructure/Logger";
 import { gitRepository } from "../infrastructure/GitRepository";
-import { GitError } from "../../../core/errors/index";
 
 class GitService {
   constructor() {

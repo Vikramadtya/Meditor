@@ -15,7 +15,6 @@ import toast from "react-hot-toast";
 import { fileSystem as fileService } from "../../../workspace/infrastructure/NeutralinoFileSystem";
 import { Logger } from "../../../../core/infrastructure/Logger";
 import { useStore } from "../../../../core/store/index";
-import { vaultRepository } from "../../../vault/infrastructure/SqliteVaultRepository";
 import { vaultService } from "../../../vault/application/VaultService";
 import { generateId } from "../../../../core/utils/generateId";
 import { clearImageCache } from "./useMarkdown";
@@ -25,7 +24,6 @@ const logger = Logger.forContext("DragAndDrop");
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 /** Sanitise a path segment so it's filesystem-safe. */
-const sanitize = (s) => s.replace(/[/\\:*?"<>|]/g, "_");
 
 /**
  * Resolves vault-relative asset path for a note.
@@ -65,25 +63,14 @@ async function ensureDir(dirPath, currentFolder) {
 }
 
 /**
- * Saves an image ArrayBuffer to disk and records it in the vault DB.
+ * Persists an image buffer to disk.
  *
  * @param {ArrayBuffer} arrayBuffer - The image data.
  * @param {string} destPath - The destination path to write the image.
- * @param {string|null} noteId - The associated note ID.
- * @param {string} fileName - The filename of the image.
  * @returns {Promise<void>}
  */
-async function persistImage(arrayBuffer, destPath, noteId, fileName) {
+async function persistImage(arrayBuffer, destPath) {
   await fileService.writeBinaryFile(destPath, arrayBuffer);
-
-  // Record in vault DB (best-effort — non-fatal if it fails)
-  try {
-    const imageId = generateId();
-    // No longer needed, image is just placed on disk
-    await vaultService.save();
-  } catch (err) {
-    logger.warn("Could not record image in DB:", err);
-  }
 }
 
 /**
@@ -125,7 +112,7 @@ async function handleImageFile(
   const imageName = window.prompt("Save image as (no extension):", defaultName);
   if (!imageName) return; // User cancelled
 
-  const safeBaseName = imageName.replace(/[^a-z0-9_\-]/gi, "_");
+  const safeBaseName = imageName.replace(/[^a-z0-9_-]/gi, "_");
   const fileName = `${safeBaseName}.${ext}`;
 
   const {
@@ -174,7 +161,7 @@ async function handleImageFile(
 
     const destPath = `${destFolder}/${fileName}`;
     const arrayBuffer = await readAsArrayBuffer(file);
-    await persistImage(arrayBuffer, destPath, noteId, fileName);
+    await persistImage(arrayBuffer, destPath);
 
     const insertText = `![${imageName}](${markdownPath})`;
 

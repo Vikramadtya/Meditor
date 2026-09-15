@@ -1,6 +1,5 @@
 import { useStore } from "../../../core/store/index";
 import { loadWorkspace } from "../../workspace/store/workspaceActions";
-import { vaultService } from "../../vault/application/VaultService";
 import { vaultRepository } from "../../vault/infrastructure/SqliteVaultRepository";
 import { fileSystem } from "../../workspace/infrastructure/NeutralinoFileSystem";
 import { Logger } from "../../../core/infrastructure/Logger";

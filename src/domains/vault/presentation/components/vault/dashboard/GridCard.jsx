@@ -1,7 +1,7 @@
 import { useShallow } from "zustand/react/shallow";
 import { openNoteFromVault } from "../../../../../../core/store/actions";
 import React from "react";
-import { Folder, FileText, Book } from "lucide-react";
+import { Book } from "lucide-react";
 import { useStore } from "../../../../../../core/store/index";
 export function GridCard({ child }) {
   const { setActiveVaultItem } = useStore(

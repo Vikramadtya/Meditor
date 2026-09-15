@@ -50,59 +50,33 @@ export class VaultSearchStrategy {
 
   /**
    * Fast tag retrieval directly from the SQLite vault.db tags column.
-   * @returns {Promise<Record<string, Array<{file: string, line: string}>>>}
+   * @returns {Promise<Record<string, Array<{id: string, name: string, path: string}>>>}
    */
   async getAllTags() {
-    const filesToScan = await fileService.readDirectory(
-      `${this.searchRoot}/notes`,
-    );
     const tagsMap = {};
-    const hashTagRegex = /(?:^|\s)#([a-zA-Z0-9_-]+)/g;
+    if (!vaultRepository.db) return tagsMap;
 
-    for (const file of filesToScan) {
-      if (file.type !== "FILE" || !file.entry.endsWith(".md")) continue;
+    const notes = vaultRepository.findAllNotes();
+    for (const note of notes) {
+      if (!note.tags) continue;
 
-      const filePath = `${this.searchRoot}/notes/${file.entry}`;
-      const noteId = file.entry.replace(".md", "");
-      const dbRes = vaultRepository.db?.exec(
-        "SELECT name FROM notes WHERE id=?",
-        [noteId],
-      );
-      const logicalName = dbRes?.[0]?.values?.[0]?.[0] || file.entry;
+      const tags = note.tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+      if (tags.length === 0) continue;
 
-      const content = await fileService.readFile(filePath);
-      const tagsForFile = new Set();
+      try {
+        const filePath = await vaultService.getNotePath(note.id);
+        const noteRef = { id: note.id, name: note.name, path: filePath };
 
-      const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?(?:\n|$)/);
-      if (fmMatch) {
-        fmMatch[1].split("\n").forEach((line) => {
-          const idx = line.indexOf(":");
-          if (idx > 0 && line.slice(0, idx).trim() === "tags") {
-            const val = line.slice(idx + 1).trim();
-            if (val.startsWith("[") && val.endsWith("]")) {
-              val
-                .slice(1, -1)
-                .split(",")
-                .forEach((t) => {
-                  if (t.trim()) tagsForFile.add(t.trim());
-                });
-            } else {
-              tagsForFile.add(val);
-            }
-          }
-        });
+        for (const t of tags) {
+          if (!tagsMap[t]) tagsMap[t] = [];
+          tagsMap[t].push(noteRef);
+        }
+      } catch (err) {
+        // Ignore path resolution errors for deleted/corrupted notes
       }
-
-      let match;
-      while ((match = hashTagRegex.exec(content)) !== null) {
-        tagsForFile.add(match[1]);
-      }
-
-      const noteRef = { id: file.entry, name: logicalName, path: filePath };
-      tagsForFile.forEach((t) => {
-        if (!tagsMap[t]) tagsMap[t] = [];
-        tagsMap[t].push(noteRef);
-      });
     }
     return tagsMap;
   }

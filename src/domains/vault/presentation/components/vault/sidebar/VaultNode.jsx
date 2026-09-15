@@ -12,9 +12,6 @@ import {
   ChevronRight,
   ChevronDown,
   Plus,
-  FilePlus,
-  FolderPlus,
-  Trash2,
 } from "lucide-react";
 import { useStore } from "../../../../../../core/store/index";
 import { vaultService } from "../../../../application/VaultService";
@@ -104,19 +101,19 @@ export default function VaultNode({ item, level }) {
         );
       }}
       onDragOver={(e) => {
-        if (!!isNote) return; // only containers can be dropped into
+        if (isNote) return; // only containers can be dropped into
         e.preventDefault();
         e.stopPropagation();
         e.currentTarget.style.backgroundColor = "var(--bg-active)";
       }}
       onDragLeave={(e) => {
-        if (!!isNote) return;
+        if (isNote) return;
         e.currentTarget.style.backgroundColor = isActive
           ? "var(--bg-active)"
           : "transparent";
       }}
       onDrop={async (e) => {
-        if (!!isNote) return;
+        if (isNote) return;
         e.preventDefault();
         e.stopPropagation();
         e.currentTarget.style.backgroundColor = isActive
