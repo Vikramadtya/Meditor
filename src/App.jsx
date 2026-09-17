@@ -5,6 +5,7 @@ import { useSystemEffects } from "./core/ui/hooks/useSystemEffects";
 import Titlebar from "./domains/workspace/presentation/components/Titlebar";
 import ModalManager from "./core/ui/ModalManager";
 import RootRouter from "./routers/RootRouter";
+import { ObservabilityDrawer } from "./core/ui/components/ObservabilityDrawer";
 import "./styles/Modals.css";
 function App() {
   // Bind global side effects
@@ -34,6 +35,7 @@ function App() {
       </div>
 
       <ModalManager />
+      <ObservabilityDrawer />
     </>
   );
 }

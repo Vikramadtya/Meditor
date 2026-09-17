@@ -1,0 +1,56 @@
+--- src/domains/editor/store/editorActions.js
++++ src/domains/editor/store/editorActions.js
+@@ -128,21 +128,8 @@
+         let dbSpan = trace ? trace.createSpan("DB: Update Note") : null;
+         vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
+           Date.now(),
+-          activeTab.vaultItem.id
+-        ]);
+-        if (dbSpan) dbSpan.end();
+-        vaultService.saveVault();
+-      }
+-    }
+-    if (trace) trace.end("ok");
+-  } catch (err) {
+-    log.error("Save failed", err);
+-    if (trace) {
+-      trace.rootSpan.setAttribute("error", err.message);
+-      trace.end("error");
+-    }
+-  } finally {
+-    window.__ACTIVE_TRACE_ID__ = prevTraceId;
+-    window.__ACTIVE_SPAN_ID__ = prevSpanId;
+-  }
+-};
+           activeTab.vaultItem.id,
+         ]);
++        if (dbSpan) dbSpan.end();
+         vaultRepository.logAuditAction(
+           "Update",
+           `Saved note "${activeTab.vaultItem.name}"`,
+         );
+       }
+     }
+ 
+     // RAG indexing - isolated, non-blocking
+     if (
+       useSettingsStore.getState().aiConfig?.enabled &&
+       workspaceMode === "vault" &&
+       activeTab?.vaultItem?.id
+     ) {
+       ragService.indexNote(activeTab.vaultItem.id, content).catch((e) => {
+         log.warn("Background RAG index failed:", e);
+       });
+     }
++    if (trace) trace.end("ok");
+   } catch (err) {
+     log.error("Save failed", err);
++    if (trace) {
++      trace.rootSpan.setAttribute("error", err.message);
++      trace.end("error");
++    }
++  } finally {
++    window.__ACTIVE_TRACE_ID__ = prevTraceId;
++    window.__ACTIVE_SPAN_ID__ = prevSpanId;
+   }
+ };

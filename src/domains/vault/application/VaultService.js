@@ -148,8 +148,14 @@ class VaultService {
     }
   }
 
-  async saveVault() {
+  async saveVault(parentSpan = null) {
     if (this.db && this.vaultPath) {
+      let span = null;
+      if (parentSpan) {
+        // dynamic import or global usage for Observability is not needed if we import it,
+        // but we'll just mock it or assume it's attached to parentSpan if it's an instance.
+      }
+      const t0 = performance.now();
       const data = this.db.export();
       const buffer = new Uint8Array(data).buffer;
       await window.Neutralino.filesystem
@@ -159,6 +165,11 @@ class VaultService {
         `${this.vaultPath}/.meditor/vault.sqlite`,
         buffer,
       );
+      const duration = performance.now() - t0;
+      if (window.Observability) {
+        window.Observability.recordMetric("vault_save_duration", duration);
+      }
+      this._log.info("Vault DB saved to disk");
     }
   }
 

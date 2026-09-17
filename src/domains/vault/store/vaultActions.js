@@ -20,17 +20,43 @@ export const reloadVaultHierarchy = async () => {
 };
 
 export const openNoteFromVault = async (note) => {
-  const { workspaceRoot } = useStore.getState();
-  if (!workspaceRoot) return;
-  const fullPath = vaultService.getNotePath(note.id);
-  if (!fullPath) {
-    log.error(`Could not resolve path for note: ${note.id}`);
-    toast.error("Could not open note — path not found");
-    return;
+  let trace = null;
+  if (window.Observability)
+    trace = window.Observability.startTrace("UI: Open Note");
+
+  const prevTraceId = window.__ACTIVE_TRACE_ID__;
+  const prevSpanId = window.__ACTIVE_SPAN_ID__;
+  if (trace) {
+    window.__ACTIVE_TRACE_ID__ = trace.id;
+    window.__ACTIVE_SPAN_ID__ = trace.rootSpan.id;
   }
-  await openFile(fullPath, note.name, note);
-  vaultRepository.logAuditAction("OPEN_NOTE", `Opened note "${note.name}"`);
-  useStore.setState({ activeVaultItem: note });
+
+  try {
+    const { workspaceRoot } = useStore.getState();
+    if (!workspaceRoot) {
+      if (trace) trace.end("error");
+      return;
+    }
+    const fullPath = vaultService.getNotePath(note.id);
+    if (!fullPath) {
+      log.error(`Could not resolve path for note: ${note.id}`);
+      toast.error("Could not open note — path not found");
+      if (trace) trace.end("error");
+      return;
+    }
+
+    let span = null;
+    if (trace) span = trace.createSpan("Core: openFile");
+    await openFile(fullPath, note.name, note);
+    if (span) span.end();
+
+    vaultRepository.logAuditAction("OPEN_NOTE", `Opened note "${note.name}"`);
+    useStore.setState({ activeVaultItem: note });
+    if (trace) trace.end("ok");
+  } finally {
+    window.__ACTIVE_TRACE_ID__ = prevTraceId;
+    window.__ACTIVE_SPAN_ID__ = prevSpanId;
+  }
 };
 
 export const openNoteByName = async (noteName) => {

@@ -67,6 +67,26 @@ export class Logger {
     else console.info(formatted, meta ?? "");
 
     this._writeToDisk(level, message, meta);
+
+    // Also push to telemetry repository
+    // We do a dynamic import or late binding to avoid circular dependency
+    if (window.__TELEMETRY_REPO__) {
+      window.__TELEMETRY_REPO__.insertLog({
+        traceId: window.__ACTIVE_TRACE_ID__ || "",
+        spanId: window.__ACTIVE_SPAN_ID__ || "",
+        timestamp: ts,
+        level,
+        context: this.context,
+        message,
+        meta: meta
+          ? meta instanceof Error
+            ? meta.message + "\n" + meta.stack
+            : typeof meta === "object"
+              ? JSON.stringify(meta)
+              : String(meta)
+          : "",
+      });
+    }
   }
 
   /**

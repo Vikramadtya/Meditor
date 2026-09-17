@@ -77,6 +77,15 @@ export const openFile = async (
 import { ragService } from "../../ai/application/RagService";
 
 export const saveActiveFile = async () => {
+  let trace = null;
+  if (window.Observability)
+    trace = window.Observability.startTrace("UI: Save Note");
+  const prevTraceId = window.__ACTIVE_TRACE_ID__;
+  const prevSpanId = window.__ACTIVE_SPAN_ID__;
+  if (trace) {
+    window.__ACTIVE_TRACE_ID__ = trace.id;
+    window.__ACTIVE_SPAN_ID__ = trace.rootSpan.id;
+  }
   try {
     const state = useStore.getState();
     const {
@@ -96,15 +105,26 @@ export const saveActiveFile = async () => {
     const fm = activeTab?.frontmatterRaw || "";
     let content = markdown;
     let savePath = currentFilePath;
-    if (editorConfig?.autoFormatOnSave) content = await formatMarkdown(content);
+    if (editorConfig?.autoFormatOnSave) {
+      let fmSpan = trace ? trace.createSpan("Editor: Format Markdown") : null;
+      content = await formatMarkdown(content);
+      if (fmSpan) fmSpan.end();
+    }
     if (!savePath) savePath = await fileSystem.showSaveDialog();
-    if (!savePath) return;
+    if (!savePath) {
+      if (trace) trace.end("ok");
+      return;
+    }
 
+    let fsSpan = trace ? trace.createSpan("FS: Write File") : null;
     await fileSystem.writeFile(savePath, fm + content);
+    if (fsSpan) fsSpan.end();
+
     markSaved(savePath, content);
 
     if (workspaceMode === "vault" && activeTab?.vaultItem?.id) {
       if (vaultRepository.db) {
+        let dbSpan = trace ? trace.createSpan("DB: Update Note") : null;
         vaultRepository.db.run("UPDATE notes SET updated_at = ? WHERE id = ?", [
           Date.now(),
           activeTab.vaultItem.id,
@@ -113,10 +133,11 @@ export const saveActiveFile = async () => {
           "Update",
           `Saved note "${activeTab.vaultItem.name}"`,
         );
+        if (dbSpan) dbSpan.end();
+        vaultService.saveVault();
       }
     }
 
-    // RAG indexing - isolated, non-blocking
     if (
       useSettingsStore.getState().aiConfig?.enabled &&
       activeTab?.vaultItem?.id
@@ -132,9 +153,17 @@ export const saveActiveFile = async () => {
     }
     log.info(`Saved file: ${savePath}`);
     toast.success("File saved!", { icon: "💾" });
+    if (trace) trace.end("ok");
   } catch (err) {
     log.error("Save failed", err);
     toast.error("Failed to save file");
+    if (trace) {
+      trace.rootSpan.setAttribute("error", err.message);
+      trace.end("error");
+    }
+  } finally {
+    window.__ACTIVE_TRACE_ID__ = prevTraceId;
+    window.__ACTIVE_SPAN_ID__ = prevSpanId;
   }
 };
 
