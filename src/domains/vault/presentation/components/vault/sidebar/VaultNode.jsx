@@ -4,7 +4,7 @@ import {
   reloadVaultHierarchy,
 } from "../../../../../../core/store/actions.js";
 import toast from "react-hot-toast";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Circle,
   CircleDashed,
