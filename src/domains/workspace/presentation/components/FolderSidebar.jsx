@@ -2,11 +2,19 @@ import { useShallow } from "zustand/react/shallow";
 import {
   createNewFile,
   createNewFolder,
+  loadWorkspace,
 } from "../../../../core/store/actions.js";
 import React, { useState, useRef, useEffect } from "react";
-import { Folder, FileText, FilePlus, FolderPlus } from "lucide-react";
+import {
+  Folder,
+  FileText,
+  FilePlus,
+  FolderPlus,
+  RefreshCw,
+} from "lucide-react";
 import { useStore } from "../../../../core/store/index";
 import { FileTree } from "./FileTree";
+import { useTrace } from "../../../../core/ui/hooks/useTrace";
 
 /**
  * A sidebar for navigating regular file system folders (non-vault mode).
@@ -31,6 +39,13 @@ export default function FolderSidebar() {
   useEffect(() => {
     if (creatingType && inputRef.current) inputRef.current.focus();
   }, [creatingType]);
+
+  const handleRefresh = useTrace("UI: Refresh Folder", async () => {
+    if (currentFolder) {
+      await loadWorkspace(currentFolder);
+    }
+  });
+
   const handleCreate = async () => {
     const trimmed = newName.trim();
     if (!trimmed) {
@@ -81,6 +96,13 @@ export default function FolderSidebar() {
               gap: "4px",
             }}
           >
+            <button
+              className="sidebar-new-file-btn"
+              onClick={handleRefresh}
+              title="Refresh Folder"
+            >
+              <RefreshCw size={14} />
+            </button>
             <button
               className="sidebar-new-file-btn"
               onClick={() => {
