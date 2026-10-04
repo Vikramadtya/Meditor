@@ -1,3 +1,6 @@
+import { Logger } from "../../../core/infrastructure/Logger";
+const log = Logger.forContext("ImageResolver");
+
 const imageCache = new Map();
 
 export function clearImageCache() {
@@ -82,14 +85,28 @@ export async function inlineLocalImages(
     }
 
     try {
+      
+      let span = (window.Observability?.createSpan && window.__ACTIVE_TRACE_ID__) ? window.Observability.createSpan("FS: Read Image", window.__ACTIVE_TRACE_ID__, window.__ACTIVE_SPAN_ID__) : null;
+      if (span) span.setAttribute("path", absPath);
+      
       const buffer = await Neutralino.filesystem.readBinaryFile(absPath);
       const mime = getMimeType(absPath);
       const base64 = arrayBufferToBase64(buffer);
       const dataUrl = `data:${mime};base64,${base64}`;
       imageCache.set(absPath, dataUrl);
       img.setAttribute("src", dataUrl);
+      
+      if (span) span.end("ok");
     } catch (err) {
-      console.warn("Failed to load local image:", absPath, err);
+      log.error(`Failed to load local image: ${absPath}`, err);
+      // We don't have span context here easily if we didn't start one, but we try:
+      if (window.__ACTIVE_TRACE_ID__) {
+        let span = (window.Observability?.createSpan && window.__ACTIVE_TRACE_ID__) ? window.Observability.createSpan("FS: Read Image", window.__ACTIVE_TRACE_ID__, window.__ACTIVE_SPAN_ID__) : null;
+        if (span) {
+           span.setAttribute("error", err.message);
+           span.end("error");
+        }
+      }
     }
   }
   return doc.body.innerHTML;

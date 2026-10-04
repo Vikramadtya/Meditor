@@ -56,6 +56,13 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
     let isCancelled = false;
 
     const renderMarkdown = async () => {
+      let trace = window.Observability?.startTrace("UI: Render Markdown");
+      let prevTraceId = window.__ACTIVE_TRACE_ID__;
+      let prevSpanId = window.__ACTIVE_SPAN_ID__;
+      if (trace) {
+        window.__ACTIVE_TRACE_ID__ = trace.id;
+        window.__ACTIVE_SPAN_ID__ = trace.rootSpan.id;
+      }
       setIsRendering(true);
       try {
         const md = getMarkdownInstance(mdConfig);
@@ -113,16 +120,13 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
 
         let rawHtml = md.render(contentToRender || "");
 
-        // Only inline images if we are in vault mode
-        if (workspaceMode === "vault") {
-          const effectiveFilePath =
-            searchMatchPath || activeVaultItem?.path || currentFilePath;
-          rawHtml = await inlineLocalImages(
-            rawHtml,
-            effectiveFilePath,
-            currentFolder,
-          );
-        }
+        // Inline images in all modes because WebViews block local file protocols
+        const effectiveFilePath = searchMatchPath || (workspaceMode === "vault" ? activeVaultItem?.path : currentFilePath) || currentFilePath;
+        rawHtml = await inlineLocalImages(
+          rawHtml,
+          effectiveFilePath,
+          currentFolder,
+        );
 
         if (isCancelled) return;
 
@@ -136,14 +140,21 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
           setToc(newToc);
           setFrontmatter(parsedFm);
         }
+        if (trace) trace.end("ok");
       } catch (err) {
         log.error("Error rendering markdown:", err);
+        if (trace) {
+          trace.rootSpan.setAttribute("error", err.message);
+          trace.end("error");
+        }
         if (!isCancelled) {
           setHtmlContent(
             `<div class="markdown-error">Failed to render markdown: ${err.message}</div>`,
           );
         }
       } finally {
+        window.__ACTIVE_TRACE_ID__ = prevTraceId;
+        window.__ACTIVE_SPAN_ID__ = prevSpanId;
         if (!isCancelled) {
           setIsRendering(false);
         }
