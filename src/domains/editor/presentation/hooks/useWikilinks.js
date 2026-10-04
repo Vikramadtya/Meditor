@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { searchService } from "../../application/SearchService";
 import { useStore } from "../../../../core/store/index";
+import { Logger } from "../../../../core/infrastructure/Logger";
+import { Observability } from "../../../../core/infrastructure/Observability";
+
+const logger = Logger.forContext("Wikilinks");
 
 /**
  * Hook to handle clicks on wikilinks in rendered Markdown.
@@ -19,7 +23,17 @@ export function useWikilinks(ref) {
           e.preventDefault();
           const noteName = target.getAttribute("data-note");
           if (noteName) {
-            useStore.getState().openNoteByName(noteName);
+            const trace = Observability.startTrace("UI: Wikilink Click");
+            trace.rootSpan.setAttribute("note_name", noteName);
+            logger.info(`Wikilink clicked: "${noteName}"`);
+            try {
+              useStore.getState().openNoteByName(noteName);
+              trace.end("ok");
+            } catch (err) {
+              logger.error(`Failed to open wikilink note: "${noteName}"`, err);
+              trace.rootSpan.setAttribute("error", err.message);
+              trace.end("error");
+            }
           }
           return;
         }

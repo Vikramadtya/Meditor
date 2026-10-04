@@ -1,5 +1,9 @@
 import { useEffect } from "react";
 import { useStore as useDocumentStore } from "../../../../core/store/index";
+import { Logger } from "../../../../core/infrastructure/Logger";
+import { Observability } from "../../../../core/infrastructure/Observability";
+
+const logger = Logger.forContext("TaskLists");
 
 /**
  * Hook to enable interactive task lists in rendered markdown.
@@ -28,11 +32,16 @@ export function useInteractiveTaskLists(ref) {
         const index = allCheckboxes.indexOf(e.target);
         if (index === -1) return;
 
+        const trace = Observability.startTrace("UI: Toggle Task Checkbox");
+        trace.rootSpan.setAttribute("checkbox_index", index);
+        const newChecked = !e.target.checked;
+        trace.rootSpan.setAttribute("new_state", newChecked ? "checked" : "unchecked");
+        logger.info(`Task checkbox #${index} toggled to ${newChecked ? "checked" : "unchecked"}`);
+
         // 2. We need the current markdown string
         const { markdown, setMarkdown } = useDocumentStore.getState();
 
         // 3. Regex to match task list items: e.g. "- [ ]" or "* [x]"
-        // This regex matches the start of a line, optional whitespace, list marker (- or *), space, and [ ] or [x]
         const taskRegex = /^([ \t]*[-*+]\s+)\[([ xX])\]/gm;
 
         let matchCount = 0;
@@ -53,6 +62,10 @@ export function useInteractiveTaskLists(ref) {
         // 4. Update state
         if (newMarkdown !== markdown) {
           setMarkdown(newMarkdown);
+          trace.end("ok");
+        } else {
+          logger.warn(`Task checkbox #${index} toggle produced no markdown change`);
+          trace.end("noop");
         }
       }
     };

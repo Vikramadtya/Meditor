@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import mermaid from "mermaid";
 import { Logger } from "../../../../core/infrastructure/Logger";
+import { Observability } from "../../../../core/infrastructure/Observability";
+
 const logger = Logger.forContext("MermaidRenderer");
 let isMermaidRunning = false;
 let pendingMermaidRun = false;
@@ -47,6 +49,12 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
           return;
         }
         isMermaidRunning = true;
+
+        // Start a trace for the entire mermaid render batch
+        const trace = Observability.startTrace("UI: Render Mermaid");
+        trace.rootSpan.setAttribute("diagram_count", targetNodes.length);
+        logger.info(`Rendering ${targetNodes.length} mermaid diagram(s)`);
+
         try {
           const nodesToProcess = Array.from(
             proseRef.current.querySelectorAll(".mermaid"),
@@ -55,14 +63,26 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
             const node = nodesToProcess[i];
             if (node.querySelector("svg") || node.querySelector(".error-text"))
               continue;
+
+            const span = trace.createSpan(`Mermaid: Render diagram #${i + 1}`);
+            const text = node.textContent;
+            // Store first 80 chars of diagram text for debugging
+            span.setAttribute("diagram_preview", text.slice(0, 80).trim());
+
             try {
               const id = `mermaid-diagram-${Date.now()}-${i}`;
-              const text = node.textContent;
               node.innerHTML = "Rendering...";
+              const t0 = performance.now();
               const { svg } = await mermaid.render(id, text);
+              const elapsed = Math.round(performance.now() - t0);
               node.innerHTML = svg;
+              span.setAttribute("duration_ms", elapsed);
+              span.end("ok");
+              logger.debug(`Mermaid diagram #${i + 1} rendered in ${elapsed}ms`);
             } catch (err) {
-              logger.error("Error running mermaid for a single node:", err);
+              span.setAttribute("error", err.message || String(err));
+              span.end("error");
+              logger.error(`Mermaid diagram #${i + 1} failed to render`, err);
 
               let userFriendlyError = "Unknown syntax error";
               if (err.str) userFriendlyError = err.str;
@@ -84,6 +104,11 @@ export function useMermaidRenderer(proseRef, htmlContent, theme) {
                 `;
             }
           }
+          trace.end("ok");
+        } catch (err) {
+          logger.error("Unexpected error in mermaid batch processing", err);
+          trace.rootSpan.setAttribute("error", err.message);
+          trace.end("error");
         } finally {
           isMermaidRunning = false;
           if (pendingMermaidRun) {

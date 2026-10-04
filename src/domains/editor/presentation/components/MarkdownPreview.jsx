@@ -10,6 +10,10 @@ import { useMermaidRenderer } from "../hooks/useMermaidRenderer";
 import { useMkDocsTabs } from "../hooks/useMkDocsTabs";
 import { useInteractiveTaskLists } from "../hooks/useInteractiveTaskLists";
 import { useWikilinks } from "../hooks/useWikilinks";
+import { Logger } from "../../../../core/infrastructure/Logger";
+import { Observability } from "../../../../core/infrastructure/Observability";
+
+const log = Logger.forContext("MarkdownPreview");
 
 /**
  * Markdown preview component that renders HTML content with various custom extensions
@@ -44,20 +48,26 @@ const MarkdownPreview = forwardRef(
           return;
         }
 
-        // Strip .md
         const logicalName = fileName.replace(".md", "");
+        const trace = Observability.startTrace("UI: Fetch Backlinks");
+        trace.rootSpan.setAttribute("note_name", logicalName);
+        log.debug(`Fetching backlinks for "${logicalName}"`);
+
         let links = [];
         try {
-          links = await (async () => {
-            const state = useStore.getState();
-            return searchService.getBacklinks(
-              logicalName,
-              state.workspaceMode,
-              state.workspaceRoot || state.currentFolder,
-            );
-          })();
+          const state = useStore.getState();
+          links = await searchService.getBacklinks(
+            logicalName,
+            state.workspaceMode,
+            state.workspaceRoot || state.currentFolder,
+          );
+          trace.rootSpan.setAttribute("backlink_count", links.length);
+          trace.end("ok");
+          log.info(`Found ${links.length} backlink(s) for "${logicalName}"`);
         } catch (err) {
-          log.error("Failed to fetch backlinks", err);
+          log.error(`Failed to fetch backlinks for "${logicalName}"`, err);
+          trace.rootSpan.setAttribute("error", err.message);
+          trace.end("error");
         }
         if (isMounted) {
           setBacklinks(links);

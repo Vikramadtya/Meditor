@@ -1,4 +1,8 @@
 import { useEffect } from "react";
+import { Logger } from "../../../../core/infrastructure/Logger";
+import { Observability } from "../../../../core/infrastructure/Observability";
+
+const logger = Logger.forContext("MkDocsTabs");
 
 /**
  * Hook to manage MkDocs-style tab switching in rendered Markdown.
@@ -18,6 +22,12 @@ export function useMkDocsTabs(proseRef, htmlContent) {
       const group = btn.closest(".mkdocs-tabs");
       if (!group) return;
 
+      const tabLabel = btn.textContent?.trim() || idx;
+      const trace = Observability.startTrace("UI: MkDocs Tab Click");
+      trace.rootSpan.setAttribute("tab_index", idx);
+      trace.rootSpan.setAttribute("tab_label", tabLabel);
+      logger.info(`MkDocs tab switched to "${tabLabel}" (index: ${idx})`);
+
       // Update buttons
       const btns = group.querySelectorAll(".mkdocs-tab-btn");
       btns.forEach((b) => b.classList.remove("active"));
@@ -32,6 +42,8 @@ export function useMkDocsTabs(proseRef, htmlContent) {
           p.classList.remove("active");
         }
       });
+
+      trace.end("ok");
     };
 
     const container = proseRef.current;

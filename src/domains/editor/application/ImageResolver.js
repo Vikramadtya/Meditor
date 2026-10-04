@@ -1,4 +1,6 @@
 import { Logger } from "../../../core/infrastructure/Logger";
+import { Observability } from "../../../core/infrastructure/Observability";
+
 const log = Logger.forContext("ImageResolver");
 
 const imageCache = new Map();
@@ -31,7 +33,7 @@ export function resolveAbsolutePath(imgPath, currentFilePath, currentFolder) {
   try {
     resolvedPath = decodeURIComponent(imgPath);
   } catch (e) {
-    // Keep as is if it fails to decode
+    log.warn(`Could not URL-decode image path, using raw: ${imgPath}`);
   }
   if (
     !resolvedPath.startsWith("http://") &&
@@ -41,12 +43,16 @@ export function resolveAbsolutePath(imgPath, currentFilePath, currentFolder) {
     if (resolvedPath.startsWith("/")) {
       if (currentFolder) {
         resolvedPath = currentFolder + resolvedPath;
+      } else {
+        log.warn("Image has absolute path but no currentFolder is set", { imgPath });
       }
     } else {
       if (currentFilePath) {
         const parts = currentFilePath.split("/");
         parts.pop();
         resolvedPath = parts.join("/") + "/" + resolvedPath;
+      } else {
+        log.warn("Image has relative path but no currentFilePath is set", { imgPath });
       }
     }
   }
@@ -72,6 +78,17 @@ export async function inlineLocalImages(
   const doc = parser.parseFromString(rawHtml, "text/html");
   const images = doc.querySelectorAll("img");
 
+  if (images.length === 0) return doc.body.innerHTML;
+
+  // Create a dedicated trace for the full image inlining pass
+  const trace = Observability.startTrace("UI: Inline Local Images");
+  trace.rootSpan.setAttribute("image_count", images.length);
+  trace.rootSpan.setAttribute("file_path", currentFilePath || "unknown");
+
+  let successCount = 0;
+  let cacheHitCount = 0;
+  let failCount = 0;
+
   for (let img of images) {
     let src = img.getAttribute("src");
     if (!src || src.startsWith("http") || src.startsWith("data:")) {
@@ -79,35 +96,48 @@ export async function inlineLocalImages(
     }
 
     const absPath = resolveAbsolutePath(src, currentFilePath, currentFolder);
+
     if (imageCache.has(absPath)) {
       img.setAttribute("src", imageCache.get(absPath));
+      cacheHitCount++;
       continue;
     }
 
+    const span = trace.createSpan("FS: Read Image");
+    span.setAttribute("resolved_path", absPath);
+
     try {
-      
-      let span = (window.Observability?.createSpan && window.__ACTIVE_TRACE_ID__) ? window.Observability.createSpan("FS: Read Image", window.__ACTIVE_TRACE_ID__, window.__ACTIVE_SPAN_ID__) : null;
-      if (span) span.setAttribute("path", absPath);
-      
+      const t0 = performance.now();
       const buffer = await Neutralino.filesystem.readBinaryFile(absPath);
+      const elapsed = Math.round(performance.now() - t0);
       const mime = getMimeType(absPath);
       const base64 = arrayBufferToBase64(buffer);
       const dataUrl = `data:${mime};base64,${base64}`;
       imageCache.set(absPath, dataUrl);
       img.setAttribute("src", dataUrl);
-      
-      if (span) span.end("ok");
+      span.setAttribute("mime", mime);
+      span.setAttribute("duration_ms", elapsed);
+      span.end("ok");
+      successCount++;
+      log.debug(`Image loaded in ${elapsed}ms: ${absPath}`);
     } catch (err) {
+      failCount++;
+      span.setAttribute("error", err.message || String(err));
+      span.end("error");
       log.error(`Failed to load local image: ${absPath}`, err);
-      // We don't have span context here easily if we didn't start one, but we try:
-      if (window.__ACTIVE_TRACE_ID__) {
-        let span = (window.Observability?.createSpan && window.__ACTIVE_TRACE_ID__) ? window.Observability.createSpan("FS: Read Image", window.__ACTIVE_TRACE_ID__, window.__ACTIVE_SPAN_ID__) : null;
-        if (span) {
-           span.setAttribute("error", err.message);
-           span.end("error");
-        }
-      }
     }
   }
+
+  trace.rootSpan.setAttribute("success", successCount);
+  trace.rootSpan.setAttribute("cache_hits", cacheHitCount);
+  trace.rootSpan.setAttribute("failures", failCount);
+  trace.end(failCount > 0 ? "partial" : "ok");
+
+  if (failCount > 0) {
+    log.warn(`Image inlining complete: ${successCount} ok, ${cacheHitCount} cached, ${failCount} failed`);
+  } else {
+    log.info(`Image inlining complete: ${successCount} ok, ${cacheHitCount} cached`);
+  }
+
   return doc.body.innerHTML;
 }
