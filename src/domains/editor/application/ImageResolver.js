@@ -25,6 +25,11 @@ export function getMimeType(path) {
 
 export function resolveAbsolutePath(imgPath, currentFilePath, currentFolder) {
   let resolvedPath = imgPath;
+  try {
+    resolvedPath = decodeURIComponent(imgPath);
+  } catch (e) {
+    // Keep as is if it fails to decode
+  }
   if (
     !imgPath.startsWith("http://") &&
     !imgPath.startsWith("https://") &&

@@ -38,6 +38,18 @@ export const openFile = async (
   logicalName = null,
   vaultItem = null,
 ) => {
+  let trace = null;
+  // Use existing active trace if it exists, otherwise start a new one
+  if (window.Observability && !window.__ACTIVE_TRACE_ID__) {
+    trace = window.Observability.startTrace("UI: Open File");
+    window.__ACTIVE_TRACE_ID__ = trace.id;
+    window.__ACTIVE_SPAN_ID__ = trace.rootSpan.id;
+  }
+  const currentTraceId = window.__ACTIVE_TRACE_ID__;
+  let span = window.Observability?.getTrace(currentTraceId)?.createSpan(
+    "Editor: Open File Tab",
+  );
+
   try {
     const state = useStore.getState();
     const existing = state.tabs.find(
@@ -52,9 +64,18 @@ export const openFile = async (
       }
       state.setActiveTab(existing.id);
       useStore.setState({ isEditMode: false });
+      if (span) span.end();
+      if (trace) trace.end("ok");
       return;
     }
+
+    let fsSpan =
+      window.Observability?.getTrace(currentTraceId)?.createSpan(
+        "FS: Read File",
+      );
     const rawContent = await fileSystem.readFile(fullPath);
+    if (fsSpan) fsSpan.end();
+
     const { fm, content } = splitFrontmatter(rawContent);
     const fileName = logicalName ?? fullPath.split(/[\\/]/).pop();
     state.openTab({
@@ -69,9 +90,18 @@ export const openFile = async (
     });
     useStore.setState({ isEditMode: false });
     log.info(`Opened file: ${fullPath}`);
+    if (span) span.end();
+    if (trace) trace.end("ok");
   } catch (err) {
     log.error(`Error reading file: ${fullPath}`, err);
     toast.error(`Could not read file.\nReason: ${err?.message || "Unknown"}`);
+    if (span) span.end();
+    if (trace) trace.end("error");
+  } finally {
+    if (trace) {
+      window.__ACTIVE_TRACE_ID__ = null;
+      window.__ACTIVE_SPAN_ID__ = null;
+    }
   }
 };
 
