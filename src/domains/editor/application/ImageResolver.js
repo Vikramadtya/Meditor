@@ -34,19 +34,19 @@ export function resolveAbsolutePath(imgPath, currentFilePath, currentFolder) {
     // Keep as is if it fails to decode
   }
   if (
-    !imgPath.startsWith("http://") &&
-    !imgPath.startsWith("https://") &&
-    !imgPath.startsWith("data:")
+    !resolvedPath.startsWith("http://") &&
+    !resolvedPath.startsWith("https://") &&
+    !resolvedPath.startsWith("data:")
   ) {
-    if (imgPath.startsWith("/")) {
+    if (resolvedPath.startsWith("/")) {
       if (currentFolder) {
-        resolvedPath = currentFolder + imgPath;
+        resolvedPath = currentFolder + resolvedPath;
       }
     } else {
       if (currentFilePath) {
         const parts = currentFilePath.split("/");
         parts.pop();
-        resolvedPath = parts.join("/") + "/" + imgPath;
+        resolvedPath = parts.join("/") + "/" + resolvedPath;
       }
     }
   }
