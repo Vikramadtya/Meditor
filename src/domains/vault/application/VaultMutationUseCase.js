@@ -199,3 +199,33 @@ export async function moveItemCommand(
     );
   }
 }
+
+export async function updateChildrenOrderCommand(
+  vaultPath,
+  parentRelPath,
+  newOrder,
+  log,
+) {
+  if (!vaultPath) return;
+  try {
+    const parentFullPath = `${vaultPath}/${parentRelPath}`;
+    const metaPath = `${parentFullPath}/.metadata`;
+    let meta = { id: parentRelPath, type: "container", children_order: [] };
+
+    try {
+      const metaStr = await fileSystem.readFile(metaPath);
+      meta = { ...meta, ...JSON.parse(metaStr) };
+    } catch (e) {
+      log.debug(
+        `No metadata found at ${metaPath}, creating new one for reorder.`,
+      );
+    }
+
+    meta.children_order = newOrder;
+    await fileSystem.writeFile(metaPath, JSON.stringify(meta, null, 2));
+    log.info(`Updated children_order for ${parentRelPath}`);
+  } catch (e) {
+    log.error(`Failed to update children_order for ${parentRelPath}`, e);
+    throw e;
+  }
+}

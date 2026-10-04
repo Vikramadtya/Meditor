@@ -11,6 +11,7 @@ import {
   deleteItemCommand,
   renameItemCommand,
   moveItemCommand,
+  updateChildrenOrderCommand,
 } from "./VaultMutationUseCase";
 
 class VaultService {
@@ -190,6 +191,17 @@ class VaultService {
       this.isSyncing = false;
       useStore.setState({ isVaultSyncing: false });
     }
+  }
+
+  async updateChildrenOrder(parentRelPath, newOrder) {
+    if (!this.vaultPath) return;
+    await updateChildrenOrderCommand(
+      this.vaultPath,
+      parentRelPath,
+      newOrder,
+      this._log,
+    );
+    this.notify(parentRelPath);
   }
 
   async createContainer(parentRelPath, name) {

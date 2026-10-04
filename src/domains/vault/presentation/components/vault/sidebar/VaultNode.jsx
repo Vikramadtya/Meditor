@@ -101,33 +101,54 @@ export default function VaultNode({ item, level }) {
         );
       }}
       onDragOver={(e) => {
-        if (isNote) return; // only containers can be dropped into
         e.preventDefault();
         e.stopPropagation();
-        e.currentTarget.style.backgroundColor = "var(--bg-active)";
+        if (isNote) {
+          e.currentTarget.style.borderTop = "2px solid var(--accent)";
+        } else {
+          e.currentTarget.style.backgroundColor = "var(--bg-active)";
+        }
       }}
       onDragLeave={(e) => {
-        if (isNote) return;
-        e.currentTarget.style.backgroundColor = isActive
-          ? "var(--bg-active)"
-          : "transparent";
+        if (isNote) {
+          e.currentTarget.style.borderTop = "none";
+        } else {
+          e.currentTarget.style.backgroundColor = isActive
+            ? "var(--bg-active)"
+            : "transparent";
+        }
       }}
       onDrop={async (e) => {
-        if (isNote) return;
         e.preventDefault();
         e.stopPropagation();
-        e.currentTarget.style.backgroundColor = isActive
-          ? "var(--bg-active)"
-          : "transparent";
+
+        if (isNote) {
+          e.currentTarget.style.borderTop = "none";
+        } else {
+          e.currentTarget.style.backgroundColor = isActive
+            ? "var(--bg-active)"
+            : "transparent";
+        }
+
         try {
           const data = JSON.parse(
             e.dataTransfer.getData("application/meditor-item"),
           );
           if (
-            data &&
-            data.path !== item.path &&
-            !data.path.startsWith(item.path + "/")
-          ) {
+            !data ||
+            data.path === item.path ||
+            data.path.startsWith(item.path + "/")
+          )
+            return;
+
+          const getParentPath = (p) => {
+            const parts = p.split("/");
+            parts.pop();
+            return parts.join("/");
+          };
+
+          if (!isNote) {
+            // Drop onto container: Move INTO container
             await vaultService.moveItem(
               data.type,
               data.id,
@@ -136,9 +157,43 @@ export default function VaultNode({ item, level }) {
             );
             toast.success(`Moved "${data.name}"`);
             reloadVaultHierarchy();
+            return;
           }
+
+          // Drop onto Note: Reorder BEFORE this note
+          const targetParent = getParentPath(item.path);
+          const sourceParent = getParentPath(data.path);
+
+          if (sourceParent !== targetParent) {
+            // Move to target parent first
+            await vaultService.moveItem(
+              data.type,
+              data.id,
+              data.path,
+              targetParent,
+            );
+          }
+
+          // Fetch children and reorder
+          const children = await vaultService.getFolderContents(targetParent);
+          // Current order of IDs
+          let currentOrder = children.map((c) => c.id);
+
+          // Remove source ID from wherever it is
+          currentOrder = currentOrder.filter((id) => id !== data.id);
+
+          // Find target index and insert before it
+          const targetIndex = currentOrder.indexOf(item.id);
+          if (targetIndex !== -1) {
+            currentOrder.splice(targetIndex, 0, data.id);
+          } else {
+            currentOrder.push(data.id);
+          }
+
+          await vaultService.updateChildrenOrder(targetParent, currentOrder);
+          reloadVaultHierarchy();
         } catch (err) {
-          toast.error("Move failed");
+          toast.error("Action failed");
         }
       }}
       style={{
