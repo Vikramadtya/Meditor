@@ -1,3 +1,4 @@
+import { vaultService } from "../../vault/application/VaultService";
 import { useStore } from "../../../core/store/index";
 import { loadWorkspace } from "../../workspace/store/workspaceActions";
 import { vaultRepository } from "../../vault/infrastructure/SqliteVaultRepository";
