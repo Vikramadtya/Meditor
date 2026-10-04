@@ -205,6 +205,18 @@ export function useDragAndDrop(currentFolder, imageSavePath, setMarkdown) {
   return useMemo(
     () =>
       EditorView.domEventHandlers({
+        dragover(event, view) {
+          const types = event.dataTransfer?.types;
+          if (
+            types &&
+            (Array.from(types).includes("Files") ||
+              Array.from(types).includes("application/x-moz-file"))
+          ) {
+            event.preventDefault();
+            return true;
+          }
+          return false;
+        },
         drop(event, view) {
           const files = event.dataTransfer?.files;
           if (!files?.length || !files[0].type.startsWith("image/"))

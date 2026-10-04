@@ -65,4 +65,18 @@ export function useSystemEffects() {
     const timer = setTimeout(() => autoSaveFile(), 2000);
     return () => clearTimeout(timer);
   }, [markdown, currentFilePath, editorConfig.autoSaveMode]);
+  // 6. Global Drag and Drop Prevention (prevent browser opening images)
+  useEffect(() => {
+    const preventDefault = (e) => {
+      // Don't prevent default if they are dropping on the editor, CodeMirror handles it
+      if (e.target.closest(".cm-editor")) return;
+      e.preventDefault();
+    };
+    window.addEventListener("dragover", preventDefault, false);
+    window.addEventListener("drop", preventDefault, false);
+    return () => {
+      window.removeEventListener("dragover", preventDefault, false);
+      window.removeEventListener("drop", preventDefault, false);
+    };
+  }, []);
 }
