@@ -46,9 +46,14 @@ export const openFile = async (
     window.__ACTIVE_SPAN_ID__ = trace.rootSpan.id;
   }
   const currentTraceId = window.__ACTIVE_TRACE_ID__;
-  let span = window.Observability?.getTrace(currentTraceId)?.createSpan(
-    "Editor: Open File Tab",
-  );
+  let span =
+    window.Observability && currentTraceId
+      ? window.Observability.createSpan(
+          "Editor: Open File Tab",
+          currentTraceId,
+          window.__ACTIVE_SPAN_ID__,
+        )
+      : null;
 
   try {
     const state = useStore.getState();
@@ -70,9 +75,13 @@ export const openFile = async (
     }
 
     let fsSpan =
-      window.Observability?.getTrace(currentTraceId)?.createSpan(
-        "FS: Read File",
-      );
+      window.Observability && currentTraceId
+        ? window.Observability.createSpan(
+            "FS: Read File",
+            currentTraceId,
+            window.__ACTIVE_SPAN_ID__,
+          )
+        : null;
     const rawContent = await fileSystem.readFile(fullPath);
     if (fsSpan) fsSpan.end();
 

@@ -50,6 +50,10 @@ export class Observability {
     this.repository = repo;
   }
 
+  static createSpan(name, traceId, parentId = null) {
+    return new Span(name, traceId, parentId);
+  }
+
   static startTrace(name) {
     return new Trace(name);
   }
