@@ -45,7 +45,7 @@ export function useMarkdown(markdown, mdConfig, debounceMs = 100) {
   const [isRendering, setIsRendering] = useState(false);
 
   const currentFilePath = useStore((state) => state.activeVaultItem?.path);
-  const currentFolder = useStore((state) => state.repoPath);
+  const currentFolder = useStore((state) => state.workspaceRoot || state.currentFolder);
   const workspaceMode = useStore((state) => state.workspaceMode);
   const searchMatchPath = useStore((state) => state.searchMatchPath);
   const activeVaultItem = useStore((state) => state.activeVaultItem);
